@@ -1,0 +1,26 @@
+---
+title: "Session 1 - Intro to R"
+format: revealjs
+references: 
+---
+
+## Agenda
+•	Introduction to data science.  
+•	Introduce R Studio and familiarize with the R Studio interface.  
+•	Learn about creating reproducible reports with R - markdown and Quarto.  
+•	Review the structure of scientific manuscripts, specifically the Introduction, Methods, Results, and Discussion sections (IMRaD format).  
+•	Gain practical experience in importing data into R from various sources, including Excel, packages, and external data.  
+•	Learn about different data types (variables) in R, including logical, factor, character, and numeric.  
+
+# Data Science
+
+## What is Data Science?
+
+- Activity 
+
+
+## Defining Data Science 
+
+Data Science allows you to transform raw data into understanding, insight, and knowledge [@wickham2023r]
+
+## References
