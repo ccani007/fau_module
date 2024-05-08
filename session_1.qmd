@@ -1,18 +1,47 @@
 ---
 title: "Session 1 - Intro to R"
-format: revealjs
-references: ref.bib
+author: "Catalina Cañizares and Raymond Balise"
+date: "`r format(Sys.time(), '%b %d, %Y')`"
+format: 
+  revealjs:
+    scrollable: false
+    slide-number: true
+    width: 1600
+    height: 900
+    theme: "simple"
+    echo: true
+    chalkboard: true
+editor_options: 
+  chunk_output_type: console
+bibliography: ref.bib
 ---
 
-## Agenda
-•	Introduction to data science.  
-•	Introduce R Studio and familiarize with the R Studio interface.  
-•	Learn about creating reproducible reports with R - markdown and Quarto.  
-•	Review the structure of scientific manuscripts, specifically the Introduction, Methods, Results, and Discussion sections (IMRaD format).  
-•	Gain practical experience in importing data into R from various sources, including Excel, packages, and external data.  
-•	Learn about different data types (variables) in R, including logical, factor, character, and numeric.  
+
+## Module Objectives
+
+
+## Module Project 
+- Create a reproducible manuscript using RStudio to analyze the Youth Risk Behavior Survey that includes:
+  1. The main structure of a scientific report.
+  2. Tables and figures representing the data.
+  3. An application of a machine learning method to the data.
+  4. A references section.
+
+## Objectives for Today
+:::{.incremental}
+- Define and identify the primary responsibilities of a data scientist.
+- Gain insight into the history of R and RStudio.
+- Recognize the importance of working within projects and initiate a new project in RStudio.
+- Create the first Quarto document and understand its components.
+- Incorporate the basic structure of a scientific project within the Quarto project.
+- Learn to import data from various sources into the Quarto file.
+- Explore a dataset and identify different data types.
+- Begin the main project for the module: establish the research question and start writing a brief introduction.
+:::
 
 # Data Science
+
+# Introduction to Data Science
 
 ## What is Data Science?
 
@@ -21,24 +50,471 @@ references: ref.bib
 
 ## Defining Data Science 
 
+:::{.incremental}
 Data Science allows you to transform raw data into understanding, insight, and knowledge [@wickham2023r]
+:::
 
-The Data Science Association: 
+::: {.fragment}
+:::{.incremental}
+**The Data Science Association:**
 
-Data Science: "The scientific study of the creation, validation and transformation of data to create meaning"
+- <mark>Data Science:</mark> "The scientific study of the creation, validation and transformation of data to create meaning"
 
-Statistics: "The practice or science of collecting and analysing numerical data in large quantities"
+- <mark>Statistics:</mark> "The practice or science of collecting and analyzing numerical data in large quantities"
+:::
+:::
+::: {.fragment}
+> There is a disagreement between academics over the terminology, value and contribution of both disciplines [@hassani2021]
 
-- There is a disagreement between academics over the terminology, value and contribution of both disciplines [@hassani2021]
+:::
+
 
 ## Definining Data Science
 
-![](img/data_science.png)
+![](img/data_science.png){fig-align="center"}
 
 
 :::footer
 [@hassani2021]
 :::
 
+# Introduction to R and R Studio 
+
+## Let's talk about R 
+
+![](img/r_story.png){fig-align="center"}
+
+
+:::footer
+[@giorgi2022]
+:::
+
+## The best advice...
+:::{.incremental}
+- The best advice about working in R is to organize your work within projects.
+
+- **Why?**
+- Reproducibility 
+- Organization
+- More reasons [here](https://www.tidyverse.org/blog/2017/12/workflow-vs-script/)
+:::
+
+## Steps to create the project 
+
+::: {.fragment}
+::: {.r-stack}
+
+![](img/1.png){.fragment fig-align="center"}
+
+![](img/2.png){.fragment fig-align="center"}
+:::
+:::
+
+## Steps to create the project 
+![](img/3.png)
+
+
+## Steps to create the project 
+
+::: {.r-stack}
+![](img/4.png){.fragment}
+
+![](img/5.png){.fragment}
+
+:::
+
+## Steps to create the project 
+
+![](img/6.png)
+
+
+## Now that we have a project
+
+- Let's create a script and explore the IDE
+
+> (Integrated Development Environment)
+
+::: {.fragment}
+![](https://media.giphy.com/media/lYjA4tfvCc8UAju1Op/giphy.gif?cid=790b76114ceilsw854km4k6b0tkgvdqv0xy5sb6e5n7rratd&ep=v1_gifs_search&rid=giphy.gif&ct=g){fig-align="center"}
+:::
+
+## Creating the script
+
+::: {.fragment}
+::: {.r-stack}
+![](img/8.png){.fragment fig-align="center"}
+
+![](img/9.png){.fragment fig-align="center" width="50%"}
+
+
+![](img/10.png){.fragment fig-align="center"}
+
+:::
+:::
+
+## The R Studio IDE
+
+![](img/11.png)
+
+## Let's take a break 
+
+![](https://media.giphy.com/media/jWcZAS6PyQyRJn634G/giphy.gif?cid=790b76113eswejr4wbrnqrxna9owuqa5ddd949pl2k0a79gu&ep=v1_gifs_search&rid=giphy.gif&ct=g){fig-align="center"}
+
+# Quarto Files
+
+## Inspecting the file 
+
+![](img/Rmd_disect.png)
+
+
+
+# YAML{background-color="black"}
+
+# The Meta-Data Header: <mark>YAML</mark>
+
++ The first few lines of the document are the document header.  
++ These lines tell R crucial information about how to build your report.   
++ The entire header, and all of the document options in it, are bounded by the three horizontal dashes <mark> - - - </mark>  above and below.  
+
+# The Meta-Data Header: <mark>YAML</mark>
+
+::: columns
+::: {.column width="50%"}
+
+![](img/YAML.png)
+:::
+::: {.column width="50%"}
+**Currently our header is quite basic. It includes:**
+
+  + The title of the document; title: "Hello Quarto"
+  + Who wrote it: author: "Catalina Canizares"
+  + Today’s date: "2022-05-11"
+  + The output type: html_document
+  + Bibliography 
+  + Type of citation and format
+:::
+:::
+
+## Different YAML examples{.scrollable}
+
+::: {.absolute}
+![](img/word.png){.fragment}
+
+![](img/ppt.png){.fragment}
+
+![](img/simple_html.png){.fragment}
+![](img/CV.png){.fragment}
+:::
+
+# Code Chunks{background-color="black"}
+
+## Anatomy of a Chunk
+
+![](img/chunk.png)
+ 
+## Chunk Options 
+![](img/chunk_options.png)
+ 
+ *Source:* [Code Chunks](https://rmarkdown.rstudio.com/lesson-3.html)
+
+## More about Chunks
+
+**Make chunks like a `pro`**  
+![](img/key_board.png){.fragment}
+
+## More about Chunks
+
+**Name chunks like a `pro` with <mark>kebab-case</mark>**
+
+![](img/coding_cases.png){width="50%"}
+
+## Code chunk example
+
+![](img/chunk_penguin.png)]
+
+
+# Markup Text{background-color="black"}
+
+## Markup Text
+
+
+Now that we have a report with a header and some code, we need to explain what the code is doing and why.  
+
++ This is where the plain text comes in. 
+
++ Outside of a code chunk, type anything you want. You can even include pictures and tables.
+
+![](img/text_penguin.png)
+
+## Markup Text
+::: columns
+::: {.column width="50%"}
+
+![](img/text_penguin.png)
+:::
+
+::: {.column width="50%"}
+![](img/result_text_penguin.png)
+:::
+:::
+
+## Cross-Reference 
+::: columns
+::: {.column width="50%"}
+
+### Tables
+![](img/tbl.png){.fragment}
+
+:::
+::: {.column width="50%"}
+### Figures
+![](img/fig.png){.fragment}
+:::
+:::
+## Text Formatting
+
+![](img/text.png)]
+
+*Source* [Get Started with Quarto](https://rstudio-conf-2022.github.io/get-started-quarto/materials/01-intro-quarto.html#/quarto-more-internals) 
+
+## Text Headings
+![](img/headings.png)
+*Source* [Get Started with Quarto](https://rstudio-conf-2022.github.io/get-started-quarto/materials/01-intro-quarto.html#/quarto-more-internals) 
+
+## Exercise
+
+![](img/palmer.png)
+
+## Exercise
+::: incremental
++ Let's go to the project we created 
+
++ Modify the YAML with your information, and name your file 
+
++ Check the YAML so we can see the code and the results.
+:::
+
+## Exercise
++ Create a chunk and type:
+
+```{r}
+#| eval: false
+#| code-copy: true
+
+install.packages("palmerpenguins")
+install.packages("table1")
+
+library(palmerpenguins)
+library(table1)
+
+
+```
+
+
+## Exercise
+
+**Are there differences between the penguin species regarding their flipper lengths?**
+
+
++ Create a chunk and load the palmerpenguins data 
+```{r}
+#| code-copy: true
+data("penguins")
+```
+
++ Create another chunk, name it, and explore the data for 
+the flipper length for the different kind of penguins with this code: 
+
+```{r}
+#| eval: false
+#| code-copy: true
+table1(~ flipper_length_mm | species, data = penguins)
+```
+
++ Describe what you see in the table.
+
+## Let's visualize our findings 
+
++ Create another chunk, let's check 
+
+```{r}
+#| eval: false
+#| code-copy: true
+
+ ggplot(
+  data = penguins,
+  aes(x = species, y = flipper_length_mm)) +
+  geom_boxplot(aes(color = species), 
+               width = 0.3,
+               show.legend = FALSE) +
+  geom_jitter(aes(color = species),
+              alpha = 0.5, 
+              show.legend = FALSE, 
+              position = position_jitter(
+                width = 0.2, seed = 0)) +
+  scale_color_manual(values = c("darkorange", "purple", "cyan4")) +
+  labs(
+    x = "Species",
+    y = "Flipper length (mm)"
+  )
+```
+
+## We are ready to Render our report
+
+Save your report and...
+
+![](img/knit.png)
+
+
+# Look at your Console while it Renders 
+
+![](img/console.png)
+
+![](img/report.png)
+
+
+## A little more more of that reproducible magic
+
+```{r}
+#| echo: false
+library(palmerpenguins)
+data("penguins")
+```
+
+Inside your text you can include executable code with the syntax:  
+
+[](img/inline.png)
+
+For example:
+
+There are `r nrow(penguins)` rows in the `penguins` data set.
+
+**The truth:***  
+![](img/inlinepenguins.png)
+
+
+## More resources
+
+[Quarto Website](https://quarto.org/)
+
+[R Markdown: The Definitive Guide](https://bookdown.org/yihui/rmarkdown/)
+
+![](img/logo_quarto.jpeg)
+
+
+## Let's take another break
+
+![](https://media.giphy.com/media/RiWZUGcZPEKdQgrQ96/giphy.gif?cid=790b76113eswejr4wbrnqrxna9owuqa5ddd949pl2k0a79gu&ep=v1_gifs_search&rid=giphy.gif&ct=g)
+
+
+
+## Summary
+
+- Explored the foundational concepts of data science.
+- Delved into the history and evolution of R.
+- Learned how to create and manage projects in RStudio.
+- Gained proficiency in working with Quarto files.
+
+**Next Steps:**
+- Understand how to structure and organize projects for scientific research.
+
+## How Should We Organize Our Projects in Science?
+::: {.fragment}
+:::{.incremental}
+::: {.columns}
+::: {.column width="50%"}
+
+- Scientific papers generally follow a consistent structure and require similar tools, especially when working with quantitative data.
+- I'll share a useful trick to organize your files and start a project in alignment with the typical structure of scientific papers.
+
+:::
+
+::: {.column width="50%"}
+::: {.fragment}
+
+![](img/scientific_paper.png)
+:::
+:::
+:::
+:::
+:::
+
+## The `rUM` Package
+
+:::{.incremental}
+::: {.columns}
+::: {.column width="50%"}
+1. In your current RStudio window type in the `console: intall.packages("rUM")`
+2. Go to "Session" and click "Restart R"
+3. Go to File --> New Project...
+
+:::
+
+::: {.column width="50%"}
+::: {.fragment}
+![](img/rum.mov)
+:::
+:::
+:::   
+:::
+
+## What happened?
+::: {.fragment}
+![](img/12.png)
+:::
+
+## Inspecting the Project 
+:::{.incremental}
+- `.gitignore`: We will skip this for now, but it will become important later as it helps manage what files get tracked by Git.
+- `analysis`: This is the Quarto file where you will write your manuscript. It's central to our project as it integrates our analysis and reporting.
+- **What do you think about the organization of the Quarto file? Does it align with what we've just learned?**
+- `data` folder: Currently, this folder is empty, but it will store the dataset we will use for our analysis. Proper organization of data is crucial for reproducible research.
+- Two text files, `packages.bib` and `references.bib`, which are used to hold details for your paper’s bibliography. 
+- The-new-england-journal-of-medicine.csl is the citation style language (CSL) based on the New England Journal of Medicine requirements.
+:::
+
+## Let's populate our project 
+
+1. Download to your computers the csv file than contains the data set to analyze
+2. Store the data you just downloaded to the `data` folder
+3. ready?
+
+## Reading data in our quarto files
+:::{.incremental}
+::: {.columns}
+::: {.column width="50%"}
+- R can read data from a variety of formats, including:
+  - Excel (e.g., CSV, XLSX, TXT)
+  - SAS
+  - Stata
+  - SPSS
+  - Other statistical packages
+
+:::
+
+::: {.column width="50%"}
+
+```{r}
+#| eval: false
+#| code-copy: true
+
+read_csv
+```
+
+:::
+:::
+:::
+
+## Explore the data set
+- Functions: glimpse, 
+
+## Types of variables or vectors?
+
+## Your turn! 
+
+1. Explore the data
+2. Choose the variables of interest
+3. Write them in your Introduction 
+4. 
 
 ## References
