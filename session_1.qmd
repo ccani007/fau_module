@@ -1,7 +1,7 @@
 ---
 title: "Session 1 - Intro to R"
-author: "Catalina Cañizares and Raymond Balise"
-date: "`r format(Sys.time(), '%b %d, %Y')`"
+author: "Catalina Cañizares, Ph.D. and Raymond Balise Ph.D."
+date: today
 format: 
   revealjs:
     scrollable: false
@@ -16,12 +16,9 @@ editor_options:
 bibliography: ref.bib
 ---
 
-
-## Module Objectives
-
-
 ## Module Project 
-- Create a reproducible manuscript using RStudio to analyze the Youth Risk Behavior Survey that includes:
+Create a reproducible manuscript using RStudio to analyze the Youth Risk Behavior Survey that includes:  
+
   1. The main structure of a scientific report.
   2. Tables and figures representing the data.
   3. An application of a machine learning method to the data.
@@ -142,12 +139,12 @@ Data Science allows you to transform raw data into understanding, insight, and k
 
 ::: {.fragment}
 ::: {.r-stack}
-![](img/8.png){.fragment fig-align="center"}
+![](img/8.png){.fragment fig-align="center" width="60%"}
 
-![](img/9.png){.fragment fig-align="center" width="50%"}
+![](img/9.png){.fragment fig-align="center" width="40%"}
 
 
-![](img/10.png){.fragment fig-align="center"}
+![](img/10.png){.fragment fig-align="center" width="70%"}
 
 :::
 :::
@@ -203,7 +200,7 @@ Data Science allows you to transform raw data into understanding, insight, and k
 ![](img/ppt.png){.fragment}
 
 ![](img/simple_html.png){.fragment}
-![](img/CV.png){.fragment}
+![](img/vitae.png){.fragment}
 :::
 
 # Code Chunks{background-color="black"}
@@ -480,9 +477,9 @@ There are `r nrow(penguins)` rows in the `penguins` data set.
 3. ready?
 
 ## Reading data in our quarto files
+
 :::{.incremental}
-::: {.columns}
-::: {.column width="50%"}
+
 - R can read data from a variety of formats, including:
   - Excel (e.g., CSV, XLSX, TXT)
   - SAS
@@ -492,18 +489,21 @@ There are `r nrow(penguins)` rows in the `penguins` data set.
 
 :::
 
-::: {.column width="50%"}
+## `rio` package A Swiss-Army Knife for Data 
+<br/>
 
 ```{r}
 #| eval: false
 #| code-copy: true
-
-read_csv
+install.packages("rio")
 ```
 
-:::
-:::
-:::
+```{r}
+#| code-copy: true
+library(rio)
+```
+
+
 
 ## Explore the data set
 - Functions: glimpse, 

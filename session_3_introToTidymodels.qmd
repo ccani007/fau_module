@@ -1,0 +1,950 @@
+---
+title: "Introduction to `tidymodels`"
+author: "Catalina Canizares"
+format:
+  revealjs:
+    scrollable: true
+    slide-number: true
+    transition: "fade"
+    auto-play-media: true
+    auto-stretch: true
+    footnotes-hover: true
+editor_options: 
+  chunk_output_type: console
+---
+
+ 
+## What is [`tidymodels`](https://tidymodels.tidymodels.org/index.html) 
+
+`tidymodels` is a “meta-package” for modeling and statistical analysis that shares the underlying design philosophy, grammar, and data structures of the `tidyverse`.
+
+
+**Developed by**
+
+:::: {.columns}
+::: {.column width="50%"}
+![](img/kuhn.png){.small width=50%}
+
+Max Kuhn
+
+:::
+ 
+::: {.column width="50%"}
+![](img/julia.png){.small width=50%}
+ 
+ Julia Silge 
+ 
+:::
+:::
+
+## When do we get to play with `tidymodels`
+
+![](img/tidymodels.png)
+
+
+
+## Installing tidymodels 
+
+```{r}
+#| eval: false
+#| echo: true
+install.packages("tidymodels")
+```
+
+```{r}
+#| echo: true
+library(tidymodels)
+```
+
+When loading the package, the versions and conflicts are listed:
+
+![](img/loading-tidymodels.png)
+---
+
+## The ecosystem
+
+![](img/ecosystem.png)
+
+:::footer
+[Tidymodels Ecosystem Tutorial](https://rpubs.com/chenx/tidymodels_tutorial)
+:::
+
+
+## Why bother?
+
+1. They adhere to tidyverse syntax and design principles
+2. Automatically build tasks such as splitting, cross validation and parameter tuning
+3. The result of a monumental fifteen year plus effort, incorporates [two hundred thirty-eight](https://topepo.github.io/caret/available-models.html) predictive models into a common framework
+
+:::footer
+[Reference: The case for tidymodels](https://rviews.rstudio.com/2020/04/21/the-case-for-tidymodels/)
+:::
+
+## What is the big deal with the 238 models?
+
+ I ❤️ R but...  
+ 
+ My 🤯 with the idiosyncratic syntax developed for different model algorithms. 
+ 
+```{r}
+#| eval: false
+#| echo: true
+
+lm_lm <- lm(x ~ . data = df)
+lm_glm <- glm(x ~ . data = df, family = gaussian)
+lm_caret <- train(x ~ . data = df, method = lm)
+```
+
+## More inconsistency 🤢
+
+![](img/inconsistency)
+
+:::footer
+Dr. Raymond Balise Slides for BST 692-2022
+:::
+
+
+## More inconsistency 🤢
+**Same model, different packages**
+
+The same issue persists if you try to implement same model using alternative packages.
+
+::: panel-tabset 
+
+:::{.footer}
+[ML with Tidymodels](https://simonschoe.github.io/ml-with-tidymodels/#1 )
+:::
+
+### `randomForest`
+- **Number of predictors:** mtry
+- **Number of trees:** ntree
+- **Number of split points:** nodesize
+
+### `ranger`
+- **Number of predictors:** mtry
+- **Number of trees:** num.trees
+- **Number of split points:** min.node.size
+
+### `sparklyr`
+- **Number of predictors:** feature_subset_strategy
+- **Number of trees:** num_trees
+- **Number of split points:** min_instances_per_node
+
+:::
+
+## `tidymodels` Consistency 😎
+
+:::: {.columns}
+::: {.column width="70%"}
+
+Through the `parsnip` package we are provided with a time saving framework for exploring multiple models!!
+
+Example:
+
+```{r}
+#| eval: false
+#| echo: true
+
+# Logistic Regression
+logistic_reg_glm_spec <-
+  logistic_reg() %>%
+  set_engine('glm') %>%
+  set_mode('classification')
+
+# Decision Tree
+decision_tree_rpart_spec <-
+  decision_tree(
+    tree_depth = tune(),
+    min_n = tune(),
+    cost_complexity = tune()
+  ) %>%
+  set_engine("rpart") %>%
+  set_mode("classification")
+
+# Bagged MARS Model 
+bag_mars_earth_spec <-
+  bag_mars() %>%
+  set_engine('earth') %>%
+  set_mode('classification')
+
+# Naive Bayes
+naive_Bayes_naivebayes_spec <-
+  naive_Bayes(smoothness = tune(), Laplace = tune()) %>%
+  set_engine('naivebayes') %>%
+  set_mode('classification')
+
+# Random Forest
+rand_forest_randomForest_spec <-
+  rand_forest(mtry = tune(), min_n = tune()) %>%
+  set_engine('randomForest') %>%
+  set_mode('classification')
+
+```
+:::
+
+::: {.column width="30%"}
+![](https://parsnip.tidymodels.org/logo.png)
+:::
+::::
+
+## If I haven't convinced you yet
+
+:::: {.columns}
+::: {.column width="70%"}
+
+The real power of `tidymodels` is baked into the `recipes` package.
+
+
+
+![](https://recipes.tidymodels.org/logo.png)
+
+
+:::
+::: {.column width="30%"}
+
+![](https://media.tenor.com/9axwaN_W9_8AAAAC/baking-cake.gif)
+:::
+::::
+
+## ![](https://recipes.tidymodels.org/logo.png)
+
+
+1. Binds a sequence of preprocessing steps to a training data set.   
+
+2. Defines the roles that the variables are to play in the design matrix.   
+
+3. Specifies what data cleaning needs to take place, and what feature engineering needs to happen.
+
+
+## Recap
+
+:::: {.columns}
+::: {.column width="70%"}
+
+1. We know what `tidymodels` is
+2. We understand its importance
+3. Lets starts coding...
+:::
+
+::: {.column width="30%"}
+
+![](https://media2.giphy.com/media/13GIgrGdslD9oQ/giphy.gif)
+
+:::
+::::
+
+# A real, not so real example 
+
+## Research Question
+
+Are healthy behaviors, such as diet, sleep, physical activity and hours of playing video games associated with concentration in adolescents?
+
+- Outcome: Difficulty Concentrating
+- Predictors: Healthy Behaviors 
+
+
+## Data
+
+2019 Youth Risk Behavioral Surveillance System 
+
+
+![](img/ml-package.png)
+
+
+
+## Load libraries 
+
+```{r}
+#| echo: true
+
+library(MLearnYRBSS)
+library(gt)
+suppressPackageStartupMessages(library(gtsummary))
+library(skimr)
+suppressPackageStartupMessages(library(tidyverse))
+```
+
+### Load the Data 
+```{r}
+#| echo: true
+data("healthyBehaviors")
+```
+
+```{r}
+healthyBehaviors_df <-
+  healthyBehaviors |> 
+  select(
+    Sex, Grade, SexOrientation, DifficultyConcentrating, DrinkFruitJuice, EatFruit, EatSalad,
+    EatPotatoes, EatCarrots, EatOtherVeggies, DrinkSoda,
+    DrinkMilk, EatBreakfast, PhysicalActivity, HoursTV,
+    HoursVideoGames, HoursSleep, SportsDrinks, DrinksWater,
+    ConcussionSports
+  )
+```
+
+## EDA
+```{r}
+#| echo: true
+#| eval: false
+skim(healthyBehaviors_df)
+```
+Output in next slide
+
+---
+::: panel-tabset 
+
+
+### Data Summary
+
+```
+── Data Summary ────────────────────────
+                           Values             
+Name                       healthyBehaviors_df
+Number of rows             13677              
+Number of columns          20                 
+_______________________                       
+Column type frequency:                        
+  character                3                  
+  factor                   1                  
+  numeric                  16                 
+________________________                      
+Group variables            None   
+```
+
+###  Character
+
+```
+── Variable type: character ─────────────────────────────────────────────────────────
+  skim_variable  n_missing complete_rate min max empty n_unique whitespace
+1 Sex                  151         0.989   4   6     0        2          0
+2 Grade                151         0.989   1   2     0        4          0
+3 SexOrientation       702         0.949   8  14     0        4          0
+```
+
+### Factor 
+
+```
+── Variable type: factor ────────────────────────────────────────────────────────────
+  skim_variable           n_missing complete_rate ordered n_unique top_counts      
+1 DifficultyConcentrating      5237         0.617 FALSE          2 0: 5245, 1: 3195
+```
+
+### Numeric
+```
+── Variable type: numeric ───────────────────────────────────────────────────────────
+   skim_variable    n_missing complete_rate mean    sd p0 p25 p50 p75 p100 hist 
+ 1 DrinkFruitJuice       1085         0.921 2.37 1.53   1   1   2   3    7 ▇▂▁▁▁
+ 2 EatFruit               791         0.942 3.11 1.65   1   2   3   4    7 ▇▃▂▂▂
+ 3 EatSalad              1779         0.870 1.97 1.23   1   1   2   2    7 ▇▁▁▁▁
+ 4 EatPotatoes           1778         0.870 1.94 1.12   1   1   2   2    7 ▇▁▁▁▁
+ 5 EatCarrots            1800         0.868 1.72 1.09   1   1   1   2    7 ▇▁▁▁▁
+ 6 EatOtherVeggies       1830         0.866 2.66 1.44   1   2   2   3    7 ▇▃▂▁▁
+ 7 DrinkSoda             2282         0.833 2.31 1.45   1   1   2   3    7 ▇▂▁▁▁
+ 8 DrinkMilk             4188         0.694 2.64 1.64   1   1   2   4    7 ▇▂▂▁▁
+ 9 EatBreakfast          2084         0.848 4.90 2.67   1   3   5   8    8 ▅▂▃▂▇
+10 PhysicalActivity       457         0.967 4.69 2.52   1   2   5   7    8 ▇▃▆▃▇
+11 HoursTV                881         0.936 2.96 1.81   1   1   3   4    7 ▇▂▃▂▂
+12 HoursVideoGames        500         0.963 4.07 2.13   1   2   4   6    7 ▇▃▅▅▇
+13 HoursSleep             572         0.958 3.44 1.38   1   2   4   4    7 ▇▇▇▅▂
+14 SportsDrinks          4083         0.701 1.94 1.32   1   1   2   2    7 ▇▁▁▁▁
+15 DrinksWater           3517         0.743 5.15 1.92   1   4   6   7    7 ▂▂▁▂▇
+16 ConcussionSports      2128         0.844 1.25 0.715  1   1   1   1    5 ▇▁▁▁▁
+```
+
+:::
+
+## EDA 
+
+
+```{r}
+#| echo: false
+
+healthyBehaviors_df |>
+  select(
+    Sex, Grade, SexOrientation, DifficultyConcentrating
+  ) |>
+  filter(!is.na(DifficultyConcentrating)) |>
+  mutate(
+    DifficultyConcentrating = case_when(
+      DifficultyConcentrating == 0 ~ "No",
+      DifficultyConcentrating == 1 ~ "Yes"
+    )
+  ) |>
+  tbl_summary(
+    by = DifficultyConcentrating, percent = "row"
+  ) |>
+  modify_header(label ~ "**Variable**") |>
+  modify_caption(
+    "**Table 1. Demographic Characteristics by Difficulty Concentrating**"
+  ) |>
+  add_p(pvalue_fun = ~ style_pvalue(.x, digits = 2)) |>
+  as_gt() |>
+  tab_source_note(
+    gt::md("*Data source: `MLearnYRBSS::healthyBehaviors`*")
+  )
+```
+
+## EDA 
+
+Let's explore the relationship between difficulty concentrating, diet, sleep, physical activity and hours of playing video games. 
+
+```{r}
+#| echo: false
+
+healthyBehaviors |>
+  filter(!is.na(DifficultyConcentrating)) |>
+  mutate(
+    DifficultyConcentrating = case_when(
+      DifficultyConcentrating == 0 ~ "No",
+      DifficultyConcentrating == 1 ~ "Yes"
+    )
+  ) |>
+  group_by(DifficultyConcentrating) |>
+  summarise(across(
+    c(
+      DrinkFruitJuice, EatFruit, EatSalad,
+      EatPotatoes, EatCarrots, EatOtherVeggies, DrinkSoda,
+      DrinkMilk, EatBreakfast, PhysicalActivity, HoursTV,
+      HoursVideoGames, HoursSleep, SportsDrinks, DrinksWater,
+      ConcussionSports
+    ), mean,
+    na.rm = TRUE
+  )) |>
+  pivot_longer(-DifficultyConcentrating) |>
+  ggplot(aes(value,
+    fct_reorder(name, value),
+    fill = DifficultyConcentrating
+  )) +
+  geom_col(alpha = 0.8, position = "dodge") +
+  scale_x_continuous() +
+  labs(
+    x = "",
+    fill = "Difficulty Concentrating",
+    y = NULL, fill = NULL
+  ) +
+  theme_classic()
+```
+
+# `Tidymodels` 
+
+![](img/lego.gif){.absolute}
+
+## Building Blocks `tidymodels`
+
+![](img/Recipe.png)
+
+# 1. Recipes: Preprocessing Tools
+
+## Recipes
+![](https://recipes.tidymodels.org/logo.png){.absolute top=0 right=0 width=80 height=100}
+
+- Every model requires a design matrix as an input. 
+- Design Matrix: tidy data, with one obervation per row and one predictor per column. 
+
+:::{.fragment}
+ 
+ **HOWEVER** 
+
+Design matrices do not always come in the required format:
+
+- KNN needs normalized predictors 
+- A linear model requires categorical predictors to be one-hot encoded 
+- Logistic regression *needs* complete data (imputation)
+
+:::
+
+## Recipes
+
+
+```{r}
+#| echo: true
+#| code-line-numbers: "2|3|4|5|6|7|9"
+
+healthy_recipe <- 
+  recipe(formula = DifficultyConcentrating ~ ., data = healthyBehaviors_df) |>
+  step_zv(all_predictors()) |> 
+  step_impute_mode(all_nominal_predictors()) |>
+  step_impute_mean(all_numeric_predictors()) |>
+  step_corr(all_numeric_predictors(), threshold = 0.7) |> 
+  step_dummy(all_nominal_predictors()) 
+
+healthy_recipe
+
+```
+
+## `healthy_recipe`
+```
+── Recipe ───────────────────────────────────────────────────────────────────────────
+
+── Inputs 
+Number of variables by role
+outcome:    1
+predictor: 19
+
+── Operations 
+• Zero variance filter on: all_predictors()
+• Mode imputation for: all_nominal_predictors()
+• Mean imputation for: all_numeric_predictors()
+• Correlation filter on: all_numeric_predictors()
+• Dummy variables from: all_nominal_predictors()
+```
+
+
+## For future models how will I know the steps?
+
+:::incremental
+
+1. Know your data.   
+
+ - Exclude the ID's  `update_role`
+
+2. [Click here](https://www.tmwr.org/pre-proc-table.html)
+
+3. Use the [`usemodels`](https://www.tidyverse.org/blog/2020/09/usemodels-0-0-1/) package
+
+
+:::
+
+## Imperative Vs. Declarative Programming
+
+The recipe has only sketched a blueprint of what R is supposed to do with your data. You have NOT performed any actual pre-processing yet. 
+
+
+:::: {.columns}
+::: {.column width="50%"}
+**Imperative Programming**
+
+- A command is entered and immediately executed
+:::
+::: {.column width="50%"}
+**Declarative Programming**
+
+- A Command is specified and the execution code occurs at a later point in time
+:::
+:::
+
+:::{.footer}
+[ML with Tidymodels](https://simonschoe.github.io/ml-with-tidymodels/#1 )
+:::
+
+## Baking the Recipe -- Declarative Programming
+![](https://recipes.tidymodels.org/logo.png){.absolute top=0 right=0 width=80 height=100}
+
+This step is crucial!   
+
+You have to check your data after the recipe to make sure the transformations look alright. 
+
+```{r}
+#| echo: true
+#| output-location: fragment
+
+healthy_recipe |> 
+  prep() |> 
+  bake(new_data = healthyBehaviors_df)
+
+```
+
+
+## `Recipes` in ONE image
+
+![](img/recipe_process.png)
+
+:::footer
+[Allison Horst](https://github.com/allisonhorst/stats-illustrations)
+:::
+
+
+# 2. `parnsip` Modeling and Analysis Functions
+
+## `Parsnip`
+![](https://parsnip.tidymodels.org/logo.png){.absolute top=0 right=0 width=80 height=90}
+A model specification has three individual components:
+
+1. **Type:** The model type that is about to be fitted (e.g., linear/logit regression, random forest or SVM).
+2.  **Mode:** The mode of prediction, i.e. regression or classification.
+3.  **Engine:** The computational engine implemented in `R` which usually corresponds to a certain modeling function (`lm`, `glm`), package (e.g., `rpart`, `glmnet`, `randomForest`) or computing framework (e.g., `Stan`, `sparklyr`).
+
+
+[Check the models and engines supported](https://www.tidymodels.org/find/parsnip/) 
+
+:::{.footer}
+[ML with Tidymodels](https://simonschoe.github.io/ml-with-tidymodels/#1 )
+:::
+
+## Setting the Specifications ![](https://parsnip.tidymodels.org/logo.png){.absolute top=0 right=0 width=80 height=90}
+
+
+```{r}
+#| echo: true
+#| output-location: fragment
+#| code-line-numbers: "2|3|4"
+
+healthy_spec <- 
+  logistic_reg() %>% 
+  set_mode("classification") %>% 
+  set_engine("glm") 
+
+healthy_spec
+```
+
+## Setting the specification with help 🥹
+
+
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2"
+#| output-location: fragment
+library(usemodels)
+use_glmnet(formula = DifficultyConcentrating ~ ., data = healthyBehaviors_df)
+```
+
+
+
+## `parsnip` in ONE image 
+
+![](https://github.com/allisonhorst/stats-illustrations/blob/main/rstats-artwork/parsnip.png?raw=true)
+
+:::footer
+[Allison Horst](https://github.com/allisonhorst/stats-illustrations)
+:::
+
+
+# 3. Workflows
+
+## Workflows 
+![](https://workflows.tidymodels.org/logo.png){.absolute top=0 right=0 width=80 height=90}
+
+Bundles the preprocessing recipe and model specification. 
+It is specifically useful when you have different combinations of preprocsessing recipes and model specifications using the `workflowsets` package
+
+## Workflows
+
+```{r}
+#| echo: true
+#| output-location: slide
+#| code-line-numbers: "2|3|4"
+healthy_workflow <- 
+  workflow() %>% 
+  add_recipe(healthy_recipe) %>% 
+  add_model(healthy_spec) 
+
+healthy_workflow
+```
+
+
+
+## Fit 
+When calling `fit()` on a workflow object, tidymodels performs the following steps for us:
+
+- It fits the recipe object to the training set and produces the in-sample estimates `(prep())`.
+- It applies the fitted recipe to the training set to process the predictors `(bake())`.
+- It trains the specified model on the transformed set.
+
+```{r}
+#| echo: true
+#| output-location: fragment
+#| code-line-numbers: "1|2|4"
+
+mod_1 <- 
+  fit(healthy_workflow, data = healthyBehaviors_df) 
+
+mod_1
+
+```
+
+## Tidy
+
+```{r}
+#| echo: true
+#| output-location: slide
+#| code-line-numbers: "1|2|3|4|5|6|8"
+
+tidy_model <- 
+  mod_1 |>
+  tidy(exponentiate = TRUE,
+       conf.int = TRUE, 
+       conf.level = .95) |>
+  mutate(p.value = scales::pvalue(p.value))
+
+tidy_model
+```
+
+
+## `glance`
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2"
+#| output-location: fragment
+
+mod_1 |>
+  glance()
+```
+
+:::{.footer}
+[ML with Tidymodels](https://simonschoe.github.io/ml-with-tidymodels/#1 )
+:::
+
+## Understanding the Effect Sizes
+
+```{r}
+#| echo: true
+#| output-location: slide
+
+tidy_model|>
+  filter(term != "(Intercept)") |>
+  ggplot(aes(reorder(term, estimate),
+    y = (estimate),
+    ymin = conf.low,
+    ymax = conf.high
+  )) +
+  geom_pointrange(alpha = 0.8) +
+  labs(
+    y = "Odd Ratio CI",
+    title = "Multiple Logistic Regression Model for \nDifficulty Concentrating",
+    x = ""
+  ) +
+  ggeasy::easy_center_title() +
+  geom_hline(yintercept = 1, linetype = "dashed") +
+  coord_flip() +
+  theme_minimal(base_size = 13) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  theme(legend.position = "none")
+```
+
+
+
+## The Prediction
+
+```{r}
+#| echo: true
+#| output-location: fragment
+#| code-line-numbers: "1|2"
+
+augment(mod_1, healthyBehaviors_df) |> 
+  select(DifficultyConcentrating, .pred_class, .pred_0, .pred_1)
+```
+
+## Confusion Matrix 
+
+```{r}
+#| echo: true
+#| output-location: fragment
+#| code-line-numbers: "1|2|3"
+
+augment(mod_1, healthyBehaviors_df) |> 
+  select(DifficultyConcentrating, .pred_class, .pred_0, .pred_1) |> 
+  conf_mat(DifficultyConcentrating, .pred_class)
+```
+
+## A Quick Logistic Regression With Tidymodels
+
+```{r}
+#| echo: true
+#| code-line-numbers: "2|3|4|5"
+#| output-location: slide
+
+quick_fit <- 
+  logistic_reg() |> 
+  set_mode("classification") |> 
+  set_engine("glm") |> 
+  fit(DifficultyConcentrating ~ ., data = healthyBehaviors_df)
+
+quick_fit
+
+```
+
+
+## Visualize With tidy
+
+```{r}
+#| echo: true
+#| output-location: slide
+
+quick_fit |> 
+  tidy(exponentiate = TRUE, 
+       conf.int = TRUE, 
+       conf.level = .95) |>
+  mutate(p.value = scales::pvalue(p.value))
+```
+
+# Now, lets try splitting our data and trying different resampling methods
+
+
+## The Data - `riskyBehaviors`
+
+```{r}
+#| echo: true
+#| output-location: fragment
+
+data("riskyBehaviors")
+glimpse(riskyBehaviors)
+```
+
+## Task
+
+-  Predict the likelihood of and adolescent carrying a weapon to school 
+
+```{r}
+#| echo: true
+#| output-location: slide
+
+# Data cleaning to transform the outocme into binary and drop NAs in the outcome
+
+riskyBehaviors_analysis <- 
+riskyBehaviors |> 
+  mutate(
+    WeaponCarryingSchool = case_when(
+      WeaponCarrying == 1 ~ "No", 
+      WeaponCarrying %in% c(2, 3, 4, 5) ~ "Yes", 
+      TRUE ~ NA_character_
+  )) |> 
+  drop_na(WeaponCarryingSchool)
+
+riskyBehaviors_analysis |> 
+  ggplot(aes(x = WeaponCarryingSchool )) +
+  geom_bar() +
+  coord_flip() +
+  theme_classic()
+```
+
+
+## Split Training - Testing 
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|3|4|5|6|7|8|9"
+#| output-location: fragment
+
+
+set.seed(1990)
+
+analysis_split <- initial_split(riskyBehaviors_analysis,
+                                stratum = WeaponCarryingSchool)
+
+analysis_train <- training(analysis_split)
+analysis_test <- testing(analysis_split)
+
+analysis_split
+
+```
+
+## Lets Check Our Work
+
+```{r}
+library(janitor)
+```
+
+
+:::: {.columns}
+::: {.column width="50%"}
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2|3|4"
+#| output-location: fragment
+
+
+analysis_train |> 
+  tabyl(WeaponCarryingSchool)  |> 
+  adorn_pct_formatting(0) |> 
+  adorn_totals()
+
+
+
+```
+
+:::
+
+::: {.column width="50%"}
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2|3|4"
+#| output-location: fragment
+
+analysis_test |>  
+  tabyl(WeaponCarryingSchool)  |> 
+  adorn_pct_formatting(0) |> 
+  adorn_totals()
+```
+
+:::
+:::
+
+# Resampling
+
+::: panel-tabset
+
+### Crossvalidation 
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|3|5"
+#| output-location: fragment
+
+set.seed(1990)
+
+analysis_folds <- vfold_cv(analysis_train, 
+                           v = 5) 
+analysis_folds
+```
+
+
+### Boostrapping
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|3|5"
+#| output-location: fragment
+
+set.seed(1990)
+
+analysis_boot <- bootstraps(analysis_train,
+                            times = 1000)
+analysis_boot
+```
+
+
+### Leave-One-Out 
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|3|5"
+#| output-location: fragment
+
+set.seed(1990)
+
+analysis_loc <- loo_cv(analysis_train)
+
+analysis_loc
+
+```
+
+::: 
+
+## Summary
+
+:::: {.columns}
+::: {.column width="70%"}
+
+1. Do we understand what `tidymodels` is?
+2. Should we do the extra typing? and why?
+3. What are the building blocks?
+4. Is there a quick way to use `tidymodels`?
+5. Is it hard to create the resmpling obects?
+
+:::
+::: {.column width="30%"}
+![](img/wow.gif)
+:::
+:::
+
+
+
+## Want to practice:
+
+[Click Here](https://www.tidymodels.org/learn/)
+
+![](img/practice.gif)

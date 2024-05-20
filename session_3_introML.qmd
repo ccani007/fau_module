@@ -1,0 +1,398 @@
+---
+title: "Introduction to Machine Learning"
+author: "Catalina Canizares"
+date: today
+format:
+  revealjs:
+    scrollable: true
+    slide-number: true
+    transition: "fade"
+    auto-play-media: true
+    auto-stretch: true
+---
+
+## Objectives for session 3 
+- Identify and categorize different types of models.
+- Differentiate between machine learning and traditional statistical methods.
+- Recognize the trade-offs involved in modeling decisions.
+- Learn best practices for data splitting and allocation in the modeling process.
+- Discover the purpose and structure of tidymodels.
+- Apply tidymodels through practical examples.
+- Understand the foundational components of tidymodels.
+- A solid understanding of L1 and L2 penalties.  
+
+
+## Types of Models
+::: panel-tabset
+
+### Descriptive
+
+- Describe or illustrate characteristics of some data. 
+- No other purpose than to visually emphasize some trend or artifact in the data. 
+
+:::footer
+[Tidy Modeling With R](https://www.tmwr.org/software-modeling.html)
+:::
+### Inferential
+
+- Explore a specific hypothesis: statistical tests are used. 
+An inferential model starts with a predefined conjecture or idea about a population and produces a statistical conclusion such as an interval estimate or the rejection of a hypothesis.
+
+- For example, the goal of a clinical trial might be to provide confirmation that a new therapy does a better job in prolonging life
+
+:::footer
+[Tidy Modeling With R](https://www.tmwr.org/software-modeling.html)
+:::
+### Predictive
+
+- Produce the most accurate prediction possible
+Predicted values have the highest possible fidelity to the true value of the new data.
+
+:::footer
+[Tidy Modeling With R](https://www.tmwr.org/software-modeling.html)
+:::
+:::
+
+
+## Artificial Intelligence? Machine Learning? What?
+::: {.incremental}
+:::: {.columns}
+::: {.column width="50%"}
+![](img/Aintelligence.png)
+:::
+
+
+::: {.column width="50%"}
+- **Artificial intelligence** is the name of a whole knowledge field.  
+
+- **Machine Learning**is a part of artificial intelligence.  
+
+- **Neural Networks** are one of machine learning types.
+
+:::footer
+[Machine Learning for Everyone](https://vas3k.com/blog/machine_learning/)
+:::
+:::
+:::
+:::: 
+
+## A little of History 
+
+![](img/Story.png)
+
+:::footer
+[History, current status, and future directions of artificial intelligence](https://www.sciencedirect.com/science/article/pii/B9780128202395000024)
+:::
+
+## Supervised vs Unsupervised Learning
+
+:::footer
+[Machine Learning for Everyone](https://vas3k.com/blog/machine_learning/)
+:::
+
+::: panel-tabset
+
+### Machine Learning
+
+![](img/machine_learning.png){width=60\%}
+
+
+
+
+### Unsupervised
+:::: {.columns}
+::: {.column width="70%"}
+
+**Algorithms to analyze and cluster unlabeled datasets**
+
+- *Clustering*: groups unlabeled data based on their similarities or differences
+
+- *Dimensionality reduction:* Principal component analysis
+:::
+::: {.column width="30%"}
+![](img/unsupervised.png)
+:::
+::::
+
+### Supervised
+
+:::: {.columns}
+::: {.column width="70%"}
+**Use of labeled datasets to train algorithms that classify data or predict outcomes accurately**
+
+*There is a "y" or outcome variable*. 
+
+
+Popular algorithms: 
+
+- Naive Bayes. 
+- Decision Trees. 
+- Logistic Regression. 
+:::
+::: {.column width="30%"}
+![](img/supervised.png)
+
+:::
+:::: 
+:::
+
+## How is it used in our daily lifes?
+
+:::footer
+[Machine Learning for Everyone](https://vas3k.com/blog/machine_learning/)
+:::
+
+::: panel-tabset
+
+### Example 1
+
+![](img/example_1.png)
+
+### Example 2
+![](img/example_2.png)
+
+
+### Example 3 
+![](img/example_3.png)
+
+
+:::
+
+## Machine Learning vs. "Traditional Statistics"?
+
+::: panel-tabset
+
+### Statisticians 
+- Care about variability.
+- Care about defining the range of normal values across samples (the standard error).  
+- Focus on estimating betas
+
+$${y} = \alpha + \beta_1x_1 + \beta_2x_2 + \dots + \beta_nx_n + \epsilon$$
+
+### Machine Learning -People-
+
+- Care about prediction.   
+
+- Focus on estimating y-hat.
+  
+  $$\hat{y} = \hat{f}(x_1)$$
+- $\hat{y}$ Represents the resulting prediction for $Y$.
+- $\hat{f}$ Represents the estimate for $f$, which is often treated as a blackbox (No one is concerned with the exact form of $\hat{f}$, provided that it yields accurate predictions for $Y$)
+[Introduction to Statistical Learning](https://www.statlearning.com/)
+:::
+
+## Machine Learning vs. "Traditional Statistics"
+
+::: panel-tabset
+
+
+### Statistics
+
+![](img/output_statistics.png)
+
+
+### Machine Learning
+
+![](img/ml_output.png)
+
+### Training and Testing
+
+![](img/whole_process.png)
+
+:::
+
+## Tradeoff Bias/Variance
+
+- "When we discuss prediction models, prediction errors can be decomposed into two main subcomponents we care about: **error due to "bias"** and **error due to "variance"**." ([Fortman-Roe, 2012](http://scott.fortmann-roe.com/docs/BiasVariance.html)) 
+
+- "There is a tradeoff between a model's ability to minimize bias and variance." ([Fortman-Roe, 2012](http://scott.fortmann-roe.com/docs/BiasVariance.html))
+
+--- 
+:::footer
+[Fortman-Roe, 2012](http://scott.fortmann-roe.com/docs/BiasVariance.html)
+:::
+
+:::: {.columns}
+::: {.column width="50%"}
+::: fragment
+### Bias
+The error due to bias is taken as the **difference** between the **expected** (or average) prediction of our model and the **correct** value which we are trying to predict.
+
+:::
+:::
+::: {.column width="50%"}
+::: fragment
+### Variance
+The error due to variance is taken as the variability of a model prediction for a given data point.   
+- The variance is how much the predictions for a given point vary between different realizations of the model.
+:::
+:::
+::::
+
+
+
+## Graphical Representation of the Tradeoff
+
+![](img/bullseye.png)
+
+
+:::footer
+[Fortman-Roe, 2012](http://scott.fortmann-roe.com/docs/BiasVariance.html)
+:::
+
+## An Example with Data
+
+[Animation](https://mlu-explain.github.io/bias-variance/)
+
+![](img/animation1.mp4)
+
+
+## Final Remarks About Bias/Variance
+
+![](img/bias-variance.png)
+
+:::footer
+[Understanding the Bias-Variance Tradeoff](https://towardsdatascience.com/understanding-the-bias-variance-tradeoff-165e6942b229)
+:::
+
+## What are the different models?
+
+![](img/types.png){.absolute}
+
+:::footer
+[Machine Learning for Everyone](https://vas3k.com/blog/machine_learning/)
+:::
+
+## So Where Do We Start?
+
+:::: {.columns}
+::: {.column width="50%"}
+::: fragment
+![](img/data-science-model.svg)
+[R for Data Science](https://r4ds.had.co.nz/explore-intro.html)
+
+:::
+:::
+:::  {.column width="50%"}
+::: fragment
+![](img/tunning_process.png)
+[Explanatory Model Analysis](https://ema.drwhy.ai/modelDevelopmentProcess.html)
+:::
+:::
+::::
+
+## How do we Spend our Data?
+
+![](https://media.tenor.com/EWRvErYGzPUAAAAM/bugs-bunny-looney-tunes.gif)
+
+## How do we Spend our Data?
+
+For machine learning, we split data into training and test sets:
+
+1. The **training** set is used to estimate model parameters.
+
+2. The **testing** set is used to find an independent assessment of model performance.
+
+🚫 CAUTION:
+Do not use the test set during training.
+
+:::footer
+[Machine Learning with Tidymodels](https://workshops.tidymodels.org/)
+:::
+
+
+## 🤓
+![](img/validation.png)
+
+:::footer
+[Machine Learning with Tidymodels](https://workshops.tidymodels.org/)
+:::
+
+
+## Let's take a look 
+
+
+![](img/animation2.png)
+[Animation](https://mlu-explain.github.io/train-test-validation/#train)
+
+## Resampling Methods 
+
+They are a tool consisting in repeatedly drawing samples from a dataset and calculating statistics and metrics on each of those samples. 
+
+![](img/rsamples.png)
+
+:::footer
+[rsample](https://rsample.tidymodels.org/reference/index.html)
+:::
+
+
+## Crossvalidation 
+This approach involves randomly dividing the set of observations into k folds of nearly equal size. The first fold is treated as a validation set and the model is fit on the remaining folds.
+![](img/cv.png)
+
+:::footer
+[Cross-Validation: K-Fold vs. Leave-One-Out](https://www.baeldung.com/cs/cross-validation-k-fold-loo)
+:::
+
+
+## Leave one out 
+Only one observation is used for validation and the rest is used to fit the model. 
+![](img/loocv.png)
+
+:::footer
+[Cross-Validation: K-Fold vs. Leave-One-Out](https://www.baeldung.com/cs/cross-validation-k-fold-loo)
+:::
+
+## Boostraping
+
+![](img/boostrap.png)
+
+:::footer
+[Bootstrapping – A Powerful Resampling Method in Statistics](https://yashuseth.wordpress.com/2017/12/02/bootstrapping-a-resampling-method-in-statistics/)
+:::
+
+
+## Tunning Hyperparameters
+
+ | Method        | Hyperparameter    | Description                                                    |
+| ------------- | ----------------- | -------------------------------------------------------------- |
+| Lasso         | lambda            | Regularization strength                                        |
+| KNN           | n_neighbors       | Number of neighbors to consider                                |
+| KNN           | weights           | Weight function used in prediction: "uniform" or "distance"    |
+| Trees         | max_depth         | Maximum depth of the tree                                      |
+| Trees         | min_samples_split | Minimum number of samples required to split an internal node   |
+| Trees         | min_samples_leaf  | Minimum number of samples required to be at a leaf node        |
+| Trees         | max_features      | Number of features to consider when looking for the best split |
+| Random Forest | n_estimators      | Number of decision trees in the forest                         |
+| Random Forest | max_depth         | Maximum depth of the decision trees                            |
+| Random Forest | min_samples_split | Minimum number of samples required to split an internal node   |
+| Random Forest | min_samples_leaf  | Minimum number of samples required to be at a leaf node        |
+| Random Forest | max_features      | Number of features to consider when looking for the best split |
+ 
+ 
+## The Actual Process: {.smaller}
+
+1. Collect Data
+2. Data exploration and preparation. 
+3. Model training 
+4. Model evaluation *(Don't PANIC will cover this next session)*.  
+  + Look at RMSE or contingency table statistics (accuracy, sensitivity, specificity, etc)
+5. Model improvement
+  + Tweak preparation, reparametrize a method or use a different method
+6. Use the test data to evaluate the final model.
+7. Share/Publish results
+
+## The actual Process - As an image 
+
+![](img/theprocess.svg)
+
+:::footer
+[Machine Learning with tidymodels](https://workshops.tidymodels.org/)
+:::
+
+## How to implement all of these?
+
+![](https://media.tenor.com/oTeBa4EVepMAAAAM/business-cat-working.gif)
+
+
+
