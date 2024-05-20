@@ -489,8 +489,18 @@ There are `r nrow(penguins)` rows in the `penguins` data set.
 
 :::
 
+## Let's get the Data
+
+1. From [Excel](https://github.com/ccani007/fau_module/blob/main/data/yrbs_2021.xlsx) 
+2. From [.csv](https://github.com/ccani007/fau_module/blob/main/data/yrbs_2021.csv)
+3. From R
+
 ## `rio` package A Swiss-Army Knife for Data 
 <br/>
+
+::: {.columns}
+::: {.column width="50%"}
+::: {.fragment}
 
 ```{r}
 #| eval: false
@@ -503,7 +513,47 @@ install.packages("rio")
 library(rio)
 ```
 
+:::
+:::
 
+
+::: {.column width="50%"}
+::: {.fragment}
+
+```{r}
+yrbs_2021_df <- import("data/yrbs_2021.csv")
+```
+
+
+![](img/enviorment.png)
+:::
+:::
+:::
+
+
+## `rio` package A Swiss-Army Knife for Data 
+
+<br/>
+
+::: {.columns}
+::: {.column width="50%"}
+::: {.fragment}
+
+```{r}
+yrbs_2021_xlsx <- import("data/yrbs_2021.xlsx")
+```
+
+:::
+:::
+
+::: {.column width="50%"}
+::: {.fragment}
+
+![](img/enviorment_2.png)
+
+:::
+:::
+:::
 
 ## Explore the data set
 - Functions: glimpse, 
