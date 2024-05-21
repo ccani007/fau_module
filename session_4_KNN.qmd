@@ -1,6 +1,6 @@
 ---
 title: "KNN using `tidymodels`"
-author: "Catalina Canizares"
+author: "Catalina Cañizares, Ph.D. and Raymond Balise Ph.D."
 format:
   revealjs:
     scrollable: true
