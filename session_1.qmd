@@ -36,14 +36,13 @@ Create a reproducible manuscript using RStudio to analyze the Youth Risk Behavio
 - Begin the main project for the module: establish the research question and start writing a brief introduction.
 :::
 
-# Data Science
-
 # Introduction to Data Science
 
 ## What is Data Science?
 
-- Activity 
+Scan this QR Code
 
+![](img/menti_qr_code.png)
 
 ## Defining Data Science 
 
@@ -185,8 +184,8 @@ Data Science allows you to transform raw data into understanding, insight, and k
 
   + The title of the document; title: "Hello Quarto"
   + Who wrote it: author: "Catalina Canizares"
-  + Today’s date: "2022-05-11"
-  + The output type: html_document
+  + Today’s date: "2024-05-30"
+  + The output type: format --> html
   + Bibliography 
   + Type of citation and format
 :::
@@ -210,9 +209,9 @@ Data Science allows you to transform raw data into understanding, insight, and k
 ![](img/chunk.png)
  
 ## Chunk Options 
-![](img/chunk_options.png)
+![](img/chunk_options.png){fig-align="center"}
  
- *Source:* [Code Chunks](https://rmarkdown.rstudio.com/lesson-3.html)
+ *Source:* [Code Chunks](https://quarto.org/docs/computations/execution-options.html)
 
 ## More about Chunks
 
@@ -260,11 +259,17 @@ Now that we have a report with a header and some code, we need to explain what t
 ::: {.column width="50%"}
 
 ### Tables
+
+- Always starts with <mark>`tbl-`<mark/>
+
 ![](img/tbl.png){.fragment}
 
 :::
 ::: {.column width="50%"}
 ### Figures
+
+- Always starts with <mark>`fig-`<mark/>
+
 ![](img/fig.png){.fragment}
 :::
 :::
@@ -441,7 +446,7 @@ There are `r nrow(penguins)` rows in the `penguins` data set.
 :::{.incremental}
 ::: {.columns}
 ::: {.column width="50%"}
-1. In your current RStudio window type in the `console: intall.packages("rUM")`
+1. In your current RStudio window type in the `console: install.packages("rUM")`
 2. Go to "Session" and click "Restart R"
 3. Go to File --> New Project...
 
@@ -470,12 +475,6 @@ There are `r nrow(penguins)` rows in the `penguins` data set.
 - The-new-england-journal-of-medicine.csl is the citation style language (CSL) based on the New England Journal of Medicine requirements.
 :::
 
-## Let's populate our project 
-
-1. Download to your computers the csv file than contains the data set to analyze
-2. Store the data you just downloaded to the `data` folder
-3. ready?
-
 ## Reading data in our quarto files
 
 :::{.incremental}
@@ -493,9 +492,10 @@ There are `r nrow(penguins)` rows in the `penguins` data set.
 
 1. From [Excel](https://github.com/ccani007/fau_module/blob/main/data/yrbs_2021.xlsx) 
 2. From [.csv](https://github.com/ccani007/fau_module/blob/main/data/yrbs_2021.csv)
+3. From [.sav](https://github.com/ccani007/fau_module/blob/main/data/yrbs_2021.sav)
 3. From R
 
-## `rio` package A Swiss-Army Knife for Data 
+## `rio` package: A Swiss-Army Knife for Data 
 <br/>
 
 ::: {.columns}
@@ -521,6 +521,7 @@ library(rio)
 ::: {.fragment}
 
 ```{r}
+#| code-copy: true
 yrbs_2021_df <- import("data/yrbs_2021.csv")
 ```
 
@@ -531,7 +532,7 @@ yrbs_2021_df <- import("data/yrbs_2021.csv")
 :::
 
 
-## `rio` package A Swiss-Army Knife for Data 
+## `rio` package: A Swiss-Army Knife for Data 
 
 <br/>
 
@@ -540,6 +541,7 @@ yrbs_2021_df <- import("data/yrbs_2021.csv")
 ::: {.fragment}
 
 ```{r}
+#| code-copy: true
 yrbs_2021_xlsx <- import("data/yrbs_2021.xlsx")
 ```
 
@@ -555,16 +557,145 @@ yrbs_2021_xlsx <- import("data/yrbs_2021.xlsx")
 :::
 :::
 
+
+## `rio` package: A Swiss-Army Knife for Data 
+
+<br/>
+
+::: {.columns}
+::: {.column width="50%"}
+::: {.fragment}
+
+```{r}
+#| code-copy: true
+yrbs_2021_sav <- import("data/yrbs_2021.sav")
+```
+
+:::
+:::
+
+::: {.column width="50%"}
+::: {.fragment}
+
+![](img/enviorment_3.png)
+
+:::
+:::
+:::
+
+## Exporting data from a Package{.scrollable} 
+
+1. 
+```{r}
+#| code-copy: true
+#| eval: false
+
+install.packages("devtools")
+
+```
+
+2. 
+```{r}
+#| code-copy: true
+#| eval: false
+library(devtools)
+
+install_github("ccani007/dissertationData")
+
+```
+
+3. 
+```{r}
+#| code-copy: true
+
+library(dissertationData)
+
+data("clean_yrbs_2021")
+
+```
+
+::: {.fragment}
+![](img/enviorment_4.png){fig-align="center"}
+:::
+
 ## Explore the data set
-- Functions: glimpse, 
 
-## Types of variables or vectors?
+- Let’s check out <mark>three<mark/> ways to explore datasets in R!
 
-## Your turn! 
+::: {.fragment}
+1. The simpler, traditional way:
 
-1. Explore the data
-2. Choose the variables of interest
-3. Write them in your Introduction 
-4. 
+
+```{r}
+glimpse(yrbs_2021_df)
+```
+
+:::
+
+## Explore the data set {.scrollable}
+
+2. The neatest and most detailed way (*in my personal opinion*):
+
+```{r}
+# install.packages("skimr")
+library(skimr)
+skim(yrbs_2021_df)
+```
+
+## Explore the data set 
+
+3. The way to impress your P.I (*in my personal opinion*):
+
+```{r}
+# install.packages("gtExtras")
+library(gtExtras)
+
+clean_yrbs_2021 |> 
+  select(Age,Grade, UnsafeAtSchool, GunCarrying, AttackedInNeighborhood, ForcedSexualIntercourse, SuicideIdeation ) |> 
+  gt_plt_summary()
+```
+
+
+## Types of variables
+
+![](img/types_of_variables.png)
+
+
+:::footer
+[R Academy](https://www.slideshare.net/slideshow/r-programming-variables-data-types/53546754) 
+:::
+
+
+## How to see it in the data?
+
+![](img/glimpse_types.png)
+
+
+## Now it's your turn! 
+
+::: {.columns}
+::: {.column width="50%"}
+::: {.fragment}
+In your projects: 
+
+1. Create a chunk to load the data from the `dissertationData` package
+2. Explore the data
+3. Choose the variables of interest for your research 
+3. Write about them in the introduction
+
+:::
+:::
+
+
+::: {.column width="50%"}
+::: {.fragment}
+![](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExYnppYXN1M3VwZGR2dWwwaWVwN2l0b3VueWdrNDFoY2h2MDhtMjk2ciZlcD12MV9naWZzX3NlYXJjaCZjdD1n/XIqCQx02E1U9W/giphy.gif)
+:::
+:::
+:::
+
+## See ya next time!
+
+![](https://media.giphy.com/media/jUr8EBC1eLq1oFbcBF/giphy.gif?cid=ecf05e47sepiwsspevvk5rf5cdz1wa7imclkeexbjghm0wdc&ep=v1_gifs_search&rid=giphy.gif&ct=g)
 
 ## References
