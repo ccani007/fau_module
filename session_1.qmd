@@ -441,7 +441,34 @@ There are `r nrow(penguins)` rows in the `penguins` data set.
 :::
 :::
 
-## The `rUM` Package
+
+## Lets Try Another Cool Thing! 
+
+::: {.fragment}
+:::{.incremental}
+::: {.columns}
+::: {.column width="50%"}
+
+![](img/positcloud.png)
+:::
+
+::: {.column width="50%"}
+::: {.fragment}
+
+1. Open an account
+2. Share your email with me
+3. Save the temporary copy
+:::
+:::
+:::
+:::
+:::
+
+## The `rUM` Package 
+
+![](img/rum_icloud.png)
+
+## The `rUM` Package in your own machine
 
 :::{.incremental}
 ::: {.columns}
