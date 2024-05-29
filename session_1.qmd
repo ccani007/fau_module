@@ -85,6 +85,11 @@ Data Science allows you to transform raw data into understanding, insight, and k
 [@giorgi2022]
 :::
 
+## How learning R feels like
+
+![](img/learning_r.png)
+
+
 ## The best advice...
 :::{.incremental}
 - The best advice about working in R is to organize your work within projects.
@@ -685,12 +690,10 @@ clean_yrbs_2021 |>
 
 ## Types of variables
 
-![](img/types_of_variables.png)
+![](img/types_of_variables.drawio.svg)
 
 
-:::footer
-[R Academy](https://www.slideshare.net/slideshow/r-programming-variables-data-types/53546754) 
-:::
+
 
 
 ## How to see it in the data?
