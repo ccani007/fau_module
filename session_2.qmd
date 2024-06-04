@@ -1,0 +1,762 @@
+---
+title: "Session 2 - Laundry Data Service: Cleaning Your Data with R and Tidyverse"
+author: "Catalina Cañizares, Ph.D. and Raymond Balise Ph.D."
+date: today
+format: 
+  revealjs:
+    scrollable: false
+    slide-number: true
+    width: 1600
+    height: 900
+    theme: "simple"
+    echo: false
+    chalkboard: true
+    css: style.css
+editor_options: 
+  chunk_output_type: console
+bibliography: ref.bib
+---
+
+
+# **We will go as fast as the slowest person in the room!**
+
+
+```{r}
+#|echo: false
+
+library(skimr)
+library(tidyverse)
+```
+
+
+## Objectives for Today
+:::{.incremental}
+
+:::
+
+# Introduction to the `tidyverse`
+
+## ![](img/tidyverse.png){width="5%" fig-align="center"} Tidyverse 
+
+
+- A collection of R 📦s developed by H. Wickham and others at Rstudio
+
+![](img/wickham_president.jpg){fig-align="center"}
+
+
+
+# **Tidyverse** is a collection of R 📦s
+
+
+* `ggplot2` - visualize stuff
+
+* `dplyr`, `tidyr` - data manipulation
+
+* `purrr` - advanced programming
+
+* `readr` - import data
+
+* `tibble` - improved data.frame format
+
+* `forcats` - working w/ factors
+
+* `stringr` - working w/ chain of characters
+
+
+# **Tidyverse** is a collection of R 📦s
+
+* [`ggplot2` - visualize stuff](https://ggplot2.tidyverse.org/)
+
+* [`dplyr`, `tidyr` - data manipulation](https://dplyr.tidyverse.org/)
+
+* `purrr` - advanced programming (functions and "loops")
+
+* [`readr` - import data](https://readr.tidyverse.org/)
+
+* [`tibble` - improved data.frame format](https://tibble.tidyverse.org/)
+
+* [`forcats` - working w/ factors](https://forcats.tidyverse.org/)
+
+* [`stringr` - working w/ chain of characters](https://stringr.tidyverse.org/)
+
+## **Tidyverse**
+
+:::{.incremental}
+* A framework for managing data that aims at making the cleaning and preparing steps much easier
+
+* Main characteristics of a tidy dataset:
+    - each variable is a column
+    - each observation is a raw
+    - each value is in a different cell
+    
+:::
+
+::: {.fragment}
+
+![](img/tidydata.png){fig-align="center"}
+:::
+
+
+## When do we clean the data?
+
+![](img/data-science-workflow.png){fig-align="center"}
+
+## Workflow in data science, with **Tidyverse**
+
+![](img/data-sciencie-workflow-packages.png){fig-align="center"}
+
+
+## The Pipe operator %>% *(and then)*
+
+![](img/pipe_1.png)
+
+## The Pipe operator %>% *(and then)*
+
+![](img/pipe_2.png)
+
+## The Pipe operator %>% *(and then)*
+
+![](img/pipe_3.png)
+
+## The Pipe operator %>% *(and then)*
+
+![](img/pipe_4.png)
+
+## The Pipe operator %>% *(and then)*
+
+::: columns
+::: {.column width="60%"}
+- This `|>` is also a pipe
+
+Keyboard shortcut:
+
+- Mac users: command + shift + m
+- Windows users: ctrl + shift + m
+
+:::
+::: {.column width="40%"}
+![](img/pipe.png)
+
+:::
+:::
+
+## Fun fact
+:::{.incremental}
+
+
+- The `%>%`comes from a package called `magrittr`
+- A clear reference of the famous painting “The Treachery of Images” of the Belgian painter René Magritte.
+
+
+::: {.r-stack}
+![](img/the-pipe.png){.fragment width="50%" fig-align="center" }
+
+![](img/signature.png){.fragment fig-align="center"}
+
+:::
+:::
+
+## Difference between base R and `tidyverse`
+
+- Star Wars data from the `dplyr` package 
+
+::: {.fragment}
+![](https://media.giphy.com/media/dzWhPd9Zfry79cwBhn/giphy.gif?cid=ecf05e474nhidaye4mx2l8spp8ufuuwbpcy8anedf33yz50d&ep=v1_gifs_related&rid=giphy.gif&ct=g){fig-align="center" 
+h=80%}
+:::
+
+## Exploring the Star Wars dataset{.scrollable}
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1"
+#| output-location: fragment
+
+starwars
+
+```
+
+
+::: {.fragment}
+```{r}
+#| echo: true
+#| code-line-numbers: "1"
+#| output-location: fragment
+skim(starwars)
+```
+:::
+
+## Difference between base R and `tidyverse`
+
+Let's calculate the BMI for each character in the dataset
+
+::: columns
+::: {.column width="50%"}
+
+### Base R 🤢
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1"
+starwars$bmi <- starwars$mass/(starwars$height/100)^2
+```
+
+
+:::
+
+::: {.column width="50%"}
+
+### tidyverse 😎
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1"
+starwars_bmi <- 
+  starwars %>% 
+  mutate(bmi = mass/((height/100)^2)) %>% 
+  select(bmi, everything()) # To see the created variable first
+```
+
+:::
+:::
+::: {.fragment}
+```{r}
+starwars_bmi
+```
+:::
+
+##
+
+![](img/dplyt.png){fig-align="center"}
+
+## dplyr
+<br/>
+`dplyr` is a grammar of data manipulation, providing a consistent set of verbs that help you solve the most common data manipulation challenges.
+<br/>
+We will learn the following functions:
+
+::: columns
+::: {.column width="30%"}
+
+
+- `arrange`
+
+- `filter`
+
+- `select`
+
+- `rename`
+
+
+:::
+::: {.column width="30%"}
+
+- `mutate` 
+  * `if_else`
+  * `case_when`
+
+- `summarise`
+
+- `left_join` (and family of joins)
+:::
+::: 
+
+## dplyr
+
+![](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExbmF2amxvNWsyYWZ3dHZqaGJxdHQ1YWluOG1nNWowZjM1d3lvOWQ5bSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3ohuAxV0DfcLTxVh6w/giphy.gif){fig-align="center" 
+h=100%}
+
+## Verb syntax
+
+
+All of the verbs have a very similar syntax:
+
+> *function(data, argument)*
+
+::: {.fragment}
+
+- But, we work with pipes..
+- Therefore the data comes before the verb, like this: 
+
+:::
+::: {.fragment}
+
+> *data %>% function(argument)*
+
+:::
+
+
+## `arrange()`{.scrollable}
+
+[arrange()](https://dplyr.tidyverse.org/reference/arrange.html) changes the ordering of the rows.
+
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2"
+#| output-location: fragment
+
+starwars_bmi %>% 
+  arrange(bmi)
+
+```
+
+## `arrange()`{.scrollable}
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2"
+#| output-location: fragment
+
+starwars_bmi %>% 
+  arrange(desc(bmi))
+
+```
+
+## `filter()`
+
+[filter()](https://dplyr.tidyverse.org/reference/filter.html) picks cases based on their values.
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2"
+#| output-location: fragment
+
+starwars_bmi %>% 
+  filter(sex == "female")
+
+```
+
+## `filter()`
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2"
+#| output-location: fragment
+
+starwars_bmi %>% 
+  filter(sex != "female")
+
+```
+
+## `filter()`
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2"
+#| output-location: fragment
+
+starwars_bmi %>% 
+  filter(birth_year >= 112)
+
+```
+
+
+## `select()`
+[select()](https://dplyr.tidyverse.org/reference/select.html) picks variables based on their names.
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2"
+#| output-location: fragment
+
+starwars_bmi %>% 
+  select(bmi)
+
+```
+
+## `select()`
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2"
+#| output-location: fragment
+
+starwars_bmi %>% 
+  select(-bmi)
+
+```
+
+## `select()`
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2|3|4"
+#| output-location: fragment
+
+starwars_bmi %>% 
+  select(name, bmi, sex) %>% 
+  filter(sex == "male") %>% 
+  arrange(bmi)
+
+```
+
+## `rename()`
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2|3|4|5"
+#| output-location: fragment
+
+starwars_bmi %>% 
+  select(name, bmi, sex) %>% 
+  filter(sex == "male") %>% 
+  arrange(bmi) %>% 
+  rename(personaje = name, sexo = sex)
+
+```
+
+## `rename()`
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2|3|4"
+#| output-location: fragment
+
+starwars_bmi %>% 
+  select(personaje = name, sexo = sex, bmi) %>% 
+  filter(sexo == "male") %>% 
+  arrange(bmi)
+```
+
+## `rename()`
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2|3|4"
+#| output-location: fragment
+
+starwars_bmi %>% 
+  select(name, bmi, sex) %>% 
+  filter(sex == "male") %>% 
+  arrange(bmi)
+
+```
+
+## `mutate()` *my personal favorite* 💜
+[mutate()](https://dplyr.tidyverse.org/reference/mutate.html) adds new variables that are functions of existing variables
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2|3|4|5|6"
+#| output-location: fragment
+
+starwars_bmi %>% 
+  mutate(id = row_number()) %>% 
+  select(id, personaje = name, sexo = sex, bmi) %>% 
+  filter(sexo == "male") %>% 
+  arrange(bmi) %>% 
+  select(-personaje)
+```
+
+## `mutate()` and `if_else()`
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2|3|4"
+#| output-location: fragment
+
+starwars_bmi %>% 
+  mutate(is_blue_eyes = if_else(eye_color == "blue", 1, 0)) %>% 
+  select(name,is_blue_eyes, eye_color) %>% 
+  arrange(desc(is_blue_eyes))
+
+
+```
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2|3|4"
+#| output-location: fragment
+
+starwars_bmi %>% 
+  mutate(is_blue_eyes = if_else(eye_color == "blue", "blue", "other")) %>% 
+  select(name, is_blue_eyes, eye_color) %>% 
+  arrange(is_blue_eyes)
+```
+
+
+## `mutate()` and `case_when()`💜
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2|3|4|5|6|7"
+#| output-location: fragment
+
+starwars %>%
+  mutate(is_human = case_when(
+    species == "Human" ~ 1,
+    species != "Human" ~ 0, 
+    .default = NA  # Handle cases where species might be NA
+  )) %>% 
+  select(is_human, species)
+
+```
+
+## `mutate()` and `case_when()`💜
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2|3|4|5|6|7|8|9|10|11"
+#| output-location: fragment
+starwars_bmi %>%
+  mutate(bmi_category = case_when(
+    bmi < 18.5 ~ "Underweight",
+    bmi >= 18.5 & bmi < 25 ~ "Normal weight",
+    bmi >= 25 & bmi < 30 ~ "Overweight",
+    bmi >= 30 & bmi < 35 ~ "Obesity Class I",
+    bmi >= 35 & bmi < 40 ~ "Obesity Class II",
+    bmi >= 40 ~ "Obesity Class III",
+    .default =  NA_character_  # Handle cases where bmi might be NA
+  )) %>% 
+  select(name, bmi, bmi_category)
+
+```
+
+## `summarise` *I always get it wrong the first time* 😒
+
+[summarise()](https://dplyr.tidyverse.org/reference/summarise.html) reduces multiple values down to a single summary.
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2|3|4"
+#| output-location: fragment
+
+starwars_bmi %>% 
+  summarise(
+    mean_bmi = mean(bmi, na.rm = TRUE)
+  )
+
+```
+
+## `summarise`
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18"
+#| output-location: fragment
+
+
+starwars_bmi %>%
+  mutate(bmi_category = case_when(
+    bmi < 18.5 ~ "Underweight",
+    bmi >= 18.5 & bmi < 25 ~ "Normal weight",
+    bmi >= 25 & bmi < 30 ~ "Overweight",
+    bmi >= 30 & bmi < 35 ~ "Obesity Class I",
+    bmi >= 35 & bmi < 40 ~ "Obesity Class II",
+    bmi >= 40 ~ "Obesity Class III",
+    .default =  NA_character_  # Handle cases where bmi might be NA
+  )) %>% 
+  filter(!is.na(bmi_category)) %>% # We created an NA ctaegory and I want to rmv
+  summarise(
+    mean_bmi = mean(bmi, na.rm = TRUE), 
+    sd_bmi = sd(bmi, na.rm = TRUE), 
+    min = min(bmi, na.rm = TRUE), 
+    max = max(bmi, na.rm = TRUE), 
+    .by = bmi_category
+  )
+
+```
+
+## `summarise`
+
+- This is an example of code using the <- `gets` arrow
+> Keyboard shortcut:
+    - Mac users: option + - (minus key)
+    - Windows users: Alt + - (minus key)
+
+::: {.fragment}
+
+1. I create and store as an object the dataset with the categories
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2|3|4|5|6|7|8|9|10|11|12"
+#| output-location: fragment
+
+starwars_bmi_cat <- 
+  starwars_bmi %>%
+  mutate(bmi_category = case_when(
+    bmi < 18.5 ~ "Underweight",
+    bmi >= 18.5 & bmi < 25 ~ "Normal weight",
+    bmi >= 25 & bmi < 30 ~ "Overweight",
+    bmi >= 30 & bmi < 35 ~ "Obesity Class I",
+    bmi >= 35 & bmi < 40 ~ "Obesity Class II",
+    bmi >= 40 ~ "Obesity Class III",
+    .default =  NA_character_  # Handle cases where bmi might be NA
+  )) %>% 
+  filter(!is.na(bmi_category))
+
+
+```
+:::
+
+## `summarise`
+2. I use the dataset
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2|3|4|5|6|7|8|9|10"
+#| output-location: fragment
+
+starwars_bmi_cat %>% 
+  summarise(
+    mean_bmi = mean(bmi, na.rm = TRUE), 
+    sd_bmi = sd(bmi, na.rm = TRUE), 
+    min = min(bmi, na.rm = TRUE), 
+    max = max(bmi, na.rm = TRUE), 
+    .by = c(bmi_category, species)
+  ) %>% 
+  arrange(bmi_category, mean_bmi) %>% 
+  print(n = 41)
+
+```
+
+
+## `summarise`
+
+::: columns
+::: {.column width="50%"}
+::: {.fragment}
+- Was it useful? 
+:::
+
+::: {.fragment}
+
+![](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMms2aGF4azRqam9ucWpuZ3A2OHVwNTFtNDlxbTRmYnNuMjd1bHIzaCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/cttd21xPEJL3i/giphy.gif)
+:::
+:::
+
+::: {.column width="50%"}
+::: {.fragment}
+- Can we make it better?
+:::
+
+::: {.fragment}
+![](https://media.giphy.com/media/UTGF13ELbCSNtFcp1l/giphy.gif?cid=ecf05e47zjszf14eubnlug3sh83z9qsicknrogxjeoze73kq&ep=v1_gifs_search&rid=giphy.gif&ct=g)
+:::
+:::
+:::
+
+
+## `summarise`
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2|3|4|5|6|7|8|9|10|11|12|13|14|15"
+#| output-location: fragment
+
+starwars_bmi_cat %>%
+  mutate(is_human = case_when(
+    species == "Human" ~ 1,
+    species != "Human" ~ 0,
+    .default = NA # Handle cases where species might be NA
+  )) %>%
+  filter(!is.na(is_human)) %>% 
+  summarise(
+    mean_bmi = mean(bmi, na.rm = TRUE),
+    sd_bmi = sd(bmi, na.rm = TRUE),
+    min = min(bmi, na.rm = TRUE),
+    max = max(bmi, na.rm = TRUE),
+    .by = c(bmi_category, is_human)
+  ) %>% 
+  arrange(bmi_category)
+```
+
+## The `Joins` Family 
+
+### **[Inner join](https://dplyr.tidyverse.org/reference/mutate-joins.html)**: 
+
+* An inner_join() only keeps observations from x that have a matching key in y.
+
+
+### **[Outer joins](https://dplyr.tidyverse.org/reference/mutate-joins.html)**: 
+
+The outer joins keep observations that appear in at least one of the data frames:
+
+* A left_join() keeps all observations in x.
+
+* A right_join() keeps all observations in y.
+
+* A full_join() keeps all observations in x and y.
+
+## An unnrealisitc example
+
+I am creating the data sets to assign a penguin to a star wars character that has the same ID
+
+::: columns
+::: {.column width="50%"}
+
+```{r}
+#| echo: true
+penguins <-
+  palmerpenguins::penguins
+
+penguins_math_starwars <- 
+  penguins %>%
+  mutate(id = seq(2, by = 2, length.out = nrow(penguins))) %>%
+  select(id, everything())
+  
+```
+:::
+
+::: {.column width="50%"}
+
+```{r}
+#| echo: true
+starwars_match_penguins <- 
+  starwars %>% 
+  mutate(id = seq(nrow(starwars))) %>% 
+  select(id, everything())
+  
+```
+
+:::
+:::
+::: {.fragment}
+![](https://media.giphy.com/media/mUzzNtYHPU3e/giphy.gif?cid=ecf05e47h4hydujkay4ev6eeuwpswk4j8n8hlxqk7k7iv3nb&ep=v1_gifs_search&rid=giphy.gif&ct=g){fig-align="center" width="50%"}
+:::
+
+## `left_join()`
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2|3"
+#| output-location: fragment
+
+starwars_match_penguins %>% 
+  select(id, name) %>% 
+  left_join(penguins_math_starwars, by = "id") 
+
+```
+
+## `right_join()`
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2|3"
+#| output-location: fragment
+
+starwars_match_penguins %>% 
+  select(id, name) %>% 
+  right_join(penguins_math_starwars, by = "id")
+
+```
+
+## `full_join()`
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2|3"
+#| output-location: fragment
+
+starwars_match_penguins %>% 
+  select(id, name) %>% 
+  full_join(penguins_math_starwars, by = "id")
+
+```
+
+## `anti_join()`
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2|3"
+#| output-location: fragment
+
+starwars_match_penguins %>% 
+  select(id, name) %>% 
+  anti_join(penguins_math_starwars, by = "id")
+
+```
+

@@ -1,0 +1,4 @@
+- source: session_1.qmd
+  quarto-pub:
+    - id: 3c93f774-646a-4770-8881-9cc9df4fef30
+      url: 'https://catalina.quarto.pub/session-1---intro-to-r'
