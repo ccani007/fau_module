@@ -1,5 +1,5 @@
 ---
-title: "Session 2 - Laundry Data Service: Cleaning Your Data with R and Tidyverse"
+title: "Session 2 - The Data Jedi Academy: Cleaning Your Data with R and Tidyverse"
 author: "Catalina Cañizares, Ph.D. and Raymond Balise Ph.D."
 date: today
 format: 
@@ -17,6 +17,13 @@ editor_options:
 bibliography: ref.bib
 ---
 
+## About This Material
+
+> Session 2 - The Data Jedi Academy: Cleaning Your Data with R and Tidyverse © 2024 by Catalina Canizares and Raymond Balise is licensed under Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International 
+
+This material is freely available under the Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License. Some sections are based on content from two other presentations, which are credited at the end of this presentation.
+
+For more information on this license, please visit: [Creative Commons License](https://creativecommons.org/licenses/by-nc-nd/4.0/)
 
 # **We will go as fast as the slowest person in the room!**
 
@@ -31,6 +38,9 @@ library(tidyverse)
 
 ## Objectives for Today
 :::{.incremental}
+1. Understand the Basics of Data Cleaning: Learn fundamental concepts and techniques for cleaning data using R and tidyverse.
+2. Explore Tidyverse Tools: Familiarize with key Tidyverse packages such as dplyr, and tidyr for data manipulation and cleaning.
+3. Apply Data Cleaning Techniques: Practice applying data cleaning methods to various datasets to prepare them for analysis.
 
 :::
 
@@ -85,9 +95,9 @@ library(tidyverse)
 * A framework for managing data that aims at making the cleaning and preparing steps much easier
 
 * Main characteristics of a tidy dataset:
-    - each variable is a column
-    - each observation is a raw
-    - each value is in a different cell
+    - Each variable is a column
+    - Each observation is a raw
+    - Each value is in a different cell
     
 :::
 
@@ -161,8 +171,8 @@ Keyboard shortcut:
 - Star Wars data from the `dplyr` package 
 
 ::: {.fragment}
-![](https://media.giphy.com/media/dzWhPd9Zfry79cwBhn/giphy.gif?cid=ecf05e474nhidaye4mx2l8spp8ufuuwbpcy8anedf33yz50d&ep=v1_gifs_related&rid=giphy.gif&ct=g){fig-align="center" 
-h=80%}
+![](https://media.giphy.com/media/dzWhPd9Zfry79cwBhn/giphy.gif?cid=ecf05e474nhidaye4mx2l8spp8ufuuwbpcy8anedf33yz50d&ep=v1_gifs_related&rid=giphy.gif&ct=g){fig-align="center" width=80%}
+
 :::
 
 ## Exploring the Star Wars dataset{.scrollable}
@@ -198,6 +208,7 @@ Let's calculate the BMI for each character in the dataset
 ```{r}
 #| echo: true
 #| code-line-numbers: "1"
+#| output-location: fragment
 starwars$bmi <- starwars$mass/(starwars$height/100)^2
 ```
 
@@ -210,7 +221,7 @@ starwars$bmi <- starwars$mass/(starwars$height/100)^2
 
 ```{r}
 #| echo: true
-#| code-line-numbers: "1"
+#| code-line-numbers: "1|2|3|4"
 starwars_bmi <- 
   starwars %>% 
   mutate(bmi = mass/((height/100)^2)) %>% 
@@ -225,19 +236,26 @@ starwars_bmi
 ```
 :::
 
+## 5 minute break
+
+![](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExcjRkbWhyZGhxcW5nejI4NGhxZG9yZ2Uzb2owMTF5Z2FpcnM2MWlqNyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/GTS1f1dWh4mvkJRUrK/giphy.gif){fig-align="center" width=80%}
+
+
+
 ##
 
 ![](img/dplyt.png){fig-align="center"}
 
 ## dplyr
-<br/>
-`dplyr` is a grammar of data manipulation, providing a consistent set of verbs that help you solve the most common data manipulation challenges.
-<br/>
-We will learn the following functions:
+:::{.incremental}
 
+`dplyr` is a grammar of data manipulation, providing a consistent set of verbs that help you solve the most common data manipulation challenges.
+
+- We will learn the following functions:
+:::
 ::: columns
 ::: {.column width="30%"}
-
+:::{.incremental}
 
 - `arrange`
 
@@ -247,9 +265,10 @@ We will learn the following functions:
 
 - `rename`
 
-
 :::
-::: {.column width="30%"}
+:::
+::: {.column width="60%"}
+:::{.incremental}
 
 - `mutate` 
   * `if_else`
@@ -260,7 +279,7 @@ We will learn the following functions:
 - `left_join` (and family of joins)
 :::
 ::: 
-
+:::
 ## dplyr
 
 ![](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExbmF2amxvNWsyYWZ3dHZqaGJxdHQ1YWluOG1nNWowZjM1d3lvOWQ5bSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3ohuAxV0DfcLTxVh6w/giphy.gif){fig-align="center" 
@@ -404,6 +423,8 @@ starwars_bmi %>%
 ```
 
 ## `rename()`
+
+rename also works within a `select()` function, like this:
 ```{r}
 #| echo: true
 #| code-line-numbers: "1|2|3|4"
@@ -413,19 +434,6 @@ starwars_bmi %>%
   select(personaje = name, sexo = sex, bmi) %>% 
   filter(sexo == "male") %>% 
   arrange(bmi)
-```
-
-## `rename()`
-```{r}
-#| echo: true
-#| code-line-numbers: "1|2|3|4"
-#| output-location: fragment
-
-starwars_bmi %>% 
-  select(name, bmi, sex) %>% 
-  filter(sex == "male") %>% 
-  arrange(bmi)
-
 ```
 
 ## `mutate()` *my personal favorite* 💜
@@ -747,8 +755,24 @@ starwars_match_penguins %>%
 
 ```
 
-## `anti_join()`
 
+## `inner_join()`
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2|3"
+#| output-location: fragment
+
+starwars_match_penguins %>% 
+  select(id, name) %>% 
+  inner_join(penguins_math_starwars, by = "id")
+
+```
+
+
+## And a bonus: `anti_join()`
+
+::: columns
+::: {.column width="50%"}
 ```{r}
 #| echo: true
 #| code-line-numbers: "1|2|3"
@@ -760,3 +784,119 @@ starwars_match_penguins %>%
 
 ```
 
+:::
+
+
+::: {.column width="50%"}
+::: {.fragment}
+![](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMmIxcmp2dWJyaHBidzZ6c3l2ODdxejVkYjVwaWdndGRlYTcyeXdpayZlcD12MV9naWZzX3NlYXJjaCZjdD1n/tMqBXhuFovmzH5Fhf6/giphy.gif)
+:::
+:::
+:::
+
+## Another break?
+
+![](https://media.giphy.com/media/l1ugfgJqfbAIMKZuU/giphy.gif?cid=790b7611gr94otxydzp6e9fsehbejhw95vnpfuvwj6c26ldj&ep=v1_gifs_search&rid=giphy.gif&ct=g){fig-align="center" width=80%}
+
+
+## Briefly...
+![](img/tidyr.webp)
+
+
+## `tidyr`
+
+:::{.incremental}
+- This package has 2 very **very** useful functions you must learn. 
+
+- Have you seen this before? *(A show of hands)*
+:::
+
+::: {.fragment}
+![](img/transpose.png){fig-align="center"}
+:::
+
+## Long data vs. Wide data
+
+::: columns
+::: {.column width="50%"}
+
+### Wide format
+
+<mark>Each row represents a single character <mark/> 
+```{r}
+starwars %>% 
+  select(name, height, mass, hair_color)
+```
+
+:::
+::: {.column width="50%"}
+### Long format
+
+<mark>Each row would represent a single attribute of a character. <mark/> 
+```{r}
+starwars %>%
+  mutate(across(-name, as.character)) %>% 
+  select(name, height, mass, hair_color) %>% 
+  pivot_longer(cols = -name, # Keep the 'name' column fixed
+               names_to = "attribute", # Name for the new attribute column
+               values_to = "value") # Name for the new value column
+
+```
+
+:::
+:::
+
+## `pivot_longer()` and `pivot_wider()`
+
+- `pivot_longer()` "lengthens" data, increasing the number of rows and decreasing the number of columns. The inverse transformation is pivot_wider()
+
+- `pivot_wider()` "widens" data, increasing the number of columns and decreasing the number of rows. The inverse transformation is pivot_longer().
+
+::: {.fragment}
+![](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExcWE3Z2d3cTF4dTJ2M21zeXdtem9rMXB5cTZ1bzVmNGZwNXVub240MSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/12haGO61oFZ28w/giphy.gif){fig-align="center" width="80%"}
+:::
+
+## `pivot_longer()` 
+
+Remember to look at the documentation [here](https://tidyr.tidyverse.org/reference/pivot_longer.html)
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2|3|4|5|6|7"
+#| output-location: fragment
+
+starwars_wide <- 
+  starwars %>%
+  mutate(across(-name, as.character)) %>% 
+  select(name, height, mass, hair_color) %>% 
+  pivot_longer(cols = -name, # Keep the 'name' column fixed
+               names_to = "attribute", # Name for the new attribute column
+               values_to = "value") # Name for the new value column
+
+starwars_wide
+
+```
+
+
+## `pivot_wider()` 
+
+Also, look at the documentation [here](https://tidyr.tidyverse.org/reference/pivot_wider.html)
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2"
+#| output-location: fragment
+
+starwars_wide %>%
+  pivot_wider(names_from = attribute, values_from = value)
+
+```
+
+## We are ready for `ggplot`!!
+
+![](https://media.giphy.com/media/9Cj0oZUR3VslO/giphy.gif?cid=ecf05e47l0z481214hh5l04r9jjzfkubno3f0loukb8f83ma&ep=v1_gifs_search&rid=giphy.gif&ct=g){fig-align="center" width="80%"}
+
+## Credit
+
+I used material from: [Oliver Gimenez](https://github.com/oliviergimenez/intro_tidyverse) and [L. Paloma Rojas](https://palolili23.github.io/tidyverse_workshop_oscr_slides/index.html#1).     
+
+Thank you!

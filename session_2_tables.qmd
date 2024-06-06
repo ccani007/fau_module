@@ -1,0 +1,520 @@
+---
+title: "Session 2 - Shake It Off: Mastering Data Tables with Taylor Swift's Tracks"
+author: "Raymond Balise Ph.D. and Catalina Cañizares, Ph.D."
+date: today
+format: 
+  revealjs:
+    scrollable: true
+    slide-number: true
+    width: 1600
+    height: 900
+    theme: "simple"
+    echo: false
+    chalkboard: true
+    css: style.css
+editor_options: 
+  chunk_output_type: console
+bibliography: ref.bib
+---
+
+## About This Material
+
+
+ > Session 2 - Shake It Off: Mastering Data Tables with Taylor Swift's Tracks © 2024 by Raymond Balise and Catalina Canizares is licensed under CC BY-NC-ND 4.0 
+
+
+This material is freely available under the Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License. Some sections are based on content from other presentations, which are credited at the end of this presentation.
+
+For more information on this license, please visit: [Creative Commons License](https://creativecommons.org/licenses/by-nc-nd/4.0/)
+
+
+
+```{r}
+#|echo: false
+
+library(skimr)
+library(gt)
+library(gtsummary)
+library(table1)
+library(tidyverse)
+```
+
+
+## Objectives for Today
+:::{.incremental}
++ Understand when to use tables vs. graphics
++ Understand guiding principles for table design
++ Understand the many tools/packages for making pretty tables in R
++ Know how to use `table1` to make tables
++ Know how to use `gt`and `gtsummary`to make complex tables
+
+:::
+
+## When Dr. Balise was your age...
+:::{.incremental}
++ When I was in school, journal tables (and figures) were monochrome and simple.
++ Now we have tables that are artfully formatted and have art that is ready for Twitter.
++ The distinction between tables and figures has completely blurred.
+:::
+
+
+::: columns
+::: {.column width="50%"}
+::: {.fragment}
+![](img/nejm1.jpg){fig-align="center" width="100%"}
+:::
+:::
+
+
+::: {.column width="50%"}
+::: {.fragment}
+![](img/nejm2.jpg){fig-align="center" width="100%"}
+:::
+:::
+:::
+
+## When you were your age... 
+
++ The state-of-the-art tables are interactive and have embedded graphics. 
+
+::: columns
+::: {.column width="50%"}
+::: {.fragment}
+![](img/bars.jpg){fig-align="center" width="100%"}
+[Source](https://glin.github.io/reactable/articles/twitter-followers/twitter-followers.html)
+
+:::
+:::
+
+
+::: {.column width="50%"}
+::: {.fragment}
+![](img/bandlines.jpg){fig-align="center" width="100%"}
+:::
+:::
+:::
+
+## When should you use a table?
+:::{.incremental}
++ Tables are useful to show the exact values of your data or estimates.
+
++ They are not the best solution to show a lot of data or if you want to show the data in a compact space.
+
++ They are not usually intended to give a quick, visual representation of data.
+  + However, the core psychological principles leading to good graphics apply to both charts and tables.
+  + Read/Study/Live *Visualizing Data* and *The Elements of Graphing Data* by William S. Cleveland.
+
+:::
+
+## Tufte on Visualizations
+:::{.incremental}
++ One of the visualization thought leaders in the 1980s, Edward Tufte, stressed the importance of erasing all unnecessary ink off the page.  The same holds true for tables. 
++ When in doubt, erase.
+:::
+
+
+::: {.fragment}
+![](img/ink_to_information.jpg){fig-align="center" width="50%"}
+:::
+
+:::footer
+[Source](https://playfairdata.com/data-ink-ratio-animation-and-how-to-apply-it-in-tableau/)
+:::
+## Gestalt Principles
+:::{.incremental}
++ **Gestalt Law of Proximity** --> Things close together are automatically grouped
++ **Gestalt Law of Similarity** --> Things of the same color will be grouped.  If one thing is a different color, it will pop off of the page
++ **Gestalt Law of Closure** --> You can draw part of a bounding box and the brain will fill in the rest
+:::
+
+::: columns
+::: {.column width="33%"}
+
+![](img/proximity.jpg)
+
+:::
+::: {.column width="33%"}
+![](img/similarity.jpg)
+:::
+::: {.column width="33%"}
+![](img/closure.jpg)
+
+:::
+:::
+
+:::footer
+[Source](https://blog.xlcubed.com/2008/05/gestalt-laws-charts-and-tables-the-way-your-brain-wants-them-to-be/)
+:::
+
+## Schwabish's Rules for Better Tables
+::: columns
+::: {.column width="50%"}
+![](img/costbenefit.jpg)
+
+:::
+::: {.column width="50%"}
+![](https://cup-us.imgix.net/covers/9780231193115.jpg?auto=format&w=350)
+
+:::
+:::
+
+:::footer
+[Source](https://cup-us.imgix.net/covers/9780231193115.jpg?auto=format&w=350)
+:::
+
+## Schwabish's Ten Rules for Better Tables + Balise Three
+
+1. Offset the **Heads** from the Body
+2. Use **Subtle Dividers** Rather Than Heavy Gridlines
+3. **Right-Align** Numbers and Heads
+4. **Left-Align Text** and Heads
+5. Select the Appropriate Level of **Precision**
+6. Guide Your Reader with **Space** between Rows and Columns
+7. **Remove** Unit **Repetition**
+8. Highlight **Outliers**
+9. **Group Similar** Data and Increase White Space
+10. Add **Visualizations** When Appropriate
+11. Draw Attention to the **Key Point(s)**
+12. Use **Annotations** to Explain the Statistics
+13. Make **Captions/Titles** Self-Contained
+  + Explain Sample Size, Who and When
+  
+## What is the Key Take-Away Point in These Data?
+::: columns
+::: {.column width="50%"}
+::: {.fragment}
+![](img/ariana_before.jpg)
+:::
+:::
+
+::: {.column width="50%"}
+::: {.fragment}
+![](img/ariana_after.jpg)
+
+:::
+:::
+:::
+
+## Critique PReP Table 1 - Excel Default
+
+::: columns
+::: {.column width="50%"}
+::: {.fragment}
+![](img/ariana_before.jpg)
+:::
+:::
+
+::: {.column width="50%"}
+::: {.fragment}
+1. Heads `r emo::ji("check")`
+2. Subtle Dividers `r emo::ji("x")`
+3. Right-Align Numbers `r emo::ji("x")`
+4. Left-Align Text `r emo::ji("x")`
+5. Precision `r emo::ji("check")`
+6. Space `r emo::ji("check")`
+7. Remove Repetition `r emo::ji("x")`
+8. Outliers
+9. Group Similar `r emo::ji("check")`
+10. Visualizations
+11. Key Point(s) `r emo::ji("x")`
+12. Annotations
+13. Caption/Title `r emo::ji("x")`
+
+:::
+:::
+:::
+
+##  Critique PReP Table 1 - Also Excel
+
+::: columns
+::: {.column width="50%"}
+::: {.fragment}
+![](img/ariana_after.jpg)
+:::
+:::
+
+::: {.column width="50%"}
+::: {.fragment}
+1. Heads `r emo::ji("check")`
+2. Subtle Dividers `r emo::ji("check")`
+3. Right-Align Numbers `r emo::ji("x")`
+4. Left-Align Text `r emo::ji("check")`
+5. Precision `r emo::ji("check")`
+6. Space `r emo::ji("check")`
+7. Remove Repetition `r emo::ji("x")`
+8. Outliers 
+9. Group Similar `r emo::ji("check")`
+10. Visualizations
+11. Key Point(s) `r emo::ji("check")`
+12. Annotations 
+13. Caption/Title `r emo::ji("check")`
+:::
+:::
+:::
+
+## Critique PReP Table 1 - (Version 1.1)
+
+::: columns
+::: {.column width="50%"}
+::: {.fragment}
+![](img/ariana_after_1.jpg)
+:::
+:::
+
+::: {.column width="50%"}
+::: {.fragment}
+1. Heads `r emo::ji("check")`
+2. Subtle Dividers `r emo::ji("check")`
+3. Right-Align Numbers `r emo::ji("x")`
+4. Left-Align Text `r emo::ji("check")`
+5. Precision `r emo::ji("check")`
+6. Space `r emo::ji("check")`
+7. Remove Repetition `r emo::ji("check")`
+8. Outliers
+9. Group Similar `r emo::ji("check")`
+10. Visualizations
+11. Key Point(s) `r emo::ji("check")`
+12. Annotations
+13. Caption/Title `r emo::ji("check")`
+:::
+:::
+:::
+
+## I wish there was a "best" tool.
+
++ You have a lot of package options for making static (i.e., Word, PDF or HTML) and dynamic (i.e., HTML) publication-ready tables.
++ All packages make web-friendly tables.
++ Others make static graphics that are beautifully formatted for the the web: `gt`, `kableExtra`.
++ Yet others make static tables that look great in Word: `flextable`, `huxtable`
++ Some are ideal for interactive web content: `dt`, `reactable`
+
+## Output for Packages that Make Tables
+Not all packages support all R Markdown output formats.
+
+::: columns
+::: {.column width="50%"}
+
+![](img/render_tables.png)
+:::
+
+
+::: {.column width="50%"}
+
+![](img/guide_render_tables.png)
+:::
+:::
+
+# Let's create the tables
+![](https://media.giphy.com/media/XMmf6i3xuKZiPMvNZe/giphy.gif?cid=790b7611c9g9mnzf27mqeqwoeej5soy2s1qx0bz6b7rv7emc&ep=v1_gifs_search&rid=giphy.gif&ct=g)
+
+## The data 
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2|3"
+#| output-location: fragment
+
+# install.packages("taylor")
+library(taylor)
+taylor_album_songs 
+```
+
+## The data
+```{r}
+#| echo: true
+#| code-line-numbers: "1"
+#| output-location: fragment
+
+skim(taylor_album_songs)
+```
+
+## Data dictionary
+
+```{=html}
+<iframe width="780" height="700" src="https://taylor.wjakethompson.com/reference/taylor_songs" title="Webpage example"></iframe>
+```
+
+
+## `table1` {.scrollable}
+The simplest way to create a nice table *(in my opinion)*
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|3|4"
+#| output-location: column-fragment
+
+library(table1)
+
+table1(~ album_name + energy + danceability + 
+         explicit, data = taylor_album_songs)
+
+```
+
+## `table1`
+
+Let's explore which album has the most explicit songs
+
+We have to wrangle the data a bit:
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2|3|4"
+#| output-location: fragment
+taylor_no_na <- 
+  taylor_album_songs %>% 
+  filter(!is.na(explicit)) %>% 
+  mutate(explicit_factor = factor(explicit))
+
+
+```
+
+::: {.fragment}
+Create the table
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2|3"
+#| output-location: column-fragment
+table1(~ album_name + energy + 
+         danceability | explicit_factor, 
+       caption = "Taylor's explicit albums",
+       data = taylor_no_na)
+```
+
+:::
+
+## Can we make it prettier?
+::: {.fragment}
+![](https://media.giphy.com/media/7SKWbnycqb2Pze62Zk/giphy.gif?cid=790b7611c9g9mnzf27mqeqwoeej5soy2s1qx0bz6b7rv7emc&ep=v1_gifs_search&rid=giphy.gif&ct=g){fig-align="center" width="60%"}
+:::
+
+
+## ![](img/gtsummary.png){width="7%"}`gtsummary`
+
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2|3|4|5|6|7|8|9|10|11"
+#| output-location: column-fragment
+#| warning: false
+#| error: false
+
+taylor_no_na %>%
+  tbl_summary(
+    by = explicit_factor, 
+    include = c(album_name, energy, danceability), 
+    label = list(album_name = "Album Name",
+                 energy = "Energy",
+                 danceability = "Danceability"),
+    percent = "row"
+    
+  ) %>%
+  add_p() %>%
+  modify_header(label = "") %>% 
+  modify_caption("**Taylor's explicit albums**")
+```
+
+## And better?...
+
+![](https://media.giphy.com/media/KbwzYYv7cziNd4PiuC/giphy.gif?cid=790b7611c9g9mnzf27mqeqwoeej5soy2s1qx0bz6b7rv7emc&ep=v1_gifs_search&rid=giphy.gif&ct=g){fig-align="center" width="60%"}
+
+
+## ![](img/gt.svg){width="7%"} `gt`
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22-24"
+#| output-location: column-fragment
+#| warning: false
+#| error: false
+
+taylor_no_na %>%
+  mutate(explicit_factor = factor(explicit, labels = c("Not Explicit", "Explicit"))) %>% 
+  tbl_summary(
+    by = explicit_factor, 
+    include = c(album_name), 
+    label = list(album_name = "Album Name"), 
+     percent = "row", 
+  ) %>%
+  modify_header(label = "") %>% 
+  modify_caption("**Taylor's explicit albums**") %>% 
+  as_gt() %>% 
+  tab_style(
+    style = cell_text(color = "darkgrey", 
+                      align = "right"),
+    locations = cells_body(
+      columns = c(stat_1,stat_2)
+    )) %>%
+  tab_style(
+    style = cell_text(color = "#E5446D", 
+                      weight = "bold"),
+    locations = cells_body(
+      columns = c(stat_2),
+      rows = label == "Midnights"
+    )
+  )
+
+```
+
+## Critique Taylor Swift Table 
+
+::: columns
+::: {.column width="50%"}
+::: {.fragment}
+```{r}
+
+taylor_no_na %>%
+  mutate(explicit_factor = factor(explicit, labels = c("Not Explicit", "Explicit"))) %>% 
+  tbl_summary(
+    by = explicit_factor, 
+    include = c(album_name), 
+    label = list(album_name = "Album Name"), 
+     percent = "row", 
+  ) %>%
+  modify_header(label = "") %>% 
+  modify_caption("**Taylor's explicit albums**") %>% 
+  as_gt() %>% 
+  tab_style(
+    style = cell_text(color = "darkgrey", 
+                      align = "right"),
+    locations = cells_body(
+      columns = c(stat_1,stat_2)
+    )) %>%
+  tab_style(
+    style = cell_text(color = "#E5446D", 
+                      weight = "bold"),
+    locations = cells_body(
+      columns = c(stat_2),
+      rows = label == "Midnights"
+    )
+  )
+
+```
+:::
+:::
+
+::: {.column width="50%"}
+::: {.fragment}
+1. Heads `r emo::ji("check")`
+2. Subtle Dividers `r emo::ji("check")`
+3. Right-Align Numbers `r emo::ji("check")`
+4. Left-Align Text `r emo::ji("check")`
+5. Precision `r emo::ji("check")`
+6. Space `r emo::ji("check")`
+7. Remove Repetition `r emo::ji("x")`
+8. Outliers 
+9. Group Similar `r emo::ji("check")`
+10. Visualizations
+11. Key Point(s) `r emo::ji("check")`
+12. Annotations `r emo::ji("check")`
+13. Caption/Title `r emo::ji("check")`
+:::
+:::
+:::
+
+
+## Credit
+
+Slides 3 to 16 are an exact copy of Dr. Ray Balise's Tables lesson for the BST-623 class.
+
+## The end...
+
+![](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExZWI2eXdqYXZiOXVmczhhc2k0eWwycTczdGNnNW12MGUxeGJ5ZDk3ciZlcD12MV9naWZzX3NlYXJjaCZjdD1n/0RqeZFhf6yyBdX6r91/giphy.gif){fig-align="center" width="60%"}

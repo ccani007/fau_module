@@ -2,3 +2,13 @@
   quarto-pub:
     - id: 3c93f774-646a-4770-8881-9cc9df4fef30
       url: 'https://catalina.quarto.pub/session-1---intro-to-r'
+- source: session_2.qmd
+  quarto-pub:
+    - id: e042066a-cd39-4afd-bd59-78891ff3c3aa
+      url: 'https://catalina.quarto.pub/session-2---laundry-data-service-cleaning-your-data-with-r-and-tidyverse'
+    - id: d01ae86b-cf89-4ed6-8a3b-c7a9994fdaed
+      url: 'https://catalina.quarto.pub/session-2---the-data-jedi-academy-cleaning-your-data-with-r-and-tidyverse'
+- source: session_2_tables.qmd
+  quarto-pub:
+    - id: 8f813108-8f1d-4714-acfa-3b398c9fec5c
+      url: 'https://catalina.quarto.pub/session-2---shake-it-off-mastering-data-tables-with-taylor-swifts-tracks'
