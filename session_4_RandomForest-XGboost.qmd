@@ -260,7 +260,7 @@ alcohol_recipe <-
 
 ```{r}
 #| echo: true
-#| code-line-numbers: "1|2|3|4|5|6|7"
+#| code-line-numbers: "1|2|3|4|5|6|7|8|9|10|11|12"
 #| output-location: fragment
 
 ranger_spec <- 
@@ -299,7 +299,7 @@ ranger_workflow
 ```{r}
 #| echo: true
 #| eval: false
-#| code-line-numbers: "1|3|5|6|7|8|9|11"
+#| code-line-numbers: "1|3|5|6|7|8|9|12"
 #| output-location: fragment
 
 doParallel::registerDoParallel()
@@ -459,7 +459,7 @@ alcohol_pred |>
 
 ```{r}
 #| echo: true
-#| code-line-numbers: "1|2|3|4|5|6|7"
+#| code-line-numbers: "1|2|3|4|5|6|7|8|9|11"
 #| output-location: fragment
 
 xgb_spec <- boost_tree(
@@ -705,7 +705,8 @@ collect_metrics(alcohol_last_fit)
 
 predictions_testing <- 
   alcohol_last_fit |> 
-  collect_predictions()
+  collect_predictions() |> 
+  select(-.config, -.row)
 
 predictions_testing
 ```

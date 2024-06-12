@@ -11,9 +11,16 @@ format:
 editor_options: 
   chunk_output_type: console
 ---
+> RDecision Trees using `tidymodels` © 2024 by Catalina Canizares and Raymond Balise is licensed under Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International 
+
+This material is freely available under the Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License. 
+
+For more information on this license, please visit: [Creative Commons License](https://creativecommons.org/licenses/by-nc-nd/4.0/)
 
 
-## Agenda 😮‍💨
+
+
+## Agenda 🌲
 ```{r}
 library(tidyverse)
 library(tidymodels)
@@ -100,7 +107,7 @@ library(MLearnYRBSS)
 
 ## How the splits look
 
-![](img/depth_1.png)
+![](img/depth_1.png){fig-align="center"}
 
 :::footer
 [Tune better models](https://tmv.netlify.app/site/slides/rmed03-tune.html#25)
@@ -108,7 +115,7 @@ library(MLearnYRBSS)
 
 ## How the splits look
 
-![](img/depth_2.png)
+![](img/depth_2.png){fig-align="center"}
 
 :::footer
 [Tune better models](https://tmv.netlify.app/site/slides/rmed03-tune.html#25)
@@ -116,35 +123,35 @@ library(MLearnYRBSS)
 
 ## How the splits look
 
-![](img/depth_3.png)
+![](img/depth_3.png){fig-align="center"}
 
 :::footer
 [Tune better models](https://tmv.netlify.app/site/slides/rmed03-tune.html#25)
 :::
 
 ## How the splits look
-![](img/depth_7.png)
+![](img/depth_7.png){fig-align="center"}
 
 :::footer
 [Tune better models](https://tmv.netlify.app/site/slides/rmed03-tune.html#25)
 :::
 
 ## How the splits look
-![](img/depth_8.png)
+![](img/depth_8.png){fig-align="center"}
 
 :::footer
 [Tune better models](https://tmv.netlify.app/site/slides/rmed03-tune.html#25)
 :::
 
 ## How the splits look
-![](img/depth_9.png)
+![](img/depth_9.png){fig-align="center"}
 
 :::footer
 [Tune better models](https://tmv.netlify.app/site/slides/rmed03-tune.html#25)
 :::
 
 ## How the splits look
-![](img/depth_10.png)
+![](img/depth_10.png){fig-align="center" width = "100%}
 
 :::footer
 [Tune better models](https://tmv.netlify.app/site/slides/rmed03-tune.html#25)
@@ -307,7 +314,7 @@ $$
 
 # Classification Tree with `tidymodels`   
 
-![](https://media.giphy.com/media/F9hQLAVhWnL56/giphy.gif)
+![](https://media.giphy.com/media/F9hQLAVhWnL56/giphy.gif){fig-align="center"}
 
 
 
@@ -315,7 +322,7 @@ $$
 
 Predict whether an adolescent has consumed alcohol or not based on a set of various risk behaviors. 
 
-![](https://media.giphy.com/media/JzujPK0id34qI/giphy.gif)
+![](https://media.giphy.com/media/JzujPK0id34qI/giphy.gif){fig-align="center"}
 
 
 ## Data Cleaning
@@ -637,6 +644,14 @@ tree_pred |>
 ```
 :::
 :::
+
+## Review on Resamples
+
+```{r}
+fit_resamples(cart_final_wf, resamples = cv_alcohol) |> 
+  collect_metrics()
+```
+
 
 ## The tree
 ```{r}
