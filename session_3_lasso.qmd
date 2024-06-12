@@ -12,6 +12,16 @@ editor_options:
   chunk_output_type: console
 ---
 
+## About This Material
+
+> Regularization Techniques: Ridge, Lasso, and Elastic Net Using `tidymodels` © 2024 by Catalina Canizares and Raymond Balise is licensed under Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International 
+
+This material is freely available under the Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License. 
+
+For more information on this license, please visit: [Creative Commons License](https://creativecommons.org/licenses/by-nc-nd/4.0/)
+
+
+
 
 
 ## Review of what we have covered
@@ -26,11 +36,11 @@ library(skimr)
 
 :::: {.columns}
 ::: {.column width="50%"}
-[Click here](https://play.kahoot.it/v2/?quizId=090bbc1e-c963-4f36-9cfb-45f81949c1f3)
+[I click here...you wait...](https://play.kahoot.it/v2/?quizId=090bbc1e-c963-4f36-9cfb-45f81949c1f3)
 
 :::
 ::: {.column width="50%"}
-![](img/review.gif)
+![](https://media.giphy.com/media/kDCargqZQ88Jq/giphy.gif?cid=ecf05e47cql4isfzdq2udvl3cqfh225u0ab93sm4u87alq33&ep=v1_gifs_search&rid=giphy.gif&ct=g)
 :::
 :::
 
@@ -219,9 +229,11 @@ Determine the key predictors from a comprehensive set of 42 risky behaviors, enc
 
 :::
 ::: {.column width="50%"}
+::: {.fragment}
 
-![](img/text-drive.gif)
+![](https://media.giphy.com/media/eGyJz0UnrEy3K/giphy.gif?cid=ecf05e470l48hi14w34gpqwhaddfljk9xuwn2xir0rn52323&ep=v1_gifs_search&rid=giphy.gif&ct=g)
 
+:::
 :::
 :::
 
@@ -478,7 +490,8 @@ lasso_tune <-
   tune_grid(
   object = texting_wf, 
   resamples = analysis_folds,
-  grid = lambda_grid
+  grid = lambda_grid, 
+  control = control_resamples(event_level = "second")
 )
 
 doParallel::stopImplicitCluster()
@@ -642,6 +655,30 @@ texting_fit |>
 ```
 
 
+## Lets look the metrics on the resamples
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2|4"
+#| output-location: fragment
+texting_fit_resamples <- 
+  fit_resamples(final_wf, resamples = analysis_folds)
+
+texting_fit_resamples
+
+```
+
+
+## Exploring the results
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2|4"
+#| output-location: fragment
+collect_metrics(texting_fit_resamples)
+```
+
+
 ## Lets fit on the **TEST** Data 
 
 
@@ -682,7 +719,8 @@ collect_metrics(texting_last_fit)
 
 the_prediction <-  
   texting_last_fit |> 
-  collect_predictions() 
+  collect_predictions() |> 
+  select(-.config, -.row)
   
 
 the_prediction 
@@ -744,7 +782,7 @@ texting_last_fit |>
 
 ## We did it! 
 
-![](img/celeb.gif)
+![](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMTh3aWhnbWl5c3RkYm54OHlidjdsd2dsdnhtZDh0YzFrbjV2enBybiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/nVXzt7FSJlX7W/giphy.gif)
 
 ## Review Questions
 
@@ -778,4 +816,3 @@ review_spec <-
 :::
 
 
-# Break

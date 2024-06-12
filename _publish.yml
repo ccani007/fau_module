@@ -12,3 +12,15 @@
   quarto-pub:
     - id: 8f813108-8f1d-4714-acfa-3b398c9fec5c
       url: 'https://catalina.quarto.pub/session-2---shake-it-off-mastering-data-tables-with-taylor-swifts-tracks'
+- source: session_3_introToTidymodels.qmd
+  quarto-pub:
+    - id: 944f430a-cf0b-4f4e-8530-53072ace28b4
+      url: 'https://catalina.quarto.pub/introduction-to-tidymodels-78fb'
+- source: session_3_lasso.qmd
+  quarto-pub:
+    - id: 669e7d5f-6ea1-4429-944c-8d092db1c926
+      url: 'https://catalina.quarto.pub/regularization-techniques-ridge-lasso-and-elastic-net-using-tidymodels-daaa'
+- source: session_3_introML.qmd
+  quarto-pub:
+    - id: c59f4430-b43a-4499-8e77-5c02d3fe492c
+      url: 'https://catalina.quarto.pub/introduction-to-machine-learning-ec98'

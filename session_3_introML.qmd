@@ -1,7 +1,6 @@
 ---
 title: "Introduction to Machine Learning"
 author: "Catalina Cañizares, Ph.D. and Raymond Balise Ph.D."
-date: today
 format:
   revealjs:
     scrollable: true
@@ -9,10 +8,26 @@ format:
     transition: "fade"
     auto-play-media: true
     auto-stretch: true
+    footnotes-hover: true
+    css: style.css
+editor_options: 
+  chunk_output_type: console
 ---
 
+## About This Material
+
+> Introduction to Machine Learning © 2024 by Catalina Canizares and Raymond Balise is licensed under Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International 
+
+This material is freely available under the Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License. 
+
+For more information on this license, please visit: [Creative Commons License](https://creativecommons.org/licenses/by-nc-nd/4.0/)
+
+
+
+
+
 ## Objectives for session 3 
-- Identify and categorize different types of models.
+::: {.incremental}
 - Differentiate between machine learning and traditional statistical methods.
 - Recognize the trade-offs involved in modeling decisions.
 - Learn best practices for data splitting and allocation in the modeling process.
@@ -20,7 +35,7 @@ format:
 - Apply tidymodels through practical examples.
 - Understand the foundational components of tidymodels.
 - A solid understanding of L1 and L2 penalties.  
-
+:::
 
 ## Types of Models
 ::: panel-tabset
@@ -45,8 +60,8 @@ An inferential model starts with a predefined conjecture or idea about a populat
 :::
 ### Predictive
 
-- Produce the most accurate prediction possible
-Predicted values have the highest possible fidelity to the true value of the new data.
+- Produce the most accurate prediction possible.
+- Predicted values have the highest possible fidelity to the true value of the new data.
 
 :::footer
 [Tidy Modeling With R](https://www.tmwr.org/software-modeling.html)
@@ -215,6 +230,7 @@ $${y} = \alpha + \beta_1x_1 + \beta_2x_2 + \dots + \beta_nx_n + \epsilon$$
 :::: {.columns}
 ::: {.column width="50%"}
 ::: fragment
+
 ### Bias
 The error due to bias is taken as the **difference** between the **expected** (or average) prediction of our model and the **correct** value which we are trying to predict.
 
@@ -240,11 +256,16 @@ The error due to variance is taken as the variability of a model prediction for 
 [Fortman-Roe, 2012](http://scott.fortmann-roe.com/docs/BiasVariance.html)
 :::
 
-## An Example with Data
+## 
 
-[Animation](https://mlu-explain.github.io/bias-variance/)
+[click here](https://mlu-explain.github.io/bias-variance/)
 
-![](img/animation1.mp4)
+```{=html}
+<iframe width="1000" height="700" src="https://mlu-explain.github.io/bias-variance/" title="Webpage example"></iframe>
+```
+
+
+
 
 
 ## Final Remarks About Bias/Variance
@@ -309,11 +330,12 @@ Do not use the test set during training.
 :::
 
 
-## Let's take a look 
+## 
 
+```{=html}
+<iframe width="1000" height="700" src="https://mlu-explain.github.io/train-test-validation/" title="Webpage example"></iframe>
+```
 
-![](img/animation2.png)
-[Animation](https://mlu-explain.github.io/train-test-validation/#train)
 
 ## Resampling Methods 
 
@@ -392,7 +414,7 @@ Only one observation is used for validation and the rest is used to fit the mode
 
 ## How to implement all of these?
 
-![](https://media.tenor.com/oTeBa4EVepMAAAAM/business-cat-working.gif)
+![](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOTMxdWJnMnV4dWkyaGhxY3FlaWtidXBpdXp2dml5ZzFsN2h6Y2lnayZlcD12MV9naWZzX3NlYXJjaCZjdD1n/CjmvTCZf2U3p09Cn0h/giphy.gif)
 
 
 
