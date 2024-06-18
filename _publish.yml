@@ -24,3 +24,15 @@
   quarto-pub:
     - id: c59f4430-b43a-4499-8e77-5c02d3fe492c
       url: 'https://catalina.quarto.pub/introduction-to-machine-learning-ec98'
+- source: session_4_DecisionTrees.qmd
+  quarto-pub:
+    - id: fc9273bb-debb-4c51-9bf4-ca94be11aefc
+      url: 'https://catalina.quarto.pub/decision-trees-using-tidymodels-cce4'
+- source: session_4_RandomForest-XGBoost.qmd
+  quarto-pub:
+    - id: bf94dbf8-2a27-4c86-9785-3c21895f95c7
+      url: 'https://catalina.quarto.pub/random-forest-and-xgboost'
+- source: session_4_KNN.qmd
+  quarto-pub:
+    - id: 6f4ec071-5475-4e04-9a6b-b59f486a579f
+      url: 'https://catalina.quarto.pub/knn-using-tidymodels'

@@ -69,6 +69,7 @@ Uses ‘feature similarity’ to predict the values of new datapoints which furt
 :::footer
 [Euclidean distance](https://en.wikipedia.org/wiki/Euclidean_distance)
 :::
+
 ## KNN
 
 KNN does better than more powerful classifiers and is used in places such as genetics, data compression, and economic forecasting.

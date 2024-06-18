@@ -11,7 +11,7 @@ format:
 editor_options: 
   chunk_output_type: console
 ---
-> RDecision Trees using `tidymodels` © 2024 by Catalina Canizares and Raymond Balise is licensed under Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International 
+> Decision Trees using `tidymodels`© 2024 by Catalina Canizares and Raymond Balise is licensed under Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International 
 
 This material is freely available under the Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License. 
 
@@ -105,7 +105,7 @@ library(MLearnYRBSS)
 [Tune better models](https://tmv.netlify.app/site/slides/rmed03-tune.html#25)
 :::
 
-## How the splits look
+## What the Splits Look Like
 
 ![](img/depth_1.png){fig-align="center"}
 
@@ -113,7 +113,7 @@ library(MLearnYRBSS)
 [Tune better models](https://tmv.netlify.app/site/slides/rmed03-tune.html#25)
 :::
 
-## How the splits look
+## What the Splits Look Like
 
 ![](img/depth_2.png){fig-align="center"}
 
@@ -121,7 +121,7 @@ library(MLearnYRBSS)
 [Tune better models](https://tmv.netlify.app/site/slides/rmed03-tune.html#25)
 :::
 
-## How the splits look
+## What the Splits Look Like
 
 ![](img/depth_3.png){fig-align="center"}
 
@@ -129,29 +129,30 @@ library(MLearnYRBSS)
 [Tune better models](https://tmv.netlify.app/site/slides/rmed03-tune.html#25)
 :::
 
-## How the splits look
+## What the Splits Look Like
 ![](img/depth_7.png){fig-align="center"}
 
 :::footer
 [Tune better models](https://tmv.netlify.app/site/slides/rmed03-tune.html#25)
 :::
 
-## How the splits look
+## What the Splits Look Like
 ![](img/depth_8.png){fig-align="center"}
 
 :::footer
 [Tune better models](https://tmv.netlify.app/site/slides/rmed03-tune.html#25)
 :::
 
-## How the splits look
+## What the Splits Look Like
 ![](img/depth_9.png){fig-align="center"}
 
 :::footer
 [Tune better models](https://tmv.netlify.app/site/slides/rmed03-tune.html#25)
 :::
 
-## How the splits look
-![](img/depth_10.png){fig-align="center" width = "100%}
+## What the Splits Look Like
+![](img/depth_10.png)
+
 
 :::footer
 [Tune better models](https://tmv.netlify.app/site/slides/rmed03-tune.html#25)
@@ -165,18 +166,10 @@ library(MLearnYRBSS)
 
 🌲 We'll make use of it to identify regions consisting of  
 
-   - a large number of similar (pure) or 
+   - A large number of similar (pure) or 
    
-   -  dissimilar (impure) elements.
+   -  Dissimilar (impure) elements.
 
-## Entropy 
-
-🌲 A dataset of only pink dots would have very low (in fact, zero) entropy.
-
-
-🌲  A dataset of mixed pink and green would have relatively high entropy.
-
-[simulation](https://mlu-explain.github.io/decision-tree/)
 
 ## Information Gain - The logic to train  
 
@@ -184,11 +177,18 @@ library(MLearnYRBSS)
 
 🌲 The core algorithm to calculate information gain is called ID3.
 
-🌲 It is calculated for a split by subtracting the weighted entropies of each branch from the original entropy. When training a Decision Tree using these metrics, the best split is chosen by maximizing Information Gain.
+🌲 It is calculated for a split by subtracting the weighted entropies of each branch from the original entropy. 
+🌲When training a Decision Tree using these metrics, the best split is chosen by maximizing Information Gain.
 
 🌲 Select the split that yields the largest reduction in entropy, or, the largest increase in information.
 
-🌲 Let's look at it [Simulation](https://mlu-explain.github.io/decision-tree/)
+
+## Information Gain
+[Click here to see the animation](https://mlu-explain.github.io/decision-tree/)
+
+```{=html}
+<iframe width="1000" height="700" src="https://mlu-explain.github.io/decision-tree/" title="Webpage example"></iframe>
+```
 
 
 ## Information Gain 
@@ -648,6 +648,9 @@ tree_pred |>
 ## Review on Resamples
 
 ```{r}
+#| echo: true
+#| code-line-numbers: "1|2|3"
+#| output-location: fragment
 fit_resamples(cart_final_wf, resamples = cv_alcohol) |> 
   collect_metrics()
 ```
