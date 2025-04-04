@@ -36,3 +36,7 @@
   quarto-pub:
     - id: 6f4ec071-5475-4e04-9a6b-b59f486a579f
       url: 'https://catalina.quarto.pub/knn-using-tidymodels'
+- source: session_4_RandomForest-XGboost.qmd
+  quarto-pub:
+    - id: f9d2d312-85a3-4058-b93c-ccb66693409d
+      url: 'https://catalina.quarto.pub/session-4-random-forest-and-xgboost'
