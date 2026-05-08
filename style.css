@@ -1,6 +1,339 @@
+/* =========================================================================
+   FAU Module · shared revealjs theme
+   Single purple/violet palette used across every hello_*_v2.qmd deck.
+   ========================================================================= */
 
+/* ---- Color palette ----------------------------------------------------- */
+:root {
+    --fau-violet-50:  #F5F3FF;
+    --fau-violet-100: #EDE9FE;
+    --fau-violet-200: #DDD6FE;
+    --fau-violet-300: #C4B5FD;
+    --fau-violet-400: #A78BFA;
+    --fau-violet-500: #8B5CF6;
+    --fau-violet-600: #7C3AED;   /* primary */
+    --fau-violet-700: #6D28D9;
+    --fau-violet-800: #5B21B6;
+    --fau-violet-900: #4C1D95;
+
+    --fau-ink:        #1F2937;   /* main text */
+    --fau-muted:      #6B7280;
+    --fau-rule:       #E5E7EB;
+    --fau-bg-soft:    #FAFAFB;
+
+    --fau-tip:        #10B981;   /* green */
+    --fau-warning:    #F59E0B;   /* amber */
+    --fau-danger:     #EF4444;   /* red */
+}
+
+/* ---- Base text --------------------------------------------------------- */
+.reveal {
+    color: var(--fau-ink);
+    font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.reveal .slides section {
+    text-align: left;
+}
+
+/* ---- Headings ---------------------------------------------------------- */
+.reveal h1,
+.reveal h2,
+.reveal h3,
+.reveal h4 {
+    color: var(--fau-violet-700);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    text-transform: none;
+    line-height: 1.15;
+}
+
+.reveal h1 { font-size: 2.4em; }
+.reveal h2 { font-size: 1.7em; margin-bottom: 0.6em; }
+.reveal h3 { font-size: 1.2em; color: var(--fau-violet-800); }
+
+/* Section break slides ( # Heading ) get a soft violet background */
+.reveal section.title-slide,
+.reveal section[data-background-color] h1,
+.reveal section[data-background-color] h2 {
+    color: white;
+}
+
+.reveal .slides > section.stack > section h1,
+.reveal .slides > section h1 {
+    color: var(--fau-violet-800);
+}
+
+/* ---- Links ------------------------------------------------------------- */
 .reveal a {
-    color: #E5446D;
+    color: var(--fau-violet-600);
     text-decoration: none;
-    transition: color .15s ease;
+    border-bottom: 1px dashed var(--fau-violet-300);
+    transition: color .15s ease, border-color .15s ease;
+}
+
+.reveal a:hover {
+    color: var(--fau-violet-800);
+    border-bottom-color: var(--fau-violet-700);
+}
+
+/* ---- Inline code ------------------------------------------------------- */
+.reveal code {
+    background: var(--fau-violet-50);
+    color: var(--fau-violet-800);
+    padding: 0.1em 0.35em;
+    border-radius: 4px;
+    font-size: 0.92em;
+}
+
+/* ---- Code blocks ------------------------------------------------------- */
+.reveal pre {
+    border: 1px solid var(--fau-rule);
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(124, 58, 237, 0.06);
+    background: #FCFCFD;
+}
+
+.reveal pre code {
+    background: transparent;
+    color: var(--fau-ink);
+    padding: 0.8em 1em;
+    border-radius: 8px;
+    font-size: 0.78em;
+    line-height: 1.45;
+}
+
+/* Highlighted line in code chunks (code-line-numbers) */
+.reveal pre code .highlight,
+.reveal .code-line-numbers .highlight-line {
+    background: var(--fau-violet-100) !important;
+}
+
+/* ---- Blockquotes ------------------------------------------------------- */
+.reveal blockquote {
+    border-left: 4px solid var(--fau-violet-500);
+    background: var(--fau-violet-50);
+    color: var(--fau-ink);
+    padding: 0.6em 1em;
+    margin: 0.6em 0;
+    border-radius: 4px;
+    font-style: normal;
+    font-weight: 500;
+    box-shadow: none;
+}
+
+.reveal blockquote p {
+    margin: 0;
+}
+
+/* ---- Lists ------------------------------------------------------------- */
+.reveal ul,
+.reveal ol {
+    margin: 0.4em 0 0.4em 1em;
+}
+
+.reveal li {
+    margin: 0.2em 0;
+}
+
+.reveal ul li::marker {
+    color: var(--fau-violet-500);
+}
+
+/* ---- Tables (markdown only — gt / gtsummary keep their own theme) ------ */
+.reveal table:not(.gt_table):not(.gtsummary):not(.dataTable) {
+    border-collapse: collapse;
+    margin: 0.6em 0;
+    font-size: 0.9em;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.reveal table:not(.gt_table):not(.gtsummary):not(.dataTable) th {
+    background: var(--fau-violet-600);
+    color: white;
+    font-weight: 600;
+    text-align: left;
+    padding: 0.55em 0.75em;
+    border: none;
+}
+
+.reveal table:not(.gt_table):not(.gtsummary):not(.dataTable) td {
+    padding: 0.45em 0.75em;
+    border-bottom: 1px solid var(--fau-rule);
+    background: white;
+}
+
+.reveal table:not(.gt_table):not(.gtsummary):not(.dataTable) tr:nth-child(even) td {
+    background: var(--fau-bg-soft);
+}
+
+.reveal table:not(.gt_table):not(.gtsummary):not(.dataTable) tr:hover td {
+    background: var(--fau-violet-50);
+}
+
+/* ---- Callouts (Quarto) -------------------------------------------------
+   Default Quarto callouts get a violet-tinted treatment by default,
+   while keeping each variant's color cue.                                  */
+.reveal .callout {
+    border-left-width: 5px;
+    border-radius: 6px;
+    margin: 0.6em 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    overflow: hidden;
+    font-size: 0.92em;
+}
+
+.reveal .callout .callout-header {
+    font-weight: 700;
+    padding: 0.4em 0.8em;
+}
+
+.reveal .callout .callout-body {
+    padding: 0.5em 0.9em;
+}
+
+.reveal .callout .callout-body p:last-child {
+    margin-bottom: 0;
+}
+
+/* Note (default) — violet */
+.reveal .callout-note {
+    border-left-color: var(--fau-violet-500);
+    background: var(--fau-violet-50);
+}
+.reveal .callout-note .callout-header {
+    background: var(--fau-violet-100);
+    color: var(--fau-violet-900);
+}
+
+/* Tip — green */
+.reveal .callout-tip {
+    border-left-color: var(--fau-tip);
+    background: #ECFDF5;
+}
+.reveal .callout-tip .callout-header {
+    background: #D1FAE5;
+    color: #065F46;
+}
+
+/* Warning — amber */
+.reveal .callout-warning {
+    border-left-color: var(--fau-warning);
+    background: #FFFBEB;
+}
+.reveal .callout-warning .callout-header {
+    background: #FEF3C7;
+    color: #92400E;
+}
+
+/* Important / Caution — red */
+.reveal .callout-important,
+.reveal .callout-caution {
+    border-left-color: var(--fau-danger);
+    background: #FEF2F2;
+}
+.reveal .callout-important .callout-header,
+.reveal .callout-caution .callout-header {
+    background: #FECACA;
+    color: #7F1D1D;
+}
+
+/* ---- Panel tabset ------------------------------------------------------ */
+.reveal .panel-tabset > .nav-tabs {
+    border-bottom: 2px solid var(--fau-violet-200);
+    margin-bottom: 0.6em;
+}
+
+.reveal .panel-tabset > .nav-tabs .nav-link {
+    color: var(--fau-muted);
+    border: none;
+    border-radius: 0;
+    padding: 0.4em 1em;
+    font-weight: 600;
+    background: transparent;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    transition: color .15s ease, border-color .15s ease;
+}
+
+.reveal .panel-tabset > .nav-tabs .nav-link:hover {
+    color: var(--fau-violet-700);
+}
+
+.reveal .panel-tabset > .nav-tabs .nav-link.active {
+    color: var(--fau-violet-700);
+    border-bottom-color: var(--fau-violet-600);
+    background: transparent;
+}
+
+/* ---- Slide number + progress bar -------------------------------------- */
+.reveal .progress {
+    color: var(--fau-violet-600);
+}
+
+.reveal .progress span {
+    background: var(--fau-violet-600);
+}
+
+.reveal .slide-number {
+    color: var(--fau-violet-700);
+    background: var(--fau-violet-50);
+    padding: 0.2em 0.55em;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.65em;
+}
+
+/* ---- Footer ----------------------------------------------------------- */
+.reveal .footer,
+.reveal div.footer {
+    color: var(--fau-muted);
+    font-size: 0.65em;
+}
+
+.reveal .footer a {
+    color: var(--fau-violet-600);
+    border-bottom: none;
+}
+
+/* ---- Selection -------------------------------------------------------- */
+::selection {
+    background: var(--fau-violet-200);
+    color: var(--fau-violet-900);
+}
+
+/* ---- Images ------------------------------------------------------------ */
+.reveal img {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* No box-shadow on icons / small inline images */
+.reveal img.absolute,
+.reveal .footer img,
+.reveal img[src*="giphy"] {
+    box-shadow: none;
+}
+
+/* ---- Strong / em ------------------------------------------------------- */
+.reveal strong {
+    color: var(--fau-violet-800);
+    font-weight: 700;
+}
+
+.reveal em {
+    color: var(--fau-ink);
+}
+
+/* ---- Horizontal rule --------------------------------------------------- */
+.reveal hr {
+    border: none;
+    border-top: 1px solid var(--fau-rule);
+    margin: 0.8em 0;
+}
+
+/* ---- Fragments visible state nudge ------------------------------------ */
+.reveal .fragment.highlight-current-blue.current-fragment {
+    color: var(--fau-violet-700);
 }

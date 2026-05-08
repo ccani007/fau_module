@@ -1,0 +1,607 @@
+---
+title: "Introduction to Machine Learning"
+author: "Catalina Cañizares, Ph.D."
+date: today
+format:
+  revealjs:
+    scrollable: true
+    slide-number: true
+    transition: "fade"
+    auto-play-media: true
+    auto-stretch: true
+    footnotes-hover: true
+    code-copy: true
+    css: style.css
+editor_options: 
+  chunk_output_type: console
+---
+
+## About This Material
+
+> Introduction to Machine Learning © 2024 by Catalina Canizares and Raymond Balise is licensed under Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International.
+
+For more information on this license, please visit: [Creative Commons License](https://creativecommons.org/licenses/by-nc-nd/4.0/)
+
+---
+
+## 🌅 Where we are
+
+::: {.callout-tip}
+## Day 3 — morning
+- ✅ **Monday:** R + Quarto + your project website.
+- ✅ **Tuesday:** wrangled YRBS data with `tidyverse`.
+- 🧠 **Right now:** the **concepts** behind machine learning.
+- 🛠️ **This afternoon:** doing ML in code with `tidymodels`.
+- 🎯 **Tomorrow:** Lasso, trees, forests, KNN — same pipeline, different specs.
+:::
+
+::: {.fragment}
+> Today is the day everything starts to *click*. 💡
+:::
+
+---
+
+## 🎯 Objectives
+
+::: {.incremental}
+By the end of this morning you will be able to:
+
+1. Tell a non-statistician **what machine learning is** (and isn't).
+2. Distinguish **supervised vs unsupervised** learning.
+3. Know the **3 cardinal sins** of ML — and how to prevent each.
+4. Explain **train / test / validation** + **resampling** in your own words.
+5. Understand the **bias–variance trade-off**.
+6. Identify what a **hyperparameter** is.
+7. Decide whether *your* research question is **classification or regression**.
+:::
+
+# 🧠 What is Machine Learning?
+
+## You already use ML every day 🌍
+
+::: {.incremental}
+- 🎵 **Spotify Wrapped** clusters songs into your "vibes" — *unsupervised learning*.
+- 📸 **iPhone "People" album** auto-tags faces in your photos — *supervised classification*.
+- 🎬 **Netflix recommendations** predict what you'll like next — *collaborative filtering*.
+- 💳 **Apple Pay fraud detection** flags weird transactions in real-time — *anomaly detection*.
+- 🤖 **ChatGPT** predicts the next word given everything you typed — *deep learning*.
+- 🩺 **Apple Watch atrial fibrillation alerts** classify your heartbeat as normal vs. abnormal — *medical ML*.
+:::
+
+::: {.fragment}
+> Today you'll learn how the same toolkit applies to **YRBS** to predict youth risk behaviors. 💪
+:::
+
+---
+
+## Vocabulary cheat sheet 📖
+
+The 10 words you'll hear all week:
+
+| Term | What it means |
+|------|---------------|
+| **Outcome** (target, label, y) | The variable you want to predict |
+| **Predictor** (feature, x) | The variables you predict *from* |
+| **Training set** | The data the model learns from |
+| **Test set** | Held-out data for an honest performance check |
+| **Validation set** | Data used during model development to tune |
+| **Overfitting** | When the model memorizes train but flunks test |
+| **Cross-validation** | A way to estimate test performance without touching the test set |
+| **Hyperparameter** | A "knob" you set *before* training |
+| **Bias** | Systematic error from too-simple models |
+| **Variance** | Sensitivity to small changes in training data |
+
+# 🌳 Types of Models
+
+## Three reasons to build a model
+
+::: {.panel-tabset}
+
+### Descriptive
+- Describe or visualize patterns in data.
+- No prediction, no inference — just understanding.
+- Example: a **boxplot of BMI by sex**.
+
+### Inferential
+- Test a specific hypothesis about a **population**.
+- Produces estimates, confidence intervals, p-values.
+- Example: *"does this drug prolong life?"* → clinical trial → t-test.
+
+### Predictive
+- Make the **most accurate prediction** possible for new data.
+- Often trades interpretability for accuracy.
+- Example: *"will this patient be re-admitted within 30 days?"* → ML model.
+
+:::
+
+::: {.footer}
+[Tidy Modeling With R](https://www.tmwr.org/software-modeling.html)
+:::
+
+---
+
+## AI ⊃ ML ⊃ Neural Nets ⊃ Deep Learning
+
+::: {.columns}
+::: {.column width="50%"}
+![](img/Aintelligence.png)
+:::
+::: {.column width="50%"}
+::: {.incremental}
+- **Artificial Intelligence** — the whole field of "making machines smart."
+- **Machine Learning** — a subset: machines learn from *data*, not rules.
+- **Neural Networks** — a flavor of ML loosely inspired by the brain.
+- **Deep Learning** — *very deep* neural networks (many layers).
+:::
+:::
+:::
+
+::: {.footer}
+[Machine Learning for Everyone](https://vas3k.com/blog/machine_learning/)
+:::
+
+---
+
+## A little history 📜
+
+![](img/Story.png){fig-align="center"}
+
+::: {.footer}
+[History, current status, and future directions of artificial intelligence](https://www.sciencedirect.com/science/article/pii/B9780128202395000024)
+:::
+
+# 🏷️ Supervised vs Unsupervised
+
+## The big split
+
+::: {.panel-tabset}
+
+### Supervised 👨‍🏫
+::: {.columns}
+::: {.column width="60%"}
+**You have an outcome (`y`). The model learns the mapping `x → y`.**
+
+Two flavors:
+
+- **Classification** — predict a *category* (Yes/No, A/B/C).
+  *Did the student carry a weapon to school?*
+- **Regression** — predict a *number*.
+  *How many hours of sleep does the student get?*
+
+Popular algorithms: logistic regression, decision trees, random forest, KNN, XGBoost.
+:::
+::: {.column width="40%"}
+![](img/supervised.png){width="80%"}
+:::
+:::
+
+### Unsupervised 🕵️
+::: {.columns}
+::: {.column width="60%"}
+**No outcome — the model finds *structure* in the data on its own.**
+
+Two flavors:
+
+- **Clustering** — group similar observations.
+  *Are there "types" of high-school students?*
+- **Dimensionality reduction** — compress many variables into a few summary axes.
+  *PCA, UMAP.*
+
+Popular algorithms: k-means, hierarchical clustering, PCA, t-SNE.
+:::
+::: {.column width="40%"}
+![](img/unsupervised.png){width="80%"}
+:::
+:::
+
+:::
+
+::: {.fragment}
+> 🌟 This week we focus on **supervised classification** — predicting Yes/No outcomes from YRBS.
+:::
+
+# 📐 Statistics + Machine Learning
+
+## Different goals, same toolkit
+
+::: {.columns}
+::: {.column width="50%"}
+**Statistical inference 🧪**
+
+- Question: *"What does this tell us about the population?"*
+- Focus: estimate **β**, get CIs, run hypothesis tests.
+
+$${y} = \alpha + \beta_1x_1 + \beta_2x_2 + \dots + \beta_nx_n + \epsilon$$
+
+Care about: **interpretability**, uncertainty.
+:::
+::: {.column width="50%"}
+**Machine learning 🤖**
+
+- Question: *"What's my best guess for *this* observation's `y`?"*
+- Focus: estimate **ŷ** as accurately as possible.
+
+$$\hat{y} = \hat{f}(x_1, x_2, \dots, x_n)$$
+
+Care about: **predictive accuracy** on new data.
+:::
+:::
+
+::: {.fragment}
+::: {.callout-note}
+## They overlap more than people admit
+- A logistic regression is *both*: you can interpret βs **and** use it to predict.
+- Modern researchers fluently switch between the two perspectives.
+- Don't pick a side — pick the right tool for your question.
+:::
+:::
+
+::: {.footer}
+[Introduction to Statistical Learning](https://www.statlearning.com/)
+:::
+
+# 😈 The 3 Cardinal Sins of ML
+
+## Sin #1 — Overfitting
+
+::: {.columns}
+::: {.column width="55%"}
+::: {.incremental}
+- The model **memorized** the training data instead of learning the *pattern*.
+- Performance is great on the data it saw, **terrible** on new data.
+- Like a student who memorizes practice answers but can't solve a new problem.
+:::
+
+::: {.fragment}
+::: {.callout-warning}
+## How to detect it
+**Train accuracy = 99%, test accuracy = 60%.** That gap is overfitting screaming at you.
+:::
+:::
+:::
+::: {.column width="45%"}
+![](img/bias-variance.png){fig-align="center"}
+:::
+:::
+
+---
+
+## Sin #2 — Data leakage 🚰
+
+::: {.incremental}
+- **Information from the test set "leaked"** into model training.
+- Your test metrics become a lie — they're inflated.
+- **Examples of leakage:**
+  - You imputed missing values using the **whole** dataset before splitting.
+  - You normalized predictors using the **whole** dataset's mean.
+  - You did feature selection using the **whole** dataset's correlations.
+:::
+
+::: {.fragment}
+::: {.callout-tip}
+## How `tidymodels` protects you
+When your `recipe` lives inside a `workflow()`, all preprocessing is **learned only from the training data** at each fold. No leakage. 🛡️
+:::
+:::
+
+---
+
+## Sin #3 — Class imbalance ⚖️
+
+::: {.incremental}
+- One outcome class is much more common than the other.
+- Example: in YRBS only **~8%** of students report carrying a weapon to school.
+- **A model that always predicts "No" gets 92% accuracy** — and is *useless*.
+- That's why you need to look at **sensitivity, specificity, and ROC AUC**, not just accuracy.
+:::
+
+::: {.fragment}
+::: {.callout-tip}
+## What to do about it
+- ✅ **Stratify** your splits and folds (`strata = outcome`).
+- ✅ **Downsample** the majority class with `step_downsample()` from `themis`.
+- ✅ Use **ROC AUC**, not accuracy, as your tuning metric.
+:::
+:::
+
+# 🔪 How Do We Spend Our Data?
+
+## Always split first
+
+![](https://media.tenor.com/EWRvErYGzPUAAAAM/bugs-bunny-looney-tunes.gif){fig-align="center" width="40%"}
+
+::: {.incremental}
+1. The **training set** is used to estimate model parameters.
+2. The **test set** is used for an **independent** assessment of performance.
+3. 🚫 The test set is **sacred**: do not peek during training.
+:::
+
+::: {.footer}
+[Machine Learning with Tidymodels](https://workshops.tidymodels.org/)
+:::
+
+---
+
+## Train / Validation / Test 🧪
+
+![](img/validation.png){fig-align="center"}
+
+::: {.incremental}
+- **Training set** — fit the model parameters.
+- **Validation set** — pick the best hyperparameters / compare candidates.
+- **Test set** — final, honest evaluation. Look once. Done.
+:::
+
+---
+
+## Play with it 🎮
+
+::: {style="text-align: center;"}
+```{=html}
+<iframe width="1100" height="600" src="https://mlu-explain.github.io/train-test-validation/" title="MLU-Explain — Train/Test/Validation"></iframe>
+```
+:::
+
+::: {.footer}
+Visualization by [MLU-Explain](https://mlu-explain.github.io/train-test-validation/)
+:::
+
+# 🔁 Resampling Methods
+
+## What is resampling?
+
+A way to estimate model performance **without touching the test set** — by repeatedly drawing samples from the training data.
+
+![](img/rsamples.png){fig-align="center" width="70%"}
+
+::: {.footer}
+[`rsample` package](https://rsample.tidymodels.org/reference/index.html)
+:::
+
+---
+
+## V-fold cross-validation 🥧
+
+::: {.columns}
+::: {.column width="60%"}
+1. Split the **training** set into **K** folds (usually 5 or 10).
+2. Train on K−1 folds, evaluate on the held-out fold.
+3. Repeat K times. Average the results.
+
+> Each row of the training data acts as both training *and* validation — but never both at the same time.
+:::
+::: {.column width="40%"}
+![](img/cv.png)
+:::
+:::
+
+::: {.footer}
+[K-Fold vs. Leave-One-Out](https://www.baeldung.com/cs/cross-validation-k-fold-loo)
+:::
+
+---
+
+## Leave-One-Out CV 🎯
+
+![](img/loocv.png){fig-align="center" width="60%"}
+
+- Each observation gets its own fold.
+- **Use when**: you have very little data (< 100 rows).
+- **Avoid when**: you have lots of data (it's *very* slow — 12,000 folds for 12,000 rows!).
+
+---
+
+## Bootstrapping 🪣
+
+![](img/boostrap.png){fig-align="center" width="60%"}
+
+- Sample **with replacement** from the training set.
+- Each bootstrap sample is the same size as the original — but some rows appear multiple times.
+- **Use when**: small datasets where you want robust estimates.
+
+---
+
+## When do I use which?
+
+| Method | Best for | Compute time ⏱️ |
+|--------|----------|----------------|
+| **5- or 10-fold CV** | Default for almost everything | 💚 Fast — fits 5–10 models |
+| **Bootstrap** | Small datasets, uncertainty estimates | 💛 Medium — usually 25–100 models |
+| **Leave-One-Out** | Tiny datasets (< 100 rows) | 🔴 Slow — fits **N** models (one per row!) |
+
+::: {.callout-note}
+## What does "compute time" mean?
+Each method **trains your model multiple times** to estimate its performance honestly. The more models it trains, the longer your laptop has to spin its fan. 🔥
+
+For 12,000 YRBS rows: 5-fold CV ≈ a few seconds. LOO ≈ 12,000 fits ≈ ☕☕☕.
+:::
+
+::: {.fragment}
+> 🌟 **For your YRBS project**: 5-fold CV with `strata = outcome`. Done. ✅
+:::
+
+# ⚖️ Bias–Variance Trade-off
+
+## The core tension of ML
+
+::: {.incremental}
+- **Bias** — error from a model that's **too simple** to capture the truth.
+- **Variance** — error from a model that's **too sensitive** to small changes in training data.
+- Reduce one and you usually increase the other.
+- The art of ML is finding the **sweet spot**.
+:::
+
+::: {.footer}
+[Fortman-Roe, 2012](http://scott.fortmann-roe.com/docs/BiasVariance.html)
+:::
+
+---
+
+## Two ends of the spectrum 🎯
+
+::: {.columns}
+::: {.column width="50%"}
+**High bias 🪨** ("underfit")
+
+- Always predicts "No" → 92% accuracy on YRBS but useless.
+- A linear model trying to fit a curved relationship.
+- ✅ **Stable** across different training sets
+- ❌ **Wrong** systematically
+:::
+::: {.column width="50%"}
+**High variance 🎢** ("overfit")
+
+- A decision tree that grows until each leaf is one row.
+- Perfect on train, terrible on test.
+- ✅ **Flexible** enough for any pattern
+- ❌ **Unstable** — small data changes → very different model
+:::
+:::
+
+::: {.fragment}
+::: {.callout-tip}
+## The sweet spot
+**Just complex enough to capture the real pattern, simple enough to generalize.**
+We find this by tuning hyperparameters on resamples.
+:::
+:::
+
+---
+
+## The bullseye view 🎯
+
+![](img/bullseye.png){fig-align="center" width="70%"}
+
+::: {.footer}
+[Fortman-Roe, 2012](http://scott.fortmann-roe.com/docs/BiasVariance.html)
+:::
+
+---
+
+## Play with it 🎮
+
+::: {style="text-align: center;"}
+```{=html}
+<iframe width="1100" height="600" src="https://mlu-explain.github.io/bias-variance/" title="MLU-Explain — Bias-Variance"></iframe>
+```
+:::
+
+::: {.footer}
+Visualization by [MLU-Explain](https://mlu-explain.github.io/bias-variance/)
+:::
+
+# 🎛️ Hyperparameters
+
+## What is a hyperparameter?
+
+::: {.incremental}
+- A **parameter** is something the model *learns* from data (like a regression coefficient β).
+- A **hyperparameter** is a knob *you* set **before** training.
+- Different hyperparameter values → very different models.
+- We pick the best ones using **resampling + tuning**.
+:::
+
+---
+
+## One example per algorithm
+
+| Algorithm | Key hyperparameter | What it controls |
+|-----------|-------------------|------------------|
+| **Lasso / Ridge** | `penalty` | How aggressive the regularization is |
+| **K-Nearest Neighbors** | `neighbors` | How many neighbors vote |
+| **Decision Tree** | `tree_depth` | How deep the tree can grow |
+| **Random Forest** | `mtry`, `trees` | Predictors per split, # of trees |
+| **XGBoost** | `learn_rate`, `trees` | Step size + # of boosting rounds |
+
+::: {.fragment}
+> 🚀 **Tomorrow** you'll see `tune()` placeholders in your spec — that tells `tidymodels` *"try a grid of values for this knob and pick the best one."*
+:::
+
+# 🧭 The Full ML Process
+
+## Step by step
+
+::: {.incremental}
+1. **Collect** data.
+2. **Explore** + clean (you did this Tuesday).
+3. **Split** — train / test.
+4. **Recipe** — preprocessing.
+5. **Spec** — choose a model.
+6. **Workflow** — bundle them.
+7. **Tune** hyperparameters with resamples.
+8. **Fit** the final model on all training data.
+9. **Evaluate** on the test set — *once*.
+10. **Communicate** — render your website + share the link. 🌐
+:::
+
+---
+
+## Visualized
+
+![](img/theprocess.svg){fig-align="center"}
+
+::: {.footer}
+[Machine Learning with `tidymodels`](https://workshops.tidymodels.org/)
+:::
+
+# 🎯 Your Turn (Reflection)
+
+## Before lunch, decide:
+
+::: {.columns}
+::: {.column width="55%"}
+::: {.incremental}
+1. **What's your outcome variable?** Write it down.
+2. Is your problem **classification** (Yes/No, multi-class) or **regression** (a number)?
+3. Run `count(your_outcome)` — what's the **class balance**?
+4. Will you need **stratification** in your split? (almost certainly yes)
+5. What 5–10 **predictors** are most likely to matter?
+6. **Update your `dataset.qmd` page** with this info.
+:::
+:::
+::: {.column width="45%"}
+![](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOTMxdWJnMnV4dWkyaGhxY3FlaWtidXBpdXp2dml5ZzFsN2h6Y2lnayZlcD12MV9naWZzX3NlYXJjaCZjdD1n/CjmvTCZf2U3p09Cn0h/giphy.gif)
+:::
+:::
+
+# 🎁 Wrapping Up
+
+## What you learned this morning
+
+::: {.incremental}
+- ✅ ML is everywhere — Spotify, iPhone, Netflix, your bank.
+- ✅ The 10 vocabulary words you'll use all week.
+- ✅ Supervised vs unsupervised, classification vs regression.
+- ✅ Statistics & ML are *complementary*, not opposing teams.
+- ✅ The **3 sins**: overfitting, leakage, class imbalance.
+- ✅ Train / test / validation + 3 flavors of resampling.
+- ✅ The **bias–variance trade-off**.
+- ✅ What a hyperparameter is.
+- ✅ The full **10-step ML process**.
+:::
+
+---
+
+## Next 🚀
+
+> This afternoon we **code** all of this in `tidymodels` — and you'll add the first model page to your project website.
+
+![](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOTMxdWJnMnV4dWkyaGhxY3FlaWtidXBpdXp2dml5ZzFsN2h6Y2lnayZlcD12MV9naWZzX3NlYXJjaCZjdD1n/CjmvTCZf2U3p09Cn0h/giphy.gif){fig-align="center" width="40%"}
+
+---
+
+## 📚 Want to keep learning?
+
+- 📘 [**Tidy Modeling with R**](https://www.tmwr.org/) — Kuhn & Silge, the official `tidymodels` book
+- 📘 [**An Introduction to Statistical Learning** (R)](https://www.statlearning.com/) — the classic ML textbook, free PDF
+- 🎮 [**MLU-Explain**](https://mlu-explain.github.io/) — interactive visualizations of every ML concept
+- 🎥 [**Cassie Kozyrkov — Making Friends with ML**](https://www.youtube.com/watch?v=1vkb7BCMQd0) — best 4-hour intro to ML on the internet
+- 🎓 [**Andrew Ng — Machine Learning Specialization**](https://www.coursera.org/specializations/machine-learning-introduction) (Coursera, audit free)
+- 📰 [**Distill.pub**](https://distill.pub/) — beautiful, visual ML papers
+- 📰 [**Christoph Molnar — Interpretable ML**](https://christophm.github.io/interpretable-ml-book/) — when you need to *explain* a model
+
+---
+
+## See you in `tidymodels`! 🛠️
+
+![](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOTMxdWJnMnV4dWkyaGhxY3FlaWtidXBpdXp2dml5ZzFsN2h6Y2lnayZlcD12MV9naWZzX3NlYXJjaCZjdD1n/CjmvTCZf2U3p09Cn0h/giphy.gif){fig-align="center" width="50%"}

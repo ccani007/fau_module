@@ -1,0 +1,907 @@
+---
+title: "Introduction to `tidymodels`"
+author: "Catalina Cañizares, Ph.D."
+date: today
+format:
+  revealjs:
+    scrollable: true
+    slide-number: true
+    transition: "fade"
+    auto-play-media: true
+    auto-stretch: true
+    footnotes-hover: true
+    code-copy: true
+    css: style.css
+editor_options: 
+  chunk_output_type: console
+---
+
+## About This Material
+
+> Introduction to `tidymodels` © 2024 by Catalina Canizares is licensed under Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International.
+
+This material is freely available under the Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License.
+
+For more information on this license, please visit: [Creative Commons License](https://creativecommons.org/licenses/by-nc-nd/4.0/)
+
+---
+
+## 🌅 Where we are
+
+::: {.callout-tip}
+## Recap of the day so far
+- 🧠 **This morning** you learned **what machine learning is** — train/test splits, supervised vs unsupervised, overfitting, the bias-variance trade-off.
+- 🛠️ **Right now** you're going to learn **how to do it in R** with the `tidymodels` ecosystem.
+- 📄 **Today's deliverable**: a working **logistic regression page** in your project website.
+:::
+
+::: {.fragment}
+> Tomorrow we'll reuse the *exact same pipeline* for Lasso, Trees, Random Forest and KNN. **Master it today, and tomorrow is easy.** 💪
+:::
+
+---
+
+## 🎯 Objectives
+
+::: {.incremental}
+By the end of this session you will be able to:
+
+1. Explain why `tidymodels` exists and why it matters.
+2. Recognize the **7 building-block packages** of the ecosystem.
+3. Walk through the **full ML pipeline**: split → recipe → spec → workflow → fit → predict → evaluate.
+4. Train and **honestly evaluate** a logistic regression on YRBS data.
+5. Use `last_fit()` to do steps 5–7 in *one line*.
+6. Build the **logistic-regression page** of your project website.
+:::
+
+# 🏗️ What is `tidymodels`?
+
+## What is [`tidymodels`](https://www.tidymodels.org/)?
+
+A **meta-package** for modeling and machine learning that shares the design philosophy, grammar, and data structures of the `tidyverse`.
+
+**Built by:**
+
+::: {.columns}
+::: {.column width="50%"}
+![](img/kuhn.png){.small width=50%}
+
+**Max Kuhn** — author of `caret`, the original R ML package.
+:::
+::: {.column width="50%"}
+![](img/julia.png){.small width=50%}
+
+**Julia Silge** — engineer, blogger, and the most active tidymodels evangelist.
+:::
+:::
+
+# 🤔 Why bother?
+
+## R has 200+ ML packages and they all speak different languages 😩
+
+::: {.incremental}
+- I ❤️ R, but…
+- My 🤯 with the **idiosyncratic syntax** developed for every model algorithm.
+:::
+
+::: {.fragment}
+```r
+# Linear regression
+lm_fit    <- lm(y ~ ., data = df)
+glm_fit   <- glm(y ~ ., data = df, family = gaussian)
+caret_fit <- train(y ~ ., data = df, method = "lm")
+```
+
+> Same model. Three packages. Three syntaxes. 🤬
+:::
+
+---
+
+## Same model, different packages
+
+The same problem persists for **Random Forest**:
+
+::: {.panel-tabset}
+
+### `randomForest`
+- **Number of predictors:** `mtry`
+- **Number of trees:** `ntree`
+- **Number of splits:** `nodesize`
+
+### `ranger`
+- **Number of predictors:** `mtry`
+- **Number of trees:** `num.trees`
+- **Number of splits:** `min.node.size`
+
+### `sparklyr`
+- **Number of predictors:** `feature_subset_strategy`
+- **Number of trees:** `num_trees`
+- **Number of splits:** `min_instances_per_node`
+
+:::
+
+::: {.fragment}
+> Three packages. Three names for **the exact same hyperparameter**. 🤯
+:::
+
+::: {.footer}
+[ML with Tidymodels](https://simonschoe.github.io/ml-with-tidymodels/#1)
+:::
+
+---
+
+## `tidymodels` solves this with `parsnip` 😎
+
+**One unified syntax** for every model:
+
+```r
+# Logistic Regression
+logistic_reg() |>
+  set_engine("glm") |>
+  set_mode("classification")
+
+# Random Forest — same shape!
+rand_forest(mtry = tune(), trees = 500) |>
+  set_engine("ranger") |>
+  set_mode("classification")
+
+# XGBoost — same shape!
+boost_tree(trees = 1000, learn_rate = tune()) |>
+  set_engine("xgboost") |>
+  set_mode("classification")
+```
+
+::: {.fragment}
+> Learn one pattern → use **238+ models**. 🚀
+:::
+
+---
+
+## The `tidymodels` ecosystem 🧱
+
+| Package | What it does | Day you'll use it |
+|---------|-------------|-------------------|
+| 📦 **`rsample`** | Split data + create CV folds | Today |
+| 🍳 **`recipes`** | Preprocess (impute, normalize, dummy…) | Today |
+| 🌱 **`parsnip`** | Specify the model | Today |
+| 🔗 **`workflows`** | Bundle recipe + model | Today |
+| 📏 **`yardstick`** | Compute metrics (accuracy, ROC AUC…) | Today |
+| 🎛️ **`tune` + `dials`** | Hyperparameter tuning | Tomorrow |
+| 🧹 **`broom`** | Tidy model output (`tidy()`, `glance()`) | Today |
+
+::: {.fragment}
+**Loading them all at once:**
+
+```r
+library(tidymodels)
+```
+:::
+
+# 🗺️ The ML Pipeline
+
+## The 7 steps you'll repeat for *every* model
+
+::: {.incremental}
+1. **Split** the data into train / test.
+2. **Recipe** — describe the preprocessing.
+3. **Spec** — choose the model and engine.
+4. **Workflow** — bundle the recipe and the spec.
+5. **Fit** the workflow on the training set.
+6. **Predict** on the test set.
+7. **Evaluate** with metrics (accuracy, ROC AUC…).
+:::
+
+::: {.fragment}
+::: {.callout-tip}
+## The good news
+This is *literally the same code* for Lasso, Decision Trees, Random Forest, KNN, and XGBoost. **Only the spec changes.** ✨
+:::
+:::
+
+# 📚 Quick Review: Logistic Regression
+
+## What is logistic regression?
+
+::: {.fragment}
+**Logistic regression…**
+
+::: {.incremental}
+- Is a **supervised learning** algorithm used to *classify data* into categories by **predicting the probability** that an observation belongs to a particular class, based on its features.
+- Is most often used for **binary classification** — deciding between two groups (Yes / No, Survived / Died, Carried weapon / Did not).
+- Outputs a number between 0 and 1 that we interpret as a **probability**, then threshold (usually at 0.5) to assign a class.
+:::
+:::
+
+::: {.fragment}
+> 🧠 **Why start with logistic regression?** It's the simplest and most interpretable classifier — every fancier model (Lasso, trees, RF, KNN) is judged against it.
+:::
+
+---
+
+## Play with it 🎮
+
+::: {style="text-align: center;"}
+```{=html}
+<iframe width="1100" height="650" src="https://mlu-explain.github.io/logistic-regression/" title="MLU-Explain — Logistic Regression"></iframe>
+```
+:::
+
+::: {.footer}
+Visualization by [MLU-Explain](https://mlu-explain.github.io/logistic-regression/)
+:::
+
+# 🎬 A Real Example
+
+## Research question
+
+> **Can we predict whether an adolescent will carry a weapon to school based on other risk behaviors reported in the YRBS?**
+
+::: {.incremental}
+- **Outcome**: `WeaponCarrying` (binary: Yes / No)
+- **Predictors**: All other risk behavior items in the survey
+- **Why it matters**: Identifying patterns of risk could help target school-based prevention.
+:::
+
+---
+
+## The data — `MLearnYRBSS::riskyBehaviors`
+
+```{r}
+#| echo: true
+#| message: false
+#| warning: false
+library(tidymodels)
+library(MLearnYRBSS)
+library(janitor)
+library(skimr)
+
+data("riskyBehaviors")
+glimpse(riskyBehaviors)
+```
+
+---
+
+## Setup — load packages
+
+```{r}
+#| echo: true
+#| eval: false
+# pak::pak("tidymodels")        # if not installed
+# pak::pak("MLearnYRBSS")       # for the dataset
+
+library(tidymodels)
+library(MLearnYRBSS)
+library(janitor)
+```
+
+::: {.fragment}
+::: {.callout-note}
+## What `library(tidymodels)` loads
+A whole family of packages: `rsample`, `recipes`, `parsnip`, `workflows`, `tune`, `dials`, `yardstick`, `broom`, plus `dplyr`, `ggplot2`, `tibble`, `purrr`. Almost everything you need for ML.
+:::
+:::
+
+---
+
+## Recode the outcome to binary
+
+```{r}
+#| echo: true
+#| output-location: fragment
+analysis_data <-
+    riskyBehaviors |>
+    mutate(
+        WeaponCarryingSchool = case_when(
+            WeaponCarrying == 1 ~ "No",
+            WeaponCarrying %in% c(2, 3, 4, 5) ~ "Yes",
+            .default = NA_character_
+        ),
+        WeaponCarryingSchool = factor(WeaponCarryingSchool)
+    ) |>
+    drop_na(WeaponCarryingSchool) |>
+    select(-WeaponCarrying)
+
+analysis_data |> count(WeaponCarryingSchool)
+```
+
+::: {.fragment}
+::: {.callout-warning}
+## Class imbalance ⚖️
+About **8% Yes vs 92% No**. We'll handle this with `strata =` in the split (and later, downsampling for tuning). Always look at this *before* modeling.
+:::
+:::
+
+# 1️⃣ Split: train + test
+
+## Why split FIRST?
+
+::: {.columns}
+::: {.column width="55%"}
+::: {.incremental}
+- If you train *and* evaluate on the same data, your metrics are **inflated** — the model has memorized the answers.
+- **The test set is sacred**: it's the *only* honest measure of how the model will perform on data it has never seen.
+- **Split BEFORE you do anything else.** Even before EDA on the predictors.
+:::
+:::
+::: {.column width="45%"}
+::: {.callout-warning}
+## Common beginner mistake
+Splitting *after* you've already imputed missing values, normalized predictors, or computed PCA on the full dataset. That's **data leakage**, and your test metrics become a lie.
+
+✅ Tidymodels protects you from this when you wrap the recipe in a `workflow()`.
+:::
+:::
+:::
+
+---
+
+## `initial_split()` — stratified
+
+```{r}
+#| echo: true
+#| output-location: fragment
+set.seed(1990)
+
+analysis_split <-
+    initial_split(
+        analysis_data,
+        prop = 0.75,
+        strata = WeaponCarryingSchool # ⬅️ keeps class balance in both sets
+    )
+
+analysis_train <- training(analysis_split)
+analysis_test <- testing(analysis_split)
+
+analysis_split
+```
+
+::: {.fragment}
+::: {.callout-tip}
+## `set.seed()`
+Splits are random. Setting a seed makes your work **reproducible** — you and your teacher get the exact same train/test split.
+:::
+:::
+
+---
+
+## Sanity check — class balance preserved
+
+```{r}
+#| echo: true
+#| output-location: fragment
+analysis_train |>
+    tabyl(WeaponCarryingSchool) |>
+    adorn_pct_formatting(0)
+
+analysis_test |>
+    tabyl(WeaponCarryingSchool) |>
+    adorn_pct_formatting(0)
+```
+
+::: {.fragment}
+> Both sets are ~8% / 92% — `strata =` did its job. ✅
+:::
+
+# 2️⃣ Recipe: preprocessing
+
+## What is a `recipe`?
+
+A **blueprint** of preprocessing steps that will be learned from the **training set** and *then* applied to test or new data.
+
+```{r}
+#| echo: true
+#| code-line-numbers: "2|3|4|5|6|7|8"
+weapon_recipe <-
+    recipe(WeaponCarryingSchool ~ ., data = analysis_train) |>
+    step_zv(all_predictors()) |> # drop zero-variance predictors
+    step_impute_mode(all_nominal_predictors()) |> # fill NAs in categoricals with the mode
+    step_impute_mean(all_numeric_predictors()) |> # fill NAs in numerics with the mean
+    step_normalize(all_numeric_predictors()) |> # mean = 0, sd = 1 (helps KNN later)
+    step_corr(all_numeric_predictors(), threshold = 0.7) |> # drop highly correlated predictors
+    step_dummy(all_nominal_predictors()) # one-hot encode categoricals
+```
+
+::: {.fragment}
+::: {.callout-tip}
+## How do I know which steps to use?
+- 📖 [The "Pre-processing methods" table](https://www.tmwr.org/pre-proc-table.html) tells you what *each model* needs.
+- 🤖 The [`usemodels`](https://usemodels.tidymodels.org/) package writes a starter recipe for you.
+:::
+:::
+
+---
+
+## What we just told R to do
+
+```
+── Recipe ───────────────────────────────────────────────────────────────────
+── Inputs 
+Number of variables by role
+outcome:    1
+predictor: 19
+
+── Operations 
+• Zero variance filter on: all_predictors()
+• Mode imputation for: all_nominal_predictors()
+• Mean imputation for: all_numeric_predictors()
+• Centering and scaling for: all_numeric_predictors()
+• Correlation filter on: all_numeric_predictors()
+• Dummy variables from: all_nominal_predictors()
+```
+
+::: {.fragment}
+::: {.callout-warning}
+## Nothing has been computed yet!
+A recipe is a **plan**, not an action. R hasn't touched the data yet — it's just remembering what you want to do.
+:::
+:::
+
+---
+
+## (Optional) See what the recipe will produce
+
+You can `prep()` the recipe (learn the parameters from training data) and `bake()` it (apply to a dataset) — useful for **debugging**:
+
+```{r}
+#| echo: true
+weapon_recipe |>
+    prep() |>
+    bake(new_data = NULL) |> # NULL = use the training set
+    glimpse()
+```
+
+::: {.fragment}
+> 💡 **In practice**, you don't need to prep + bake by hand — `workflow()` does it for you. But it's a great way to inspect what's happening.
+:::
+
+# 3️⃣ Spec: choose the model
+
+## `parsnip` — the model spec
+
+A spec has **3 components**:
+
+::: {.incremental}
+1. **Type** — what kind of model? (`logistic_reg`, `decision_tree`, `rand_forest`…)
+2. **Mode** — `"classification"` or `"regression"`?
+3. **Engine** — which underlying R package implements it? (`"glm"`, `"ranger"`, `"xgboost"`…)
+:::
+
+::: {.fragment}
+```{r}
+#| echo: true
+#| output-location: fragment
+weapon_spec <-
+    logistic_reg() |>
+    set_mode("classification") |>
+    set_engine("glm")
+
+weapon_spec
+```
+:::
+
+---
+
+## Want help writing the spec?
+
+The [`usemodels`](https://usemodels.tidymodels.org/) package writes a **starter scaffold** for the *more complex* models — Lasso, Random Forest, KNN, XGBoost…
+
+```{r}
+#| echo: true
+library(usemodels)
+
+# A scaffold for tomorrow's Lasso!
+use_glmnet(WeaponCarryingSchool ~ ., data = analysis_train)
+```
+
+::: {.fragment}
+::: {.callout-tip}
+## When to reach for `usemodels`
+- ✅ `use_glmnet()` — Lasso, Ridge, Elastic Net
+- ✅ `use_ranger()` — Random Forest
+- ✅ `use_xgboost()` — XGBoost
+- ✅ `use_kknn()` — K-Nearest Neighbors
+
+It writes the recipe, the spec, the workflow, and the tuning grid — copy-paste, adjust, you're done. ✨
+
+For plain `glm` like today's example, the spec is so short you don't need a scaffold. 🤷‍♀️
+:::
+:::
+
+# 4️⃣ Workflow: bundle them
+
+## `workflow()` = recipe + spec
+
+```{r}
+#| echo: true
+#| output-location: fragment
+weapon_workflow <-
+    workflow() |>
+    add_recipe(weapon_recipe) |>
+    add_model(weapon_spec)
+
+weapon_workflow
+```
+
+::: {.fragment}
+::: {.callout-tip}
+## Why bundling matters
+A `workflow` keeps the recipe and the model **glued together**. When you fit, predict, or resample, the recipe is **always applied to the right data at the right time** — no leakage. 🛡️
+:::
+:::
+
+# 5️⃣ Fit: train on the training set
+
+## Train the model
+
+```{r}
+#| echo: true
+#| output-location: fragment
+weapon_fit <-
+    weapon_workflow |>
+    fit(data = analysis_train)
+```
+
+::: {.fragment}
+**Behind the scenes, tidymodels:**
+
+1. ✅ Runs `prep()` on the recipe using `analysis_train`
+2. ✅ Bakes the training data through the recipe
+3. ✅ Trains the model on the baked data
+:::
+
+::: {.fragment}
+> 💡 The recipe **never sees the test set**. That's how leakage is prevented.
+:::
+
+---
+
+## Interpret coefficients with `tidy()`
+
+```{r}
+#| echo: true
+tidy_model <-
+    weapon_fit |>
+    tidy(
+        exponentiate = TRUE, # convert log-odds to odds ratios
+        conf.int = TRUE,
+        conf.level = 0.95
+    ) |>
+    mutate(p.value = scales::pvalue(p.value))
+
+tidy_model
+```
+
+::: {.fragment}
+> `exponentiate = TRUE` turns log-odds into **odds ratios** — much easier to interpret.
+:::
+
+---
+
+## Visualize the odds ratios
+
+```{r}
+#| echo: true
+#| output-location: slide
+#| fig-width: 12
+#| fig-height: 7
+tidy_model |>
+    filter(term != "(Intercept)") |>
+    ggplot(aes(x = estimate, y = reorder(term, estimate))) +
+    geom_pointrange(aes(xmin = conf.low, xmax = conf.high), alpha = 0.7) +
+    geom_vline(xintercept = 1, linetype = "dashed", color = "red") +
+    scale_x_log10() +
+    labs(
+        x = "Odds Ratio (95% CI)",
+        y = NULL,
+        title = "Predictors of Weapon Carrying at School"
+    ) +
+    theme_minimal(base_size = 13)
+```
+
+::: {.fragment}
+> Predictors with CI **above 1** are associated with *more* weapon carrying. Below 1 = *less*. Crossing 1 = inconclusive.
+:::
+
+---
+
+## Quick model-level summary with `glance()`
+
+```{r}
+#| echo: true
+weapon_fit |> glance()
+```
+
+::: {.fragment}
+> Returns AIC, BIC, deviance, log-likelihood — useful for comparing models.
+:::
+
+# 6️⃣ Predict: on the *test* set
+
+## Predict and bind
+
+```{r}
+#| echo: true
+predictions <-
+    weapon_fit |>
+    augment(new_data = analysis_test) |> # ⬅️ the test set!
+    select(WeaponCarryingSchool, .pred_class, .pred_No, .pred_Yes)
+
+predictions
+```
+
+::: {.fragment}
+> `augment()` adds the predicted class and predicted **probabilities** to your data — no manual joining needed.
+:::
+
+::: {.fragment}
+::: {.callout-warning}
+## Always evaluate on the TEST set
+The training metrics will look great because the model has *seen* that data. The test metrics tell you the truth.
+:::
+:::
+
+# 7️⃣ Evaluate: metrics
+
+## Confusion matrix
+
+```{r}
+#| echo: true
+predictions |>
+    conf_mat(truth = WeaponCarryingSchool, estimate = .pred_class)
+```
+
+```
+          Truth
+Prediction   No  Yes
+       No  2298  187
+       Yes   12   12
+```
+
+::: {.fragment}
+::: {.incremental}
+- **True Negatives** (correctly predicted "No"): 2298
+- **True Positives** (correctly predicted "Yes"): 12
+- **False Negatives** (missed "Yes"): 187 ⚠️
+- **False Positives** (false alarms): 12
+:::
+:::
+
+::: {.fragment}
+> 👀 The model rarely predicts "Yes" — that's class imbalance biting back. We'll address it tomorrow with downsampling and tuning.
+:::
+
+---
+
+## A `metric_set()` of metrics in one shot
+
+```{r}
+#| echo: true
+weapon_metrics <- metric_set(
+    accuracy,
+    sensitivity,
+    specificity,
+    roc_auc
+)
+
+predictions |>
+    weapon_metrics(
+        truth = WeaponCarryingSchool,
+        estimate = .pred_class,
+        .pred_Yes, # the probability column for ROC
+        event_level = "second" # "Yes" is the second level alphabetically
+    )
+```
+
+::: {.fragment}
+| Metric | What it tells you |
+|--------|-------------------|
+| **Accuracy** | % correct overall (misleading with imbalance) |
+| **Sensitivity** | Of all true Yes, how many did we catch? |
+| **Specificity** | Of all true No, how many did we correctly clear? |
+| **ROC AUC** | How well the model **ranks** Yes vs No (0.5 = random, 1 = perfect) |
+:::
+
+---
+
+## ROC curve
+
+```{r}
+#| echo: true
+#| output-location: slide
+#| fig-width: 12
+#| fig-height: 7
+predictions |>
+    roc_curve(
+        truth = WeaponCarryingSchool,
+        .pred_Yes,
+        event_level = "second"
+    ) |>
+    autoplot()
+```
+
+::: {.fragment}
+> A curve hugging the **top-left** corner = a great model. A diagonal line = random guessing.
+:::
+
+# 🪄 The `last_fit()` Magic
+
+## Steps 5 + 6 + 7 in one line ✨
+
+`last_fit()` does it all: fits on the training set, predicts on the test set, and computes metrics.
+
+```{r}
+#| echo: true
+final_results <-
+    weapon_workflow |>
+    last_fit(
+        split = analysis_split,
+        metrics = metric_set(accuracy, sensitivity, specificity, roc_auc)
+    )
+
+# Get the test metrics
+final_results |> collect_metrics()
+
+# Get the test predictions
+final_results |> collect_predictions()
+```
+
+::: {.fragment}
+::: {.callout-tip}
+## Why `last_fit()` is your best friend
+- ✅ Splits, recipes, fits, predicts, metrics — all in one object.
+- ✅ Impossible to accidentally evaluate on the training set.
+- ✅ Reproducible from a single command.
+- ✅ The cleanest way to *finalize* your model after tuning.
+:::
+:::
+
+# 🔁 A Taste of Resampling (Tomorrow's Topic)
+
+## Why resample?
+
+::: {.incremental}
+- The test set is **sacred** — we can only look at it once at the end.
+- But during model development we still need to estimate performance, compare models, and tune hyperparameters.
+- **Solution:** carve up the **training set** into smaller "mini test sets" using **cross-validation**.
+:::
+
+---
+
+## `vfold_cv()` — V-fold cross-validation
+
+```{r}
+#| echo: true
+set.seed(1990)
+
+analysis_folds <-
+    vfold_cv(
+        analysis_train,
+        v = 5,
+        strata = WeaponCarryingSchool
+    )
+
+analysis_folds
+```
+
+::: {.fragment}
+> Splits the training set into **5 folds**. Each fold takes a turn being the "validation set" while the other 4 train. → 5 estimates of performance.
+:::
+
+---
+
+## Other resampling flavors
+
+::: {.panel-tabset}
+
+### Bootstrapping
+```{r}
+#| echo: true
+set.seed(1990)
+
+bootstraps(analysis_train, times = 25)
+```
+
+Sample **with replacement** — useful for very small datasets.
+
+### Leave-One-Out
+```{r}
+#| echo: true
+#| eval: false
+# ⚠️ Don't actually run this on a 12k-row dataset — it would create 12k folds!
+loo_cv(analysis_train)
+```
+
+Each observation is its own fold. Great for tiny data, **way too expensive** for big data like ours.
+
+### Monte Carlo
+```{r}
+#| echo: true
+mc_cv(analysis_train, prop = 0.75, times = 20)
+```
+
+Repeated random splits — flexible alternative to V-fold.
+
+:::
+
+::: {.fragment}
+> 🚀 **Tomorrow** we'll feed `analysis_folds` into `tune_grid()` to pick the best Lasso penalty.
+:::
+
+# 🎯 Your Turn
+
+## Build the logistic-regression page of your project
+
+::: {.columns}
+::: {.column width="55%"}
+In your `ml-template`, open **`logistic-regression.qmd`** and:
+
+::: {.incremental}
+1. **Load** the data: `analysis_data <- rio::import("models/data/analysis_data.rds")`
+2. **Pick** an outcome variable for *your* research question.
+3. **Recode** it to binary (Yes / No factor).
+4. Run **all 7 steps** of the pipeline:
+   - `initial_split()` with `strata =`
+   - `recipe()` with sensible `step_*()`
+   - `parsnip` spec: `logistic_reg() |> set_engine("glm")`
+   - `workflow()`
+   - `fit()` on `train`
+   - `augment()` on `test`
+   - `metric_set(accuracy, sensitivity, specificity, roc_auc)`
+5. **Bonus**: do it again with `last_fit()`.
+6. **Render** your website. 🚀
+:::
+:::
+::: {.column width="45%"}
+![](https://media2.giphy.com/media/13GIgrGdslD9oQ/giphy.gif){fig-align="center"}
+:::
+:::
+
+# 🎁 Wrapping Up
+
+## What you learned today
+
+::: {.incremental}
+- ✅ **Why `tidymodels` exists** — one syntax for 238+ models.
+- ✅ The **7 building-block packages** of the ecosystem.
+- ✅ The **7-step pipeline**: split → recipe → spec → workflow → fit → predict → evaluate.
+- ✅ How to **prevent data leakage** with `workflow()`.
+- ✅ How to **honestly evaluate** a model with `last_fit()`.
+- ✅ A **first taste of resampling** (CV folds).
+:::
+
+::: {.fragment}
+> ✨ The **same pattern** works for Lasso, Decision Trees, Random Forest, KNN, and XGBoost. Tomorrow you only swap the spec.
+:::
+
+---
+
+## Before next session 📋
+
+::: {.incremental}
+1. **Finish the logistic-regression page** of your website.
+2. **Render** it successfully.
+3. **Look at your test metrics** — what does the AUC tell you about how learnable your outcome is?
+4. **Optional**: read [Chapter 5 of TMWR](https://www.tmwr.org/splitting) on splitting strategies.
+5. **Bring your laptop charged.** Tomorrow we **tune** Lasso. 🎛️
+:::
+
+---
+
+## 📚 Want to keep learning?
+
+- 📘 [**Tidy Modeling with R**](https://www.tmwr.org/) — Kuhn & Silge, *the* official book
+- 🌐 [tidymodels.org](https://www.tidymodels.org/) — official site
+- 🎯 [tidymodels Learn](https://www.tidymodels.org/learn/) — tutorials by level
+- 📋 [Available models in `parsnip`](https://www.tidymodels.org/find/parsnip/) — 238+ engines
+- 📊 [`yardstick` metric reference](https://yardstick.tidymodels.org/articles/metric-types.html)
+- 🧪 [`recipes` step gallery](https://recipes.tidymodels.org/reference/index.html)
+- 🎥 [Julia Silge's screencasts](https://www.youtube.com/@JuliaSilge) — tidymodels on real data, weekly
+- 🤖 [`usemodels`](https://usemodels.tidymodels.org/) — auto-generates the recipe + workflow scaffold
+
+---
+
+## See ya tomorrow! 🎛️
+
+![](img/practice.gif){fig-align="center" width="60%"}
+
+> Same pipeline. Different spec. **Lasso, here we come.** 💪

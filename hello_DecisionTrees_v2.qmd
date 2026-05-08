@@ -1,0 +1,1045 @@
+---
+title: "Decision Trees with `tidymodels` 🌳"
+author: "Catalina Cañizares, Ph.D."
+date: today
+format:
+  revealjs:
+    scrollable: true
+    slide-number: true
+    transition: "fade"
+    auto-play-media: true
+    auto-stretch: true
+    footnotes-hover: true
+    code-copy: true
+    css: style.css
+editor_options:
+  chunk_output_type: console
+---
+
+## About This Material
+
+> Decision Trees using `tidymodels` © 2024 by Catalina Cañizares is licensed under Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International.
+
+This material is freely available under the Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License.
+
+For more information on this license, please visit: [Creative Commons License](https://creativecommons.org/licenses/by-nc-nd/4.0/)
+
+---
+
+## 🌅 Where we are
+
+::: {.callout-tip}
+## Day 4 — afternoon
+- ✅ **Mon:** R + Quarto + your project website.
+- ✅ **Tue:** wrangled YRBS data with `tidyverse`.
+- ✅ **Wed AM:** the **concepts** behind machine learning.
+- ✅ **Wed PM:** your **first `tidymodels` pipeline** (logistic regression).
+- ✅ **Today AM:** **Lasso, Ridge, Elastic Net** — same pipeline, smarter spec.
+- 🌳 **Right now:** **Decision Trees** — a brand-new family of models.
+- 🌲 **Next:** Random Forest & XGBoost (many trees), then KNN.
+:::
+
+::: {.fragment}
+> Same 7-step pipeline you already know. **Just swap the spec.** ✨
+:::
+
+---
+
+## 🎯 Objectives
+
+::: {.incremental}
+By the end of this session you will be able to:
+
+1. Explain in plain English what a **decision tree** does.
+2. Describe **entropy** and **information gain** without panicking.
+3. Tell apart the **3 knobs** that control tree size: `tree_depth`, `min_n`, `cost_complexity`.
+4. Tune those knobs with `tune_grid()` + cross-validation.
+5. Evaluate the tuned tree honestly on a **held-out test set** with `last_fit()`.
+6. Visualize the final tree and its **most important predictors**.
+7. Build the **`decision-tree.qmd`** page of your project website.
+:::
+
+# 🌳 What is a Decision Tree?
+
+## The big idea
+
+::: {.columns}
+::: {.column width="50%"}
+::: {.incremental}
+- A series of **yes/no questions** about your data.
+- Each answer sends you down a branch.
+- At the bottom of the tree, you land on a **prediction**.
+- That's it. No math degree required.
+:::
+:::
+::: {.column width="50%"}
+![](img/tree_example.png){fig-align="center"}
+:::
+:::
+
+::: {.fragment}
+> 🎯 You already do this every day: *"Is it raining? Is the road wet? → take an umbrella."*
+:::
+
+---
+
+## You already use trees
+
+::: {.incremental}
+- 🏥 **ER triage**: *"Chest pain? → ECG → troponin? → cath lab vs floor."*
+- 🏦 **Loan approval**: *"Income > X? → credit score > Y? → approve."*
+- 📞 **Customer support menu**: *"Press 1 for billing, 2 for tech support…"*
+- 🌳 A **decision tree** just learns the questions **automatically from data**. 🤖
+:::
+
+---
+
+## Trees do classification *and* regression
+
+::: {.incremental}
+- **Classification trees** → leaves predict a **class** (Yes / No, A / B / C).
+- **Regression trees** → leaves predict a **number** (price, BMI, GPA).
+- Today we focus on **classification**. The mechanics are the same.
+:::
+
+# 🌱 How a tree grows
+
+## The growing process
+
+::: {.r-stack}
+![](img/1_tree.png){.fragment fig-align="center" width="70%"}
+![](img/2_tree.png){.fragment fig-align="center" width="70%"}
+![](img/3_tree.png){.fragment fig-align="center" width="70%"}
+![](img/4_tree.png){.fragment fig-align="center" width="70%"}
+![](img/5_tree.png){.fragment fig-align="center" width="70%"}
+![](img/6_tree.png){.fragment fig-align="center" width="70%"}
+:::
+
+::: {.fragment}
+> Each split picks the **best yes/no question** to separate the classes — and then repeats. ➡️
+:::
+
+::: {.footer}
+[Tune better models](https://tmv.netlify.app/site/slides/rmed03-tune.html#25)
+:::
+
+---
+
+## What the splits look like (in 2D)
+
+::: {.r-stack}
+![](img/depth_1.png){.fragment fig-align="center" width="65%"}
+![](img/depth_2.png){.fragment fig-align="center" width="65%"}
+![](img/depth_3.png){.fragment fig-align="center" width="65%"}
+![](img/depth_7.png){.fragment fig-align="center" width="65%"}
+![](img/depth_8.png){.fragment fig-align="center" width="65%"}
+![](img/depth_9.png){.fragment fig-align="center" width="65%"}
+![](img/depth_10.png){.fragment fig-align="center" width="65%"}
+:::
+
+::: {.fragment}
+> The deeper the tree, the **wigglier** the boundary. At some point we go from *"learning"* to *"memorizing"*. 🚨
+:::
+
+::: {.footer}
+[Tune better models](https://tmv.netlify.app/site/slides/rmed03-tune.html#25)
+:::
+
+---
+
+## The fundamental tension ⚖️
+
+::: {.incremental}
+- 🌱 **Tiny tree** → high bias, misses important patterns. *"It always predicts No."*
+- 🌳 **Huge tree** → high variance, memorizes the training set. *"Perfect on train, garbage on test."*
+- 🎯 The art is finding the **right size** — and that's what tuning is for.
+:::
+
+::: {.fragment}
+::: {.callout-tip}
+## Sound familiar?
+This is the **bias-variance trade-off** from yesterday morning. Trees are the *poster child* for it.
+:::
+:::
+
+# 🤔 How does the tree choose splits?
+
+## Entropy — measuring "messiness"
+
+::: {.columns}
+::: {.column width="55%"}
+::: {.incremental}
+- **Entropy** = how *mixed up* a group is.
+- Pure group (all "yes") → entropy = 0. ✅
+- 50/50 mix → entropy is at its **maximum**.
+- The tree wants to make groups **as pure as possible**.
+:::
+:::
+::: {.column width="45%"}
+::: {.fragment}
+> 🎯 **YRBS example**
+> If a node has 50 students who texted-and-drove and 50 who didn't → **chaos**.
+> If it has 95 / 5 → **almost pure**, very informative.
+:::
+:::
+:::
+
+---
+
+## Information Gain — the rule for picking splits
+
+::: {.incremental}
+- For each candidate question (e.g. *"Drinks alcohol? Yes/No"*), the algorithm asks:
+  > *"How much **less messy** are the two groups after this split?"*
+- That reduction in entropy = **Information Gain**.
+- The tree picks the split with the **biggest gain** — and repeats.
+:::
+
+::: {.fragment}
+::: {.callout-note collapse="true"}
+## For the math fans 🤓
+Information Gain = *parent entropy* − *weighted average entropy of children*.
+The base algorithm is called **ID3**. The `rpart` engine uses a close cousin called the **Gini index** by default — same spirit, different formula.
+
+📘 [A Simple Explanation of Information Gain and Entropy](https://victorzhou.com/blog/information-gain/)
+:::
+:::
+
+---
+
+## See it in action 🎮
+
+[👉 Open the interactive demo](https://mlu-explain.github.io/decision-tree/)
+
+```{=html}
+<iframe width="1000" height="600" src="https://mlu-explain.github.io/decision-tree/" title="MLU-Explain — Decision Tree"></iframe>
+```
+
+::: {.footer}
+MLU-Explain by Amazon — fantastic free ML visualizations.
+:::
+
+# 🎛️ How big should the tree be?
+
+## Three knobs at a glance
+
+| Knob | What it does | Effect on tree |
+|---|---|---|
+| `tree_depth` | Caps how **deep** the tree can grow | smaller depth → smaller tree |
+| `min_n` | Minimum **rows** required to split a node | larger `min_n` → smaller tree |
+| `cost_complexity` ($\alpha$) | **Penalty** added per leaf | larger $\alpha$ → smaller tree |
+
+::: {.fragment}
+> The first two stop the tree **early** (during growing). The third **prunes** it after it grows. 🌿✂️
+:::
+
+---
+
+## `tree_depth` — early stopping
+
+::: {.columns}
+::: {.column width="55%"}
+::: {.incremental}
+- Cap the **maximum depth** of the tree.
+- Shallow trees can't memorize the training set.
+- A simple, blunt way to fight overfitting.
+:::
+:::
+::: {.column width="45%"}
+![](img/tree_depth1.png){fig-align="center"}
+:::
+:::
+
+::: {.footer}
+[Tune better models](https://tmv.netlify.app/site/slides/rmed03-tune.html#25)
+:::
+
+---
+
+## `tree_depth` — visually
+
+![](img/tree_depth2.png){fig-align="center" width="70%"}
+
+::: {.footer}
+[Tune better models](https://tmv.netlify.app/site/slides/rmed03-tune.html#25)
+:::
+
+---
+
+## `min_n` — the other early stop
+
+::: {.incremental}
+- Minimum number of **observations** required for a node to be split further.
+- `min_n = 1` → the tree will keep splitting until every leaf has 1 row. **Pure overfit.** 🚨
+- `min_n = 40` → no split unless there are 40+ rows → smaller, simpler tree.
+- Useful when classes are imbalanced — keeps the tree from carving out tiny weird leaves.
+:::
+
+::: {.footer}
+[Tune better models](https://tmv.netlify.app/site/slides/rmed03-tune.html#25)
+:::
+
+---
+
+## `cost_complexity` — pruning ✂️
+
+::: {.incremental}
+- Grow the tree **all the way**, then snip back the branches that don't pay off.
+- Add a penalty $\alpha$ for **every leaf** in the tree.
+- Closer to **0** → larger trees survive.
+- Larger $\alpha$ → only the most useful splits remain.
+:::
+
+::: {.fragment}
+::: {.callout-note collapse="true"}
+## The math (optional 🤓)
+$$
+R_\alpha(T) = R(T) + \alpha\,|\widetilde{T}|
+$$
+
+- $R(T)$ = misclassification rate of tree $T$
+- $|\widetilde{T}|$ = number of **leaves** in $T$
+- $\alpha = 0$ → biggest tree wins
+- $\alpha \to \infty$ → tree of size 1 wins
+:::
+:::
+
+::: {.footer}
+[PSU — Applied Data Mining](https://online.stat.psu.edu/stat508/lesson/11/11.8/11.8.2)
+:::
+
+---
+
+## `cost_complexity` — visually
+
+::: {.r-stack}
+![](img/cost_complex1.png){.fragment fig-align="center" width="70%"}
+![](img/cost_complex2.png){.fragment fig-align="center" width="70%"}
+:::
+
+::: {.footer}
+[Tune better models](https://tmv.netlify.app/site/slides/rmed03-tune.html#25)
+:::
+
+---
+
+## Recap
+
+![](img/recap_cp.png){fig-align="center" width="70%"}
+
+::: {.footer}
+[Tune better models](https://tmv.netlify.app/site/slides/rmed03-tune.html#25)
+:::
+
+# 💻 Trees with `tidymodels`
+
+## Today's task 🎯
+
+::: {.columns}
+::: {.column width="55%"}
+> **Among adolescents, can a decision tree predict whether they have ever consumed alcohol?** 🍺
+
+::: {.incremental}
+- **Outcome**: `UsedAlcohol` (binary: Yes / No)
+- **Predictors**: every other risky-behavior item in YRBS
+- **Model**: classification tree (`rpart`)
+- **Why a tree?** It will give us a **picture** we can hand to a clinician — not just a coefficient table.
+:::
+:::
+::: {.column width="45%"}
+![](https://media.giphy.com/media/JzujPK0id34qI/giphy.gif){fig-align="center"}
+:::
+:::
+
+---
+
+## Same 7 steps you already know 🔁
+
+::: {.incremental}
+1. **Split** train / test (with `strata =`)
+2. **Resample** with V-fold CV
+3. **Recipe** for preprocessing
+4. **Spec** ← this is the **only** thing that changes today!
+5. **Workflow** = recipe + spec
+6. **Tune** the hyperparameters with `tune_grid()`
+7. `finalize_workflow()` → `last_fit()` → metrics + plots
+:::
+
+::: {.fragment}
+> 🌟 If yesterday made sense, today is *95% the same code*. Pinky promise.
+:::
+
+---
+
+## Setup — load packages 📦
+
+```{r}
+#| echo: true
+#| message: false
+#| warning: false
+library(tidyverse)
+library(tidymodels)
+library(MLearnYRBSS)
+library(janitor)
+library(skimr)
+library(vip)
+library(rpart.plot)
+
+data("riskyBehaviors")
+```
+
+---
+
+## Need to install first? 📦
+
+::: {.callout-note}
+## One-time install
+```r
+pak::pak(c(
+    "tidymodels", "rpart", "rpart.plot",
+    "vip", "janitor", "doParallel",
+    "MLearnYRBSS"
+))
+```
+:::
+
+::: {.fragment}
+> 🌟 `pak` is faster and smarter than `install.packages()` — handles dependencies in parallel.
+:::
+
+---
+
+## 1️⃣ Recode the outcome
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|3|4-9|10|11"
+#| output-location: fragment
+data("riskyBehaviors")
+
+riskyBehaviors_analysis <-
+    riskyBehaviors |>
+    mutate(
+        UsedAlcohol = case_when(
+            AgeFirstAlcohol == 1 ~ 0,
+            AgeFirstAlcohol %in% c(2, 3, 4, 5, 6, 7) ~ 1,
+            .default = NA
+        ),
+        UsedAlcohol = factor(UsedAlcohol)
+    ) |>
+    drop_na(UsedAlcohol) |>
+    select(-c(AgeFirstAlcohol, DaysAlcohol, BingeDrinking,
+              LargestNumberOfDrinks, SourceAlcohol))
+```
+
+---
+
+## Why drop those columns? 🚨
+
+::: {.callout-warning}
+## Avoid data leakage
+`AgeFirstAlcohol`, `DaysAlcohol`, `BingeDrinking`, `LargestNumberOfDrinks`, `SourceAlcohol` are **all about alcohol use**. If we left them in, the tree would just memorize the answer.
+:::
+
+::: {.fragment}
+> 🎯 **Outcome encoding:** `0` = never used alcohol · `1` = has used alcohol.
+:::
+
+# 2️⃣ Split + Resample
+
+## Train / test split — stratified
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|3-6|8-9|11"
+#| output-location: fragment
+set.seed(2023)
+
+alcohol_split <- initial_split(
+    riskyBehaviors_analysis,
+    strata = UsedAlcohol
+)
+
+alcohol_train <- training(alcohol_split)
+alcohol_test <- testing(alcohol_split)
+
+alcohol_split
+```
+
+::: {.fragment}
+::: {.callout-tip}
+## Why `strata =` again?
+Keeps the proportion of `UsedAlcohol` roughly equal in train and test — same logic as Lasso this morning. 🔒
+:::
+:::
+
+---
+
+## Sanity check — class balance
+
+::: {.columns}
+::: {.column width="50%"}
+**Training**
+```{r}
+#| echo: true
+#| output-location: fragment
+alcohol_train |>
+    tabyl(UsedAlcohol) |>
+    adorn_pct_formatting(0) |>
+    adorn_totals()
+```
+:::
+::: {.column width="50%"}
+**Testing**
+```{r}
+#| echo: true
+#| output-location: fragment
+alcohol_test |>
+    tabyl(UsedAlcohol) |>
+    adorn_pct_formatting(0) |>
+    adorn_totals()
+```
+:::
+:::
+
+::: {.fragment}
+> Both sets show the same proportions — `strata =` did its job. ✅
+:::
+
+---
+
+## Cross-validation folds
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|3"
+#| output-location: fragment
+set.seed(2023)
+
+cv_alcohol <- vfold_cv(alcohol_train, v = 10, strata = UsedAlcohol)
+cv_alcohol
+```
+
+::: {.fragment}
+> **10 folds** of the *training* set. Every candidate tree we try will be evaluated on all 10 — the test set stays untouched until the very end.
+:::
+
+# 3️⃣ Recipe + Spec + Workflow
+
+## Recipe (preprocessing)
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1-2|3|4"
+#| output-location: fragment
+alcohol_recipe <-
+    recipe(UsedAlcohol ~ ., data = alcohol_train) |>
+    step_impute_mode(all_nominal_predictors()) |>
+    step_impute_mean(all_numeric_predictors())
+
+alcohol_recipe
+```
+
+::: {.fragment}
+::: {.callout-note}
+## Trees don't need fancy preprocessing
+- ❌ No `step_normalize()` — trees only care about *order*, not scale.
+- ❌ No `step_dummy()` — `rpart` handles factor predictors natively.
+- ✅ Imputation still useful: `rpart` can't split on `NA`.
+:::
+:::
+
+---
+
+## Spec — the **only** thing that changed!
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1-5|6|7|9"
+#| output-location: fragment
+cart_spec <-
+    decision_tree(
+        cost_complexity = tune(), # ⬅️ tune
+        tree_depth = tune(), # ⬅️ tune
+        min_n = tune() # ⬅️ tune
+    ) |>
+    set_engine("rpart") |>
+    set_mode("classification")
+
+cart_spec
+```
+
+::: {.fragment}
+> Yesterday: `logistic_reg(penalty = tune(), mixture = 1) |> set_engine("glmnet")`.
+> Today: same pattern, **different model**. ✨
+:::
+
+---
+
+## Workflow — bundle it 🔗
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2|3|4"
+#| output-location: fragment
+cart_workflow <-
+    workflow() |>
+    add_recipe(alcohol_recipe) |>
+    add_model(cart_spec)
+
+cart_workflow
+```
+
+::: {.fragment}
+> Recipe + spec, neatly packaged. From here on, the code is **identical** to Lasso. ✨
+:::
+
+# 4️⃣ Tune the Tree
+
+## Build the tuning grid
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2|3|4|5"
+#| output-location: fragment
+tree_grid <- grid_regular(
+    cost_complexity(),
+    tree_depth(c(2, 5)),
+    min_n(),
+    levels = 4
+)
+
+tree_grid
+```
+
+---
+
+## Heads up — this can be slow ⏳
+
+::: {.callout-warning}
+## Math of the grid
+- 4 × 4 × 4 = **64 candidates**
+- × 10 folds = **640 model fits** 🤯
+- We'll use `doParallel` to speed it up.
+- On Posit Cloud Free, expect **~3–5 minutes**.
+:::
+
+::: {.fragment}
+> 🌟 **Pro tip:** while learning, set `levels = 3` for a faster turnaround.
+:::
+
+---
+
+## Run the tuning ⚙️
+
+```{r}
+#| echo: true
+#| eval: false
+#| code-line-numbers: "1|3-9|11"
+doParallel::registerDoParallel()
+
+cart_tune <-
+    cart_workflow |>
+    tune_grid(
+        resamples = cv_alcohol,
+        grid = tree_grid,
+        metrics = metric_set(roc_auc),
+        control = control_grid(save_pred = TRUE)
+    )
+
+doParallel::stopImplicitCluster()
+```
+
+```{r}
+#| echo: false
+cart_tune <- readRDS("outputs/cart_tune.rds")
+```
+
+::: {.fragment}
+> 💡 We use **ROC AUC** as the tuning metric — robust to class imbalance, and the same one we used for Lasso. Consistency = sanity.
+:::
+
+---
+
+## Show the best candidates
+
+```{r}
+#| echo: true
+#| output-location: fragment
+show_best(cart_tune, metric = "roc_auc")
+```
+
+::: {.fragment}
+> The top 5 hyperparameter combos, ranked by mean ROC AUC across the 10 folds. 🏆
+:::
+
+---
+
+## Visualize the tuning results
+
+```{r}
+#| echo: true
+#| fig-width: 10
+#| fig-height: 5
+#| output-location: slide
+autoplot(cart_tune)
+```
+
+::: {.fragment}
+> Each panel shows how the metric changes as one knob varies — colored by the others. Look for the sweet spot. 🍯
+:::
+
+---
+
+## Pick the best combo
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1-3"
+#| output-location: fragment
+best_cart <- select_best(cart_tune, metric = "roc_auc")
+
+best_cart
+```
+
+::: {.fragment}
+> One row, the winner candidate. **Don't commit yet** — let's check how it actually performs first. 🤔
+:::
+
+# 5️⃣ Sanity-Check Before Committing
+
+## How does our chosen candidate *actually* do? 🔍
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2|3|4"
+#| output-location: fragment
+cart_workflow |>
+    finalize_workflow(best_cart) |>
+    fit_resamples(resamples = cv_alcohol) |>
+    collect_metrics()
+```
+
+::: {.fragment}
+> An honest, CV-estimated performance for our **single** chosen combo.
+:::
+
+---
+
+## 🔄 This is your decision point!
+
+::: {.incremental}
+- 😀 **Metrics look good** → lock it in, evaluate on test. ✅
+- 😬 **Metrics look bad** → **STOP**. Go back and re-tune. 🛑
+:::
+
+::: {.fragment}
+::: {.callout-warning}
+## 🚨 Important
+Once you commit with `finalize_workflow()` → `last_fit()`, **you've used your test set**. No going back.
+:::
+:::
+
+---
+
+## What does "go back and re-tune" mean? 🔧
+
+::: {.incremental}
+- Try a **wider** or **finer** grid.
+- Add a different **metric** (e.g. `pr_auc` for imbalanced data).
+- Revisit your **recipe** — more imputation? feature engineering?
+- Try **more folds** in your CV.
+- Drop redundant or leaky predictors.
+:::
+
+::: {.fragment}
+> 🌟 **Iterating here is the *job*.** Most "good models" took 5–10 rounds of this loop.
+:::
+
+---
+
+## Looks good? Lock it in 🔒
+
+```{r}
+#| echo: true
+#| output-location: fragment
+cart_final_wf <- finalize_workflow(cart_workflow, best_cart)
+
+cart_final_wf
+```
+
+::: {.fragment}
+> `finalize_workflow()` swaps the `tune()` placeholders for the actual best values. **Now we're committed.** ✅
+:::
+
+# 6️⃣ Evaluate on the Test Set
+
+## `last_fit()` — the magic shortcut ✨
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2-6"
+#| output-location: fragment
+cart_last_fit <-
+    last_fit(
+        cart_final_wf,
+        split   = alcohol_split,
+        metrics = metric_set(accuracy, kap, roc_auc, sensitivity, specificity)
+    )
+
+cart_last_fit
+```
+
+---
+
+## Why `last_fit()` is so cool 🪄
+
+::: {.callout-tip}
+## Same trick as Lasso this morning
+- ✅ Fits on **all** training data
+- ✅ Predicts on the **test** set
+- ✅ Computes metrics — once, honestly
+- ✅ No accidental cheating possible
+:::
+
+::: {.fragment}
+> 🌟 One function, one honest answer. **Use it everywhere.**
+:::
+
+---
+
+## Test-set metrics
+
+```{r}
+#| echo: true
+#| output-location: fragment
+collect_metrics(cart_last_fit)
+```
+
+::: {.fragment}
+> Compare these to the **CV metrics** from the sanity-check slide. If they're in the same ballpark → 🎉 your model generalizes. If test is *much* worse → the tree may have been too tuned to your folds.
+:::
+
+---
+
+## Test-set predictions
+
+```{r}
+#| echo: true
+#| output-location: fragment
+tree_pred <-
+    cart_last_fit |>
+    collect_predictions() |>
+    select(UsedAlcohol, .pred_class, .pred_1, .pred_0)
+
+tree_pred
+```
+
+---
+
+## Confusion matrix
+
+```{r}
+#| echo: true
+#| output-location: fragment
+tree_pred |>
+    conf_mat(truth = UsedAlcohol, estimate = .pred_class) |>
+    autoplot(type = "heatmap")
+```
+
+::: {.fragment}
+> Look at the **off-diagonals** — those are the *kinds* of mistakes your tree makes. Are false positives or false negatives more dangerous for your question?
+:::
+
+---
+
+## ROC curve on the test set
+
+```{r}
+#| echo: true
+#| fig-width: 7
+#| fig-height: 5
+#| output-location: slide
+tree_pred |>
+    roc_curve(truth = UsedAlcohol, .pred_1, event_level = "second") |>
+    autoplot()
+```
+
+::: {.fragment}
+> A curve hugging the **top-left corner** = excellent. The diagonal = random guessing. 🎲
+:::
+
+# 🌟 The Big Reveal
+
+## Visualize the final tree 🌳
+
+```{r}
+#| echo: true
+#| fig-width: 12
+#| fig-height: 6
+#| output-location: slide
+cart_last_fit |>
+    extract_fit_engine() |>
+    rpart.plot(roundint = FALSE, type = 4, extra = 104)
+```
+
+::: {.fragment}
+> **This** is the superpower of trees: a model your collaborator (or PI, or grandma 👵) can read without a stats degree.
+:::
+
+---
+
+## Variable importance with `vip` 🏆
+
+```{r}
+#| echo: true
+#| fig-width: 9
+#| fig-height: 5
+#| output-location: slide
+cart_last_fit |>
+    extract_fit_parsnip() |>
+    vip(num_features = 15)
+```
+
+---
+
+## How to read the `vip` plot 👀
+
+::: {.callout-tip}
+## What you're looking at
+- Each bar = how much that predictor **reduced impurity** across all splits.
+- Predictors **not shown** were never useful enough to make the tree.
+- A free **feature ranking** for your manuscript. 📝
+:::
+
+::: {.fragment}
+> 🌟 `vip` works for **any** `tidymodels` model — Lasso, RF, XGBoost, KNN. Same syntax. ✨
+:::
+
+# 🎯 Your Turn
+
+## Step 1 — Set up your page 📄
+
+In your `ml-template`, open **`models/decision-tree.qmd`** and:
+
+::: {.incremental}
+1. **Load** your data:
+   ```r
+   analysis_data <- rio::import("models/data/analysis_data.rds")
+   ```
+2. Use the **same outcome** you used for logistic regression and Lasso.
+3. Copy your **Lasso pipeline** as a starting point. 📋
+:::
+
+---
+
+## Step 2 — Swap the spec 🔄
+
+::: {.incremental}
+4. Change the spec:
+   ```r
+   decision_tree(
+       cost_complexity = tune(),
+       tree_depth      = tune(),
+       min_n           = tune()
+   ) |>
+       set_engine("rpart") |>
+       set_mode("classification")
+   ```
+5. **Drop** `step_normalize()` and `step_dummy()` — trees don't need them.
+6. Build the tuning grid (start with `levels = 3` for speed).
+:::
+
+---
+
+## Step 3 — Sanity-check, fit, visualize 🌳
+
+::: {.incremental}
+7. Add the **CV sanity-check** with `fit_resamples()` before finalizing.
+8. Add `last_fit()` + confusion matrix + ROC on the test set.
+9. Visualize your tree with **`rpart.plot`** + a **`vip()`** plot.
+10. **Render** your website. 🚀
+:::
+
+::: {.fragment}
+![](https://media.giphy.com/media/Cv1j2hKet0OamdSVFg/giphy.gif){fig-align="center" width="40%"}
+:::
+
+# 🌲 Bridge to Random Forest
+
+## One tree is good. **Five hundred** is better.
+
+::: {.columns}
+::: {.column width="55%"}
+::: {.incremental}
+- A single tree is **interpretable** but **unstable** — small changes in data → very different tree.
+- What if we grew **hundreds** of trees on different bootstrap samples and let them **vote**? 🗳️
+- That's a **Random Forest** — and it usually beats one tree, hands down.
+- After the break, that's exactly what we'll build. 🌲🌲🌲
+:::
+:::
+::: {.column width="45%"}
+![](https://media.giphy.com/media/3o7budMRwZvNGJ3pyE/giphy.gif){fig-align="center"}
+:::
+:::
+
+# 🎁 Wrapping Up
+
+## What you learned this session
+
+::: {.incremental}
+- ✅ A decision tree = a **series of yes/no questions** learned from data.
+- ✅ It picks splits using **entropy** + **information gain**.
+- ✅ Three knobs control its size: **`tree_depth`**, **`min_n`**, **`cost_complexity`**.
+- ✅ The full `tidymodels` flow: split → recipe → spec → workflow → **tune** → finalize → **CV check** → `last_fit()` → metrics → tree plot → `vip`.
+- ✅ Trees are **interpretable** — that's their superpower (and their main reason for existing).
+:::
+
+::: {.fragment}
+> 🌟 You've now seen **three** spec swaps (logistic → Lasso → tree) on the **same** pipeline. Random Forest, XGBoost, and KNN are just **three more spec swaps**. 💪
+:::
+
+---
+
+## Review questions 🧠
+
+::: {.fragment}
+1. Why does a deeper tree usually have **higher variance**?
+:::
+
+::: {.fragment}
+2. What does **`min_n = 1`** do to the tree, and why is it dangerous?
+:::
+
+::: {.fragment}
+3. Why don't trees need `step_normalize()`?
+:::
+
+::: {.fragment}
+4. We compared **CV metrics** vs **test metrics**. What does it mean if they're very different?
+:::
+
+::: {.fragment}
+5. **Bonus**: when would you choose a single tree **on purpose** over a Random Forest? 🤔
+:::
+
+---
+
+## 📚 Want to keep learning?
+
+- 📘 [**Tidy Modeling with R — Ch. 7 Recipes**](https://www.tmwr.org/recipes) — Kuhn & Silge
+- 📘 [**Hands-On ML with R — Decision Trees**](https://bradleyboehmke.github.io/HOML/DT.html)
+- 📘 [**Interpretable ML — Trees**](https://christophm.github.io/interpretable-ml-book/tree.html) — when & why trees beat black boxes
+- 🎥 [**StatQuest — Decision & Classification Trees**](https://www.youtube.com/watch?v=_L39rN6gz7Y) — Josh Starmer at his clearest
+- 🎮 [**MLU-Explain — Decision Trees**](https://mlu-explain.github.io/decision-tree/) — interactive playground
+- 📋 [**`rpart.plot` reference**](http://www.milbo.org/rpart-plot/prp.pdf) — every option for prettier trees
+- 📦 [**`vip` package**](https://koalaverse.github.io/vip/) — feature importance for *any* model
+- 🎥 [**Julia Silge — `tidymodels` screencasts**](https://www.youtube.com/@JuliaSilge) — real datasets, real code
+
+---
+
+## See you after the break! 🌲🌲🌲
+
+![](https://media.giphy.com/media/F9hQLAVhWnL56/giphy.gif){fig-align="center" width="55%"}
+
+> One tree is good. **A forest is better.** 💪

@@ -1,0 +1,927 @@
+---
+title: "K-Nearest Neighbors with `tidymodels` 👯"
+author: "Catalina Cañizares, Ph.D."
+date: today
+format:
+  revealjs:
+    scrollable: true
+    slide-number: true
+    transition: "fade"
+    auto-play-media: true
+    auto-stretch: true
+    footnotes-hover: true
+    code-copy: true
+    css: style.css
+editor_options:
+  chunk_output_type: console
+---
+
+## About This Material
+
+> K-Nearest Neighbors using `tidymodels` © 2024 by Catalina Cañizares is licensed under Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International.
+
+This material is freely available under the Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License.
+
+For more information on this license, please visit: [Creative Commons License](https://creativecommons.org/licenses/by-nc-nd/4.0/)
+
+---
+
+## 🌅 Where we are
+
+::: {.callout-tip}
+## Day 4 — last stretch! 🏁
+- ✅ **Mon:** R + Quarto + your project website.
+- ✅ **Tue:** wrangled YRBS data with `tidyverse`.
+- ✅ **Wed AM:** the **concepts** behind machine learning.
+- ✅ **Wed PM:** logistic regression — your first `tidymodels` pipeline.
+- ✅ **Today AM:** Lasso, Ridge, Elastic Net.
+- ✅ **Today PM #1:** Decision Trees 🌳.
+- ✅ **Today PM #2:** Random Forest + XGBoost 🌲🌲🌲.
+- 👯 **Right now:** **KNN** — one more model.
+- 🚀 **In ~2 hours:** **YOU PUBLISH YOUR PROJECT WEBSITE.** Live URL. Real internet. 🌐
+:::
+
+::: {.fragment}
+> The **last** algorithm of the module. Then we celebrate. 🎉
+:::
+
+---
+
+## 🎯 Objectives
+
+::: {.incremental}
+By the end of this session you will be able to:
+
+1. Explain KNN in **one sentence**: *"Show me your friends and I'll tell you who you are."*
+2. Describe what **distance** and the **K parameter** do.
+3. Know **why scaling matters** for KNN (and why imputation matters).
+4. Apply the **same `tidymodels` pipeline** for the *6th* time. 💪
+5. Build the **`knn.qmd`** page of your project website.
+6. **Publish your website** to Quarto Pub. 🚀
+:::
+
+# 👯 What is KNN?
+
+## The big idea
+
+::: {.columns}
+::: {.column width="55%"}
+::: {.incremental}
+- 📌 To predict a new data point, find its **K nearest neighbors** in the training set.
+- 🗳️ Let those neighbors **vote** on what label to assign.
+- 🎯 That's it. **No model is "trained"** — KNN just memorizes.
+- 🤔 *"Show me your friends and I'll tell you who you are."*
+:::
+:::
+::: {.column width="45%"}
+![](img/knn.png){fig-align="center"}
+:::
+:::
+
+::: {.footer}
+[Machine Learning Basics with KNN](https://towardsdatascience.com/machine-learning-basics-with-the-k-nearest-neighbors-algorithm-6a6e71d01761)
+:::
+
+---
+
+## Visualizing KNN
+
+![](img/knn2.png){fig-align="center" width="65%"}
+
+::: {.fragment}
+> The **green dot** wants to be classified. With **K = 3**, it asks the 3 nearest dots — and goes with the majority. ✅
+:::
+
+::: {.footer}
+[KNN Tutorial — Machine Learning Basics](https://pub.towardsai.net/k-nearest-neighbors-knn-algorithm-tutorial-machine-learning-basics-ml-ec6756d3e0ac)
+:::
+
+---
+
+## How does it measure "near"?
+
+**Euclidean distance** — straight-line distance between two points.
+
+![](img/euclidean_rep.png){fig-align="center" width="55%"}
+
+::: {.fragment}
+> 📏 In 2D it's the Pythagorean theorem. In *p* dimensions, same idea — just more terms.
+:::
+
+::: {.footer}
+[Euclidean distance — Wikipedia](https://en.wikipedia.org/wiki/Euclidean_distance)
+:::
+
+---
+
+## Other distances exist
+
+::: {.callout-note}
+## A small zoo of distances 🦒
+- **Euclidean** — the default, straight-line.
+- **Manhattan** — sum of absolute differences (city-block routes).
+- **Minkowski** — generalizes both (parameter `p`).
+- **Cosine** — angle between vectors (text + recommender systems).
+- **Hamming** — for categorical / string data.
+:::
+
+::: {.fragment}
+> 🌟 In `tidymodels` you can pick via `dist_power` and `weight_func`. Default Euclidean is usually fine.
+:::
+
+# 🎛️ The K parameter
+
+## What does K do?
+
+::: {.columns}
+::: {.column width="50%"}
+**Small K (e.g. K = 1)**
+
+::: {.incremental}
+- Predictions follow every training point exactly. 🌀
+- **Low bias, high variance.**
+- Prone to **overfitting** — and very sensitive to noise.
+:::
+:::
+::: {.column width="50%"}
+**Large K (e.g. K = 100)**
+
+::: {.incremental}
+- Predictions get **smoothed out**. 🧈
+- **High bias, low variance.**
+- Risks **underfitting** — and misses local patterns.
+:::
+:::
+:::
+
+::: {.fragment}
+> 🎯 **The right K is somewhere in between.** That's why we tune it with cross-validation.
+:::
+
+---
+
+## See it in action 🎮
+
+[👉 Open the interactive demo](https://mlu-explain.github.io/knn-classification/)
+
+```{=html}
+<iframe width="1000" height="500" src="https://mlu-explain.github.io/knn-classification/" title="MLU-Explain — KNN"></iframe>
+```
+
+::: {.footer}
+MLU-Explain by Amazon — fantastic free ML visualizations.
+:::
+
+# ⚖️ Pros & Cons
+
+## What KNN is great at
+
+::: {.incremental}
+- 🟢 **Conceptually simple** — easy to explain to non-stats people.
+- 🟢 **No model assumptions** — non-parametric.
+- 🟢 **Works for both classification and regression.**
+- 🟢 **Naturally handles non-linear** decision boundaries.
+- 🟢 Famously good in some applications: **genetics**, **text similarity**, **recommender systems**.
+:::
+
+---
+
+## Where KNN struggles 😬
+
+::: {.incremental}
+- 🔴 **Slow at prediction time** — has to compute distances to *all* training points.
+- 🔴 **Bad with high-dimensional data** — the *curse of dimensionality*.
+- 🔴 **Very sensitive to feature scale** — must `step_normalize()`.
+- 🔴 **Sensitive to imbalanced data** — majority class dominates the votes.
+- 🔴 **Sensitive to outliers and irrelevant features.**
+:::
+
+::: {.fragment}
+> 🌟 **Translation:** KNN needs careful preprocessing. We'll handle scaling and imbalance in the recipe.
+:::
+
+# 💻 KNN with `tidymodels`
+
+## Today's task 🎯
+
+::: {.columns}
+::: {.column width="55%"}
+> **Can KNN predict whether an adolescent has been bullied?** 🧒💔
+
+::: {.incremental}
+- **Outcome**: `Bullying` (binary)
+- **Predictors**: every other risky-behavior item (after dropping leaky ones)
+- **Why KNN?** Last model of the day — and a chance to see how a totally different idea handles the same data.
+:::
+:::
+::: {.column width="45%"}
+![](https://media.giphy.com/media/iFqLTjlvndks0/giphy.gif){fig-align="center"}
+:::
+:::
+
+---
+
+## Same 7 steps you've used 5 times 🔁
+
+::: {.incremental}
+1. **Split** train / test (with `strata =`)
+2. **Resample** with V-fold CV
+3. **Recipe** ← extra care for KNN: **scale + impute + downsample**
+4. **Spec** ← `nearest_neighbor(neighbors = tune())`
+5. **Workflow** = recipe + spec
+6. **Tune** + sanity-check
+7. `finalize_workflow()` → `last_fit()` → metrics
+:::
+
+::: {.fragment}
+> 🌟 **Sixth time's the charm.** You've got this.
+:::
+
+---
+
+## Setup — load packages 📦
+
+```{r}
+#| echo: true
+#| message: false
+#| warning: false
+library(tidyverse)
+library(tidymodels)
+library(MLearnYRBSS)
+library(themis)        # <- for step_downsample()
+library(kknn)
+library(janitor)
+
+data("riskyBehaviors")
+```
+
+---
+
+## Need to install first? 📦
+
+::: {.callout-note}
+## One-time install
+```r
+pak::pak(c(
+    "tidymodels", "kknn", "themis",
+    "janitor", "MLearnYRBSS"
+))
+```
+:::
+
+::: {.fragment}
+> 🌟 `kknn` is the standard KNN engine for `tidymodels`. `themis` adds resampling steps (like `step_downsample()`) for imbalanced data.
+:::
+
+---
+
+## 1️⃣ Recode the outcome
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1-5"
+#| output-location: fragment
+riskyBehaviors_analysis <-
+    riskyBehaviors |>
+    mutate(Bullying = factor(Bullying)) |>
+    drop_na(Bullying) |>
+    select(-c(SourceAlcohol, SourceVaping,
+              contains("Times"), contains("Days"),
+              CyberBullying))
+```
+
+::: {.fragment}
+> `0` = not bullied · `1` = has been bullied. We drop **`CyberBullying`** to avoid leakage and the time-frequency items to keep things clean.
+:::
+
+# 2️⃣ Split + Resample
+
+## Train / test split — stratified
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|3-6|8-9|11"
+#| output-location: fragment
+set.seed(2023)
+
+bullying_split <- initial_split(
+    riskyBehaviors_analysis,
+    strata = Bullying
+)
+
+bullying_train <- training(bullying_split)
+bullying_test  <- testing(bullying_split)
+
+bullying_split
+```
+
+::: {.fragment}
+> 🌟 You know the drill. `strata =` keeps the class balance even.
+:::
+
+---
+
+## Sanity check — class balance
+
+::: {.columns}
+::: {.column width="50%"}
+**Training**
+```{r}
+#| echo: true
+#| output-location: fragment
+bullying_train |>
+    tabyl(Bullying) |>
+    adorn_pct_formatting(0) |>
+    adorn_totals()
+```
+:::
+::: {.column width="50%"}
+**Testing**
+```{r}
+#| echo: true
+#| output-location: fragment
+bullying_test |>
+    tabyl(Bullying) |>
+    adorn_pct_formatting(0) |>
+    adorn_totals()
+```
+:::
+:::
+
+::: {.fragment}
+::: {.callout-warning}
+## 🚨 Class imbalance alert
+Notice the **0 / 1 split** is uneven. KNN is *especially* sensitive to this — it will just keep predicting the majority class.
+We'll fix it in the recipe with `step_downsample()`. 🛠️
+:::
+:::
+
+---
+
+## Cross-validation folds
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|3"
+#| output-location: fragment
+set.seed(2023)
+
+bullying_folds <- vfold_cv(bullying_train, v = 5, strata = Bullying)
+bullying_folds
+```
+
+::: {.fragment}
+> **5 folds** of the *training* set. Each candidate K will be evaluated on all 5.
+:::
+
+# 3️⃣ Recipe + Spec + Workflow
+
+## Recipe — KNN needs special care 🧴
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1-2|3|4|5|6|7|8"
+#| output-location: fragment
+bullying_recipe <-
+    recipe(Bullying ~ ., data = bullying_train) |>
+    step_downsample(Bullying, under_ratio = 1) |>
+    step_zv(all_predictors()) |>
+    step_normalize(all_numeric_predictors()) |>
+    step_impute_mode(all_nominal_predictors()) |>
+    step_impute_mean(all_numeric_predictors()) |>
+    step_dummy(all_nominal_predictors())
+
+bullying_recipe
+```
+
+---
+
+## What each step does 🛠️
+
+::: {.callout-tip}
+## KNN's special-care kit
+- **`step_downsample()`** — randomly drops rows from the majority class to fix imbalance. *(Critical for KNN.)*
+- **`step_zv()`** — drops zero-variance predictors (no info, just noise).
+- **`step_normalize()`** — *mandatory* for KNN. Without it, predictors with bigger units dominate the distance.
+- **`step_impute_*()`** — KNN can't compute distance with `NA`s.
+- **`step_dummy()`** — `kknn` needs numeric predictors only.
+:::
+
+::: {.fragment}
+> 🌟 **Skip `step_normalize()` and your KNN is broken.** Don't ask how I know.
+:::
+
+---
+
+## Spec — `kknn` 👯
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1-3|4-5"
+#| output-location: fragment
+kknn_spec <-
+    nearest_neighbor(
+        neighbors = tune()    # ⬅️ we'll tune K
+    ) |>
+    set_mode("classification") |>
+    set_engine("kknn")
+
+kknn_spec
+```
+
+::: {.fragment}
+> Yesterday: `decision_tree(...)`. This morning: `boost_tree(...)`. Now: `nearest_neighbor(...)`. **Same pattern, different model.** ✨
+:::
+
+---
+
+## Workflow — bundle it 🔗
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2|3|4"
+#| output-location: fragment
+kknn_workflow <-
+    workflow() |>
+    add_recipe(bullying_recipe) |>
+    add_model(kknn_spec)
+
+kknn_workflow
+```
+
+::: {.fragment}
+> Recipe + spec, neatly packaged. **You've done this 5 times now.** 💪
+:::
+
+# 4️⃣ Tune K
+
+## Build the tuning grid
+
+```{r}
+#| echo: true
+#| output-location: fragment
+neighbor_grid <- tibble(neighbors = c(1, 3, 5, 7, 11, 15, 21, 31, 51))
+neighbor_grid
+```
+
+::: {.fragment}
+::: {.callout-tip}
+## Why **odd** numbers?
+With binary classification + odd K, you can never get a tie vote. 🗳️
+:::
+:::
+
+---
+
+## Run the tuning ⚙️
+
+```{r}
+#| echo: true
+#| cache: true
+#| code-line-numbers: "1|3|5-9|11"
+#| output-location: fragment
+doParallel::registerDoParallel()
+
+set.seed(2023)
+
+knn_tune <- tune_grid(
+    kknn_workflow,
+    resamples = bullying_folds,
+    grid      = neighbor_grid,
+    metrics   = metric_set(roc_auc, accuracy)
+)
+
+doParallel::stopImplicitCluster()
+```
+
+::: {.fragment}
+> KNN tuning is **fast** — no model is actually trained, just distances are computed. ⚡
+:::
+
+---
+
+## Show the best K
+
+```{r}
+#| echo: true
+#| output-location: fragment
+show_best(knn_tune, metric = "roc_auc")
+```
+
+::: {.fragment}
+> Top 5 K values, ranked by mean ROC AUC across the 5 folds. 🏆
+:::
+
+---
+
+## Visualize the tuning results
+
+```{r}
+#| echo: true
+#| fig-width: 9
+#| fig-height: 4.5
+#| output-location: slide
+autoplot(knn_tune)
+```
+
+::: {.fragment}
+> 📈 ROC AUC vs K. Look for the **plateau** before performance starts to drop.
+:::
+
+---
+
+## Pick the best K
+
+```{r}
+#| echo: true
+#| output-location: fragment
+best_k <- select_best(knn_tune, metric = "roc_auc")
+best_k
+```
+
+::: {.fragment}
+> One number — our winning K. **Don't commit yet** — let's check it first. 🤔
+:::
+
+# 5️⃣ Sanity-Check Before Committing
+
+## How does our chosen K *actually* do? 🔍
+
+```{r}
+#| echo: true
+#| cache: true
+#| code-line-numbers: "1|2|3|4"
+#| output-location: fragment
+kknn_workflow |>
+    finalize_workflow(best_k) |>
+    fit_resamples(resamples = bullying_folds) |>
+    collect_metrics()
+```
+
+::: {.fragment}
+> An honest, CV-estimated performance for our **single** chosen K.
+:::
+
+---
+
+## 🔄 Decision point — last time today!
+
+::: {.incremental}
+- 😀 **Metrics look good** → lock it in, evaluate on test. ✅
+- 😬 **Metrics look bad** → **STOP**. Re-tune. 🛑
+:::
+
+::: {.fragment}
+::: {.callout-warning}
+## 🚨 Important
+Once you commit with `last_fit()`, **you've used your test set**. No going back.
+:::
+:::
+
+---
+
+## Looks good? Lock it in 🔒
+
+```{r}
+#| echo: true
+#| output-location: fragment
+final_wf <- finalize_workflow(kknn_workflow, best_k)
+
+final_wf
+```
+
+::: {.fragment}
+> Best K plugged in. **Ready for the test set.** ✅
+:::
+
+# 6️⃣ Evaluate on the Test Set
+
+## `last_fit()` — for the **6th** time today ✨
+
+```{r}
+#| echo: true
+#| cache: true
+#| code-line-numbers: "1|2-6"
+#| output-location: fragment
+bullying_last_fit <- last_fit(
+    final_wf,
+    split   = bullying_split,
+    metrics = metric_set(accuracy, kap, roc_auc, sensitivity, specificity)
+)
+
+bullying_last_fit
+```
+
+::: {.fragment}
+> Same magic as Lasso, Trees, RF, XGBoost — fits on train, predicts on test, computes metrics honestly. 🪄
+:::
+
+---
+
+## Test-set metrics
+
+```{r}
+#| echo: true
+#| output-location: fragment
+collect_metrics(bullying_last_fit)
+```
+
+::: {.fragment}
+> Compare to your **CV sanity-check** metrics. Same ballpark = your KNN generalizes. 🎉
+:::
+
+---
+
+## Test-set predictions
+
+```{r}
+#| echo: true
+#| output-location: fragment
+predictions_testing <-
+    bullying_last_fit |>
+    collect_predictions() |>
+    select(-.row, -.config)
+
+predictions_testing
+```
+
+---
+
+## Confusion matrix
+
+```{r}
+#| echo: true
+#| fig-width: 7
+#| fig-height: 5
+#| output-location: slide
+predictions_testing |>
+    conf_mat(truth = Bullying, estimate = .pred_class) |>
+    autoplot(type = "heatmap")
+```
+
+::: {.fragment}
+> Look at the **off-diagonals** — what kind of mistakes is your KNN making?
+:::
+
+---
+
+## ROC curve on the test set
+
+```{r}
+#| echo: true
+#| fig-width: 7
+#| fig-height: 5
+#| output-location: slide
+predictions_testing |>
+    roc_curve(truth = Bullying, .pred_1, event_level = "second") |>
+    autoplot()
+```
+
+::: {.fragment}
+> Top-left corner = good. Diagonal = random guessing. 🎲
+:::
+
+---
+
+## Make sure your metrics are *interpretable* 🧠
+
+```{r}
+#| echo: true
+#| output-location: fragment
+multi_metric <- metric_set(sensitivity, specificity, accuracy, kap)
+
+multi_metric(
+    predictions_testing,
+    truth = Bullying,
+    estimate = .pred_class,
+    event_level = "second"
+)
+```
+
+::: {.fragment}
+> 🎯 With imbalanced outcomes, **don't trust accuracy alone**. Sensitivity and specificity tell the real story.
+:::
+
+# 🎯 Your Turn
+
+## Step 1 — Set up your KNN page 📄
+
+In your `ml-template`, open **`models/knn.qmd`** and:
+
+::: {.incremental}
+1. **Load** your data:
+   ```r
+   analysis_data <- rio::import("models/data/analysis_data.rds")
+   ```
+2. Use the **same outcome** as in your other models.
+3. Copy your **decision-tree pipeline** as a starting point. 📋
+:::
+
+---
+
+## Step 2 — Make KNN-friendly choices 🛠️
+
+::: {.incremental}
+4. Update the recipe:
+   ```r
+   step_downsample(<outcome>, under_ratio = 1) |>
+   step_zv(all_predictors()) |>
+   step_normalize(all_numeric_predictors()) |>
+   step_impute_mode(all_nominal_predictors()) |>
+   step_impute_mean(all_numeric_predictors()) |>
+   step_dummy(all_nominal_predictors())
+   ```
+5. Swap the spec:
+   ```r
+   nearest_neighbor(neighbors = tune()) |>
+       set_engine("kknn") |>
+       set_mode("classification")
+   ```
+:::
+
+---
+
+## Step 3 — Tune, sanity-check, last_fit 🚀
+
+::: {.incremental}
+6. Build the K grid (try `c(1, 3, 5, 7, 11, 15, 21, 31, 51)`).
+7. **CV sanity-check** with `fit_resamples()`.
+8. `last_fit()` + confusion matrix + ROC.
+9. **Render** your website. 🌐
+:::
+
+::: {.fragment}
+![](https://media.giphy.com/media/yd4RuS9h1YAO4/giphy.gif){fig-align="center" width="35%"}
+:::
+
+# 🚀 The Big Moment — PUBLISH!
+
+## You're done with code. Now we go LIVE. 🌐
+
+::: {.columns}
+::: {.column width="55%"}
+::: {.incremental}
+- Every model page ✅
+- About me page ✅
+- Dataset & question page ✅
+- A `_quarto.yml` that ties it together ✅
+- **One command** stands between you and a public URL.
+:::
+:::
+::: {.column width="45%"}
+![](https://media.giphy.com/media/9GDMRlL4lqFO0/giphy.gif){fig-align="center"}
+:::
+:::
+
+---
+
+## Step 1 — Render the whole site 🎨
+
+In your project root, open the **Terminal** tab in RStudio and run:
+
+```bash
+quarto render
+```
+
+Or in R:
+
+```r
+quarto::quarto_render()
+```
+
+::: {.fragment}
+::: {.callout-tip}
+## What happened?
+A `_site/` folder appeared. Open `_site/index.html` in a browser — that's your **whole website**, ready to share.
+:::
+:::
+
+---
+
+## Step 2 — Make a Quarto Pub account 🆔
+
+1. Go to **[quartopub.com](https://quartopub.com)**.
+2. Click **Sign up** (use your GitHub account — easiest).
+3. Done. ✅
+
+::: {.fragment}
+> 🌟 100% free. No credit card. No catch.
+:::
+
+---
+
+## Step 3 — Publish it! 🚀
+
+In the Terminal:
+
+```bash
+quarto publish quarto-pub
+```
+
+::: {.fragment}
+The first time, Quarto will:
+
+1. Open your browser to **authorize** Quarto Pub.
+2. Ask you to **name** your project.
+3. Upload everything and give you a **public URL**.
+:::
+
+::: {.fragment}
+::: {.callout-tip}
+## Your URL will look like
+`https://YOUR-USERNAME.quarto.pub/your-project-name/`
+:::
+:::
+
+---
+
+## Step 4 — Share with the world 🌍
+
+::: {.incremental}
+- 📱 Copy the URL. Paste it into your **CV**, your **LinkedIn**, your **grad school application**.
+- 👨‍👩‍👧 Send it to your **family**. They've been asking what you've been doing all week.
+- 🎓 Send it to your **PI**.
+- 🐦 Tweet it. Tag `#tidymodels` `#rstats` and we'll cheer for you.
+:::
+
+::: {.fragment}
+> 🌟 Re-rendering and re-publishing is just `quarto publish` again. Iterate forever.
+:::
+
+# 🎁 Wrapping Up
+
+## What you accomplished this week 🏆
+
+::: {.incremental}
+- ✅ Wrote your **first R code** (or got way better at it).
+- ✅ Built a **reproducible Quarto website** from scratch.
+- ✅ **Wrangled** real survey data with `tidyverse`.
+- ✅ Understood **the core ideas** of machine learning.
+- ✅ Trained **6 different models** with `tidymodels`:
+  *logistic, Lasso, Decision Tree, Random Forest, XGBoost, KNN*.
+- ✅ Honestly **evaluated** them on a held-out test set.
+- ✅ **Published a public URL** you can put on your CV. 🌐
+:::
+
+::: {.fragment}
+> 💜 You're now a **data scientist**. Welcome to the club.
+:::
+
+---
+
+## What you learned about KNN
+
+::: {.incremental}
+- ✅ KNN classifies a point by asking its **K nearest neighbors** to vote.
+- ✅ It needs **scaled features** and **balanced classes** to work well.
+- ✅ K is a **hyperparameter** — tune it with cross-validation.
+- ✅ Same **`tidymodels`** pipeline as everything else this week — only the spec changed.
+:::
+
+::: {.fragment}
+> 🌟 You've now seen the **same pipeline 6 times**. The 7th model (one you teach yourself someday) will feel like nothing.
+:::
+
+---
+
+## Review questions 🧠
+
+::: {.fragment}
+1. Why is `step_normalize()` essentially **mandatory** for KNN?
+:::
+
+::: {.fragment}
+2. What does choosing `K = 1` do to the bias-variance trade-off?
+:::
+
+::: {.fragment}
+3. Why use **odd** values of K?
+:::
+
+::: {.fragment}
+4. KNN is sensitive to imbalanced data. **What did we do about it** in the recipe?
+:::
+
+::: {.fragment}
+5. **Bonus**: when would you choose KNN over a Random Forest? When would you not? 🤔
+:::
+
+---
+
+## 📚 Want to keep learning?
+
+- 📘 [**Tidy Modeling with R**](https://www.tmwr.org/) — Kuhn & Silge (the bible)
+- 📘 [**Hands-On ML with R**](https://bradleyboehmke.github.io/HOML/) — Boehmke & Greenwell
+- 📘 [**Interpretable ML**](https://christophm.github.io/interpretable-ml-book/) — Christoph Molnar
+- 🎮 [**MLU-Explain — KNN**](https://mlu-explain.github.io/knn-classification/)
+- 🎥 [**StatQuest — KNN**](https://www.youtube.com/watch?v=HVXime0nQeI) — Josh Starmer
+- 📦 [**`themis` package**](https://themis.tidymodels.org/) — every imbalance fix you'll ever need
+- 🎥 [**Julia Silge — `tidymodels` screencasts**](https://www.youtube.com/@JuliaSilge) — never run out of ideas
+
+---
+
+## You did it!! 🎉🎉🎉
+
+![](https://media.giphy.com/media/9GDMRlL4lqFO0/giphy.gif){fig-align="center" width="55%"}
+
+> **Now go publish your website.** I want the URL. 💜

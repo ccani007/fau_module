@@ -1,6 +1,15 @@
+# RStudio
 .Rproj.user
 .Rhistory
 .RData
 .Ruserdata
+
+# Rendered output
 *html
+*_files/
+_site/
+_freeze/
+.quarto/
+
+# Local images folder
 /img

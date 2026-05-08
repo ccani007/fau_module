@@ -1,0 +1,1071 @@
+---
+title: "Random Forest & XGBoost with `tidymodels` 🌲🌲🌲"
+author: "Catalina Cañizares, Ph.D."
+date: today
+format:
+  revealjs:
+    scrollable: true
+    slide-number: true
+    transition: "fade"
+    auto-play-media: true
+    auto-stretch: true
+    footnotes-hover: true
+    code-copy: true
+    css: style.css
+editor_options:
+  chunk_output_type: console
+---
+
+## About This Material
+
+> Random Forest & XGBoost using `tidymodels` © 2024 by Catalina Cañizares is licensed under Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International.
+
+This material is freely available under the Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License.
+
+For more information on this license, please visit: [Creative Commons License](https://creativecommons.org/licenses/by-nc-nd/4.0/)
+
+---
+
+## 🌅 Where we are
+
+::: {.callout-tip}
+## Day 4 — late afternoon
+- ✅ **Mon:** R + Quarto + your project website.
+- ✅ **Tue:** wrangled YRBS data with `tidyverse`.
+- ✅ **Wed AM:** the **concepts** behind machine learning.
+- ✅ **Wed PM:** logistic regression — your first `tidymodels` pipeline.
+- ✅ **Today AM:** Lasso & friends.
+- ✅ **Today PM #1:** Decision Trees 🌳.
+- 🌲 **Right now:** Random Forest + XGBoost — **ensembles of trees**.
+- 👯 **Next:** KNN — and then you publish! 🚀
+:::
+
+::: {.fragment}
+> One tree was good. **Five hundred** trees, voting together, are usually better. ✨
+:::
+
+---
+
+## 🎯 Objectives
+
+::: {.incremental}
+By the end of this session you will be able to:
+
+1. Explain why an **ensemble** of weak models often beats one strong model.
+2. Tell **bagging** and **boosting** apart in one sentence.
+3. Build a **Random Forest** with `tidymodels` end-to-end.
+4. Build an **XGBoost** with `tidymodels` end-to-end.
+5. Honestly **compare** the two on the same test set.
+6. Read a **variable importance** plot.
+7. Build the **`random-forest.qmd`** and **`xgboost.qmd`** pages of your project.
+:::
+
+# 🧠 Developing the intuition
+
+## A quick game 🎮
+
+::: {.columns}
+::: {.column width="50%"}
+**INDIVIDUALLY** — no Google, no neighbor, no AI. 👀
+
+> How many people attended the **last Taylor Swift concert** at Acrisure Stadium, Pittsburgh, during the Eras Tour?
+
+![](img/game.png){.absolute width=200 height=200}
+:::
+::: {.column width="50%"}
+![](https://media.giphy.com/media/cInyFHymgymsKA3jHi/giphy.gif){fig-align="center"}
+
+[👉 Submit your guess](https://YOUR-USERNAME.shinyapps.io/wisdom-of-crowds/)
+:::
+:::
+
+::: {.fragment}
+> 🌟 **Heads up to instructor:** open the same URL with `?admin=true` in another tab to access the *Reveal* and *Reset* buttons.
+:::
+
+---
+
+## The reveal 🎤
+
+![](img/taylor.png){fig-align="center"}
+
+::: {.fragment}
+> 🌟 **No single person** got it right. But the **average of everyone's guesses** is shockingly close to the truth.
+:::
+
+---
+
+## The Condorcet Jury Theorem 🏛️
+
+::: {.incremental}
+- 🗳️ If each "voter" is **more than 50% correct** on average…
+- ➕ Adding **more voters** *increases* the probability that the **majority** is correct.
+- 🌳 Replace "voter" with "decision tree" → **Random Forest**.
+- 🚀 Replace "voter" with "weak learner that learns from prior mistakes" → **Boosting / XGBoost**.
+:::
+
+::: {.fragment}
+> 🎯 **The whole game today:** combine many imperfect models to make one excellent prediction.
+:::
+
+# 🌳 Two flavors of ensemble
+
+## Bagging vs Boosting
+
+::: {.panel-tabset}
+
+### 🪣 Bagging
+::: {.incremental}
+- "Bootstrap **AGG**regat**ING**".
+- Train **many** trees on **different bootstrap samples** of the data.
+- Trees grow **independently** — in parallel.
+- **Average their votes** for the final prediction.
+- 🌳 **Random Forest** = bagging + random feature selection at each split.
+:::
+
+### 🚀 Boosting
+::: {.incremental}
+- Train trees **one at a time**, **sequentially**.
+- Each new tree focuses on the **mistakes** of the previous ones.
+- Trees are usually **shallow** ("weak learners").
+- Together they form a **strong learner**.
+- 🚀 **XGBoost** = the most popular boosting implementation.
+:::
+
+### 🥞 Stacking (bonus)
+::: {.incremental}
+- Train **different types** of models (a tree, a Lasso, a KNN…).
+- Train a **meta-model** that learns how to combine their predictions.
+- Powerful but complex — beyond today's scope.
+:::
+
+:::
+
+# 🌳🌲🌴 Random Forest
+
+## How a Random Forest works
+
+::: {.incremental}
+1. **Bootstrap**: draw a random sample (with replacement) from the training set.
+2. **Grow** a decision tree on that sample — but at each split, only consider a **random subset** of predictors.
+3. **Repeat** steps 1–2 hundreds of times.
+4. To predict a new case → **every tree votes**, take the majority (classification) or average (regression).
+:::
+
+::: {.fragment}
+::: {.callout-tip}
+## Why "random" twice?
+- **Random** rows → bootstrap samples decorrelate the trees.
+- **Random** columns → no single dominant predictor takes over every tree.
+- More decorrelation = lower variance = better generalization. 🎯
+:::
+:::
+
+---
+
+## See it in action 🎮
+
+> Build a Random Forest to classify if a road sign is a pedestrian crossing — using size, sides, colors, and text/symbol.
+
+[👉 Open the interactive demo](https://mlu-explain.github.io/random-forest/)
+
+```{=html}
+<iframe width="1000" height="500" src="https://mlu-explain.github.io/random-forest/" title="MLU-Explain — Random Forest"></iframe>
+```
+
+::: {.footer}
+MLU-Explain by Amazon — fantastic free ML visualizations.
+:::
+
+# 💻 Random Forest with `tidymodels`
+
+## Today's task 🎯
+
+::: {.columns}
+::: {.column width="55%"}
+> **Same question as the Trees session — does a Random Forest do better?** 🌳 vs 🌲🌲🌲
+
+::: {.incremental}
+- **Outcome**: `UsedAlcohol` (binary)
+- **Predictors**: every other risky-behavior item
+- **Why an ensemble?** Decorrelated trees + averaging = **lower variance** than a single tree.
+- We'll keep the **same split** so we can compare apples-to-apples.
+:::
+:::
+::: {.column width="45%"}
+![](https://media.giphy.com/media/JzujPK0id34qI/giphy.gif){fig-align="center"}
+:::
+:::
+
+---
+
+## Setup — load packages 📦
+
+```{r}
+#| echo: true
+#| message: false
+#| warning: false
+library(tidyverse)
+library(tidymodels)
+library(MLearnYRBSS)
+library(janitor)
+library(skimr)
+library(vip)
+
+data("riskyBehaviors")
+```
+
+---
+
+## Need to install first? 📦
+
+::: {.callout-note}
+## One-time install
+```r
+pak::pak(c(
+    "tidymodels", "ranger", "xgboost",
+    "vip", "janitor", "doParallel",
+    "MLearnYRBSS"
+))
+```
+:::
+
+::: {.fragment}
+> 🌟 `ranger` is the fastest Random Forest engine in R. `xgboost` is the standard for boosting.
+:::
+
+---
+
+## 1️⃣ Recode the outcome
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1-3|4-9|10|11"
+#| output-location: fragment
+riskyBehaviors_analysis <-
+    riskyBehaviors |>
+    mutate(
+        UsedAlcohol = case_when(
+            AgeFirstAlcohol == 1 ~ 0,
+            AgeFirstAlcohol %in% c(2, 3, 4, 5, 6, 7) ~ 1,
+            .default = NA
+        ),
+        UsedAlcohol = factor(UsedAlcohol)
+    ) |>
+    drop_na(UsedAlcohol) |>
+    select(-c(AgeFirstAlcohol, DaysAlcohol, BingeDrinking,
+              LargestNumberOfDrinks, SourceAlcohol))
+```
+
+---
+
+## Why drop those columns? 🚨
+
+::: {.callout-warning}
+## Avoid data leakage
+The dropped columns are **all about alcohol use**. If we left them in, the model would just memorize the answer.
+:::
+
+::: {.fragment}
+> 🎯 **Outcome encoding:** `0` = never · `1` = has used alcohol.
+:::
+
+# 2️⃣ Split + Resample
+
+## Train / test split — stratified
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|3-6|8-9|11"
+#| output-location: fragment
+set.seed(2023)
+
+alcohol_split <- initial_split(
+    riskyBehaviors_analysis,
+    strata = UsedAlcohol
+)
+
+alcohol_train <- training(alcohol_split)
+alcohol_test  <- testing(alcohol_split)
+
+alcohol_split
+```
+
+::: {.fragment}
+> 🌟 **Same seed, same split** as the Trees session — so we can directly compare RF vs single tree at the end.
+:::
+
+---
+
+## Sanity check — class balance
+
+::: {.columns}
+::: {.column width="50%"}
+**Training**
+```{r}
+#| echo: true
+#| output-location: fragment
+alcohol_train |>
+    tabyl(UsedAlcohol) |>
+    adorn_pct_formatting(0) |>
+    adorn_totals()
+```
+:::
+::: {.column width="50%"}
+**Testing**
+```{r}
+#| echo: true
+#| output-location: fragment
+alcohol_test |>
+    tabyl(UsedAlcohol) |>
+    adorn_pct_formatting(0) |>
+    adorn_totals()
+```
+:::
+:::
+
+::: {.fragment}
+> Both sets have the same proportions. ✅
+:::
+
+---
+
+## Cross-validation folds
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|3"
+#| output-location: fragment
+set.seed(2023)
+
+cv_alcohol <- vfold_cv(alcohol_train, v = 5, strata = UsedAlcohol)
+cv_alcohol
+```
+
+::: {.fragment}
+> **5 folds** today (instead of 10) because Random Forest + XGBoost are **slower** to fit than a single tree. Time matters. ⏱️
+:::
+
+# 3️⃣ Recipe + Spec + Workflow
+
+## Recipe (preprocessing)
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1-2|3|4|5"
+#| output-location: fragment
+alcohol_recipe <-
+    recipe(UsedAlcohol ~ ., data = alcohol_train) |>
+    step_impute_mode(all_nominal_predictors()) |>
+    step_impute_mean(all_numeric_predictors()) |>
+    step_dummy(all_nominal_predictors())
+
+alcohol_recipe
+```
+
+::: {.fragment}
+> 🌟 No `step_normalize()` — like single trees, ensembles only care about *order*, not scale.
+:::
+
+---
+
+## Random Forest spec — `ranger` 🌲
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1-5|6|7-9"
+#| output-location: fragment
+ranger_spec <-
+    rand_forest(
+        mtry  = tune(),     # ⬅️ # of predictors sampled at each split
+        min_n = tune(),     # ⬅️ minimum rows to keep splitting
+        trees = 100         # forest size (fixed, not tuned)
+    ) |>
+    set_mode("classification") |>
+    set_engine("ranger",
+               importance = "permutation")  # ⬅️ for vip() later
+
+ranger_spec
+```
+
+---
+
+## What are we tuning? 🎛️
+
+::: {.callout-tip}
+## Two main knobs
+- **`mtry`** = how many predictors to consider at each split.
+  - Small `mtry` → more decorrelation between trees → lower variance.
+- **`min_n`** = minimum rows to split a node.
+  - Larger `min_n` → shallower trees, less overfitting.
+- **`trees`** is **fixed** at 100 — more trees rarely hurt, just slower.
+:::
+
+::: {.fragment}
+> 🌟 `importance = "permutation"` lets `vip` rank predictors later. **Don't skip it.**
+:::
+
+---
+
+## Workflow — bundle it 🔗
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2|3|4"
+#| output-location: fragment
+ranger_workflow <-
+    workflow() |>
+    add_recipe(alcohol_recipe) |>
+    add_model(ranger_spec)
+
+ranger_workflow
+```
+
+::: {.fragment}
+> Recipe + spec, neatly packaged. Identical pattern to Lasso and Trees. ✨
+:::
+
+# 4️⃣ Tune the Forest
+
+## Run the tuning ⚙️
+
+```{r}
+#| echo: true
+#| eval: false
+#| code-line-numbers: "1|3|5-9|11"
+doParallel::registerDoParallel()
+
+set.seed(46257)
+
+ranger_tune <-
+    tune_grid(
+        ranger_workflow,
+        resamples = cv_alcohol,
+        grid = 11    # ⬅️ tidymodels picks 11 sensible combos for us
+    )
+
+doParallel::stopImplicitCluster()
+```
+
+```{r}
+#| echo: false
+ranger_tune <- readRDS("outputs/ranger_tune.rds")
+```
+
+---
+
+## About `grid = 11` 🎲
+
+::: {.callout-tip}
+## A shortcut you'll love
+- Instead of `grid_regular()`, just pass an **integer** to `tune_grid()`.
+- `tidymodels` auto-generates that many sensible candidate combos.
+- 🌟 Great for a **first pass**. Switch to a real grid later if needed.
+:::
+
+::: {.fragment}
+> 11 candidates × 5 folds × 100 trees = **5,500 tree fits**. Worth using `doParallel`. 🚀
+:::
+
+---
+
+## Show the best candidates
+
+```{r}
+#| echo: true
+#| output-location: fragment
+show_best(ranger_tune, metric = "roc_auc")
+```
+
+::: {.fragment}
+> Top 5 hyperparameter combos, ranked by mean ROC AUC across the 5 folds. 🏆
+:::
+
+---
+
+## Visualize the tuning results
+
+```{r}
+#| echo: true
+#| fig-width: 10
+#| fig-height: 5
+#| output-location: slide
+autoplot(ranger_tune)
+```
+
+::: {.fragment}
+> Look for where ROC AUC peaks across `mtry` and `min_n`. 🍯
+:::
+
+---
+
+## Pick the best combo
+
+```{r}
+#| echo: true
+#| output-location: fragment
+best_rf <- select_best(ranger_tune, metric = "roc_auc")
+
+best_rf
+```
+
+::: {.fragment}
+> Our winning candidate. **Don't commit yet** — let's check it. 🤔
+:::
+
+# 5️⃣ Sanity-Check Before Committing
+
+## How does our chosen combo *actually* do? 🔍
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2|3|4"
+#| output-location: fragment
+ranger_workflow |>
+    finalize_workflow(best_rf) |>
+    fit_resamples(resamples = cv_alcohol) |>
+    collect_metrics()
+```
+
+::: {.fragment}
+> An honest, CV-estimated performance for our **single** chosen Random Forest.
+:::
+
+---
+
+## 🔄 Decision point — same as before!
+
+::: {.incremental}
+- 😀 **Metrics look good** → lock it in, evaluate on test. ✅
+- 😬 **Metrics look bad** → **STOP**. Re-tune. 🛑
+:::
+
+::: {.fragment}
+::: {.callout-warning}
+## 🚨 Important
+Once you commit with `last_fit()`, **you've used your test set**. No going back.
+:::
+:::
+
+---
+
+## Looks good? Lock it in 🔒
+
+```{r}
+#| echo: true
+#| output-location: fragment
+final_wf <- finalize_workflow(ranger_workflow, best_rf)
+
+final_wf
+```
+
+::: {.fragment}
+> `finalize_workflow()` plugs the winning `mtry` and `min_n` into the workflow. **Committed.** ✅
+:::
+
+# 6️⃣ Evaluate on the Test Set
+
+## `last_fit()` ✨
+
+```{r}
+#| echo: true
+#| eval: false
+#| code-line-numbers: "1|2-6"
+alcohol_last_fit <-
+    last_fit(
+        final_wf,
+        split   = alcohol_split,
+        metrics = metric_set(accuracy, kap, roc_auc, sensitivity, specificity)
+    )
+
+alcohol_last_fit
+```
+
+```{r}
+#| echo: false
+alcohol_last_fit <- readRDS("outputs/alcohol_last_fit.rds")
+```
+
+::: {.fragment}
+> Same pattern you've used 3 times now. Fit on all train, predict on test, compute metrics — once, honestly. 🪄
+:::
+
+---
+
+## Test-set metrics
+
+```{r}
+#| echo: true
+#| output-location: fragment
+collect_metrics(alcohol_last_fit)
+```
+
+::: {.fragment}
+> Compare to your **CV sanity-check** metrics. Same ballpark = your forest generalizes. 🎉
+:::
+
+---
+
+## Test-set predictions
+
+```{r}
+#| echo: true
+#| output-location: fragment
+predictions_testing <-
+    alcohol_last_fit |>
+    collect_predictions() |>
+    select(-.config, -.row)
+
+predictions_testing
+```
+
+---
+
+## Confusion matrix
+
+```{r}
+#| echo: true
+#| fig-width: 7
+#| fig-height: 5
+#| output-location: slide
+predictions_testing |>
+    conf_mat(truth = UsedAlcohol, estimate = .pred_class) |>
+    autoplot(type = "heatmap")
+```
+
+::: {.fragment}
+> Look at the **off-diagonals** — what kind of mistakes is your forest making?
+:::
+
+---
+
+## ROC curve on the test set
+
+```{r}
+#| echo: true
+#| fig-width: 7
+#| fig-height: 5
+#| output-location: slide
+predictions_testing |>
+    roc_curve(truth = UsedAlcohol, .pred_1, event_level = "second") |>
+    autoplot()
+```
+
+::: {.fragment}
+> Top-left corner = good. Diagonal = random guessing. 🎲
+:::
+
+---
+
+## Variable importance 🏆
+
+```{r}
+#| echo: true
+#| fig-width: 9
+#| fig-height: 5
+#| output-location: slide
+alcohol_last_fit |>
+    extract_fit_parsnip() |>
+    vi() |>
+    slice_max(Importance, n = 10) |>
+    ggplot(aes(Importance, fct_reorder(Variable, Importance))) +
+    geom_col(fill = "forestgreen") +
+    labs(y = NULL, title = "Top 10 predictors of UsedAlcohol")
+```
+
+---
+
+## How to read this plot 👀
+
+::: {.callout-tip}
+## What you're looking at
+- Each bar = how much the predictor's **shuffling** hurts the model's ROC AUC.
+- Bigger bar = more **important** for accurate predictions.
+- 🌟 Trees + forests don't give you "directions" (positive/negative) like Lasso — just *importance*.
+:::
+
+::: {.fragment}
+> Want directions? Pair this with a **partial dependence plot** ([`pdp` package](https://bgreenwell.github.io/pdp/)).
+:::
+
+# 🚀 Can it get even better?
+
+## Meet XGBoost
+
+::: {.columns}
+::: {.column width="55%"}
+::: {.incremental}
+- "**Extreme Gradient Boosting**" — the most popular boosting library. 🚀
+- Builds trees **one at a time**, each one fixing the previous one's mistakes.
+- Famous for **winning Kaggle competitions** on tabular data.
+- More knobs to tune. More compute. More risk of overfitting.
+:::
+:::
+::: {.column width="45%"}
+![](https://media.giphy.com/media/B9XXtlIKF8wec/giphy.gif){fig-align="center"}
+:::
+:::
+
+---
+
+## ⚖️ Honest comparison
+
+::: {.callout-warning}
+## XGBoost is *not* always better!
+| | **Random Forest** | **XGBoost** |
+|---|---|---|
+| **Speed** | fast | slower |
+| **Tuning** | 2 knobs | 6+ knobs |
+| **Overfitting** | hard to overfit | **easy** to overfit |
+| **Default performance** | usually good | needs tuning |
+| **Interpretability** | medium | low |
+| **Best when** | quick baseline | you have time + a Kaggle ribbon to win 🏆 |
+:::
+
+::: {.fragment}
+> 🌟 **My rule of thumb:** start with RF. Try XGBoost only if RF isn't enough.
+:::
+
+# 💻 XGBoost — same pipeline, new spec
+
+## XGBoost spec
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1-2|3|4|5|6|7|8-9"
+#| output-location: fragment
+xgb_spec <-
+    boost_tree(
+        trees          = 100,
+        tree_depth     = tune(),
+        min_n          = tune(),
+        loss_reduction = tune(),
+        sample_size    = tune(),
+        mtry           = tune(),
+        learn_rate     = tune()
+    ) |>
+    set_engine("xgboost") |>
+    set_mode("classification")
+
+xgb_spec
+```
+
+---
+
+## Six knobs to tune 😰
+
+::: {.callout-tip}
+## What each knob does
+- **`tree_depth`** — how deep each tree grows
+- **`min_n`** — minimum rows to split
+- **`loss_reduction`** — minimum gain to make a split worthwhile
+- **`sample_size`** — fraction of rows used per tree (subsampling)
+- **`mtry`** — fraction of predictors per tree
+- **`learn_rate`** — how big each tree's contribution is
+:::
+
+::: {.fragment}
+> 🌟 More knobs = more power, but also more compute and more chances to overfit. **Always do the CV sanity-check.**
+:::
+
+---
+
+## Workflow + tuning
+
+```{r}
+#| echo: true
+#| eval: false
+#| code-line-numbers: "1-4|6-15"
+xgb_wf <-
+    workflow() |>
+    add_recipe(alcohol_recipe) |>
+    add_model(xgb_spec)
+
+doParallel::registerDoParallel()
+set.seed(234)
+
+xgb_res <- tune_grid(
+    xgb_wf,
+    resamples = cv_alcohol,
+    grid      = 11,
+    control   = control_grid(save_pred = TRUE)
+)
+
+doParallel::stopImplicitCluster()
+```
+
+```{r}
+#| echo: false
+xgb_wf <-
+    workflow() |>
+    add_recipe(alcohol_recipe) |>
+    add_model(xgb_spec)
+xgb_res <- readRDS("outputs/xgb_res.rds")
+```
+
+::: {.fragment}
+> **11 candidates × 5 folds × 100 trees** = a lot of compute. ☕ Coffee break time.
+:::
+
+---
+
+## Visualize the tuning
+
+```{r}
+#| echo: true
+#| fig-width: 11
+#| fig-height: 6
+#| output-location: slide
+autoplot(xgb_res)
+```
+
+::: {.fragment}
+> 6 knobs → 6 panels. Look for where ROC AUC consistently peaks. 👀
+:::
+
+---
+
+## Pick best + sanity-check
+
+```{r}
+#| echo: true
+#| output-location: fragment
+best_xgb <- select_best(xgb_res, metric = "roc_auc")
+best_xgb
+```
+
+::: {.fragment}
+```{r}
+#| echo: true
+#| output-location: fragment
+xgb_wf |>
+    finalize_workflow(best_xgb) |>
+    fit_resamples(resamples = cv_alcohol) |>
+    collect_metrics()
+```
+:::
+
+::: {.fragment}
+> 🔄 Same decision point: if these look bad → re-tune. Otherwise → commit. ✅
+:::
+
+---
+
+## Finalize + fit XGBoost
+
+```{r}
+#| echo: true
+#| eval: false
+final_wf_xg  <- finalize_workflow(xgb_wf, best_xgb)
+alcohol_fit_xg <- fit(final_wf_xg, alcohol_train)
+```
+
+```{r}
+#| echo: false
+final_wf_xg <- finalize_workflow(xgb_wf, best_xgb)
+alcohol_fit_xg <- readRDS("outputs/alcohol_fit_xg.rds")
+```
+
+::: {.fragment}
+> Now we have **two finalized models** — RF and XGBoost. Let's see who wins on the **test set**. 🥊
+:::
+
+# 🥊 Compare the models
+
+## Predict on the test set
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1-3|5-7"
+#| output-location: fragment
+preds_xgb <-
+    augment(alcohol_fit_xg, alcohol_test) |>
+    select(UsedAlcohol, .pred_class, .pred_1, .pred_0)
+
+preds_rf <-
+    predictions_testing |>
+    select(UsedAlcohol, .pred_class, .pred_1, .pred_0)
+```
+
+::: {.fragment}
+> Both models, same test set, ready to compare. 📊
+:::
+
+---
+
+## ROC curves — head to head
+
+```{r}
+#| echo: true
+#| fig-width: 7
+#| fig-height: 6
+#| output-location: slide
+bind_rows(
+    preds_rf  |> mutate(model = "Random Forest"),
+    preds_xgb |> mutate(model = "XGBoost")
+) |>
+    group_by(model) |>
+    roc_curve(truth = UsedAlcohol, .pred_1, event_level = "second") |>
+    autoplot()
+```
+
+::: {.fragment}
+> Both curves on the **same plot**. Whichever hugs the top-left corner more wins. 🏆
+:::
+
+---
+
+## Test-set metrics — side by side
+
+```{r}
+#| echo: true
+#| output-location: fragment
+multi <- metric_set(accuracy, kap, sensitivity, specificity)
+
+bind_rows(
+    multi(preds_rf,  truth = UsedAlcohol, estimate = .pred_class,
+          event_level = "second") |> mutate(model = "Random Forest"),
+    multi(preds_xgb, truth = UsedAlcohol, estimate = .pred_class,
+          event_level = "second") |> mutate(model = "XGBoost")
+) |>
+    select(model, .metric, .estimate) |>
+    pivot_wider(names_from = .metric, values_from = .estimate)
+```
+
+::: {.fragment}
+> 🌟 Pick your winner based on the metric **that matters for your question** — not just ROC AUC.
+:::
+
+---
+
+## Make sure your metrics are *interpretable* 🧠
+
+::: {.columns}
+::: {.column width="50%"}
+::: {.incremental}
+- **Sensitivity** = % of true positives caught. *(Critical when missing a case is costly — cancer screening.)*
+- **Specificity** = % of true negatives correctly identified. *(Critical when false alarms are costly.)*
+- **Kappa** = agreement adjusted for chance. Robust to imbalance.
+- **Accuracy** = % correct overall. **Misleading with imbalance!**
+:::
+:::
+::: {.column width="50%"}
+![](img/calculator1.png){fig-align="center"}
+[medcalc.org calculator](https://www.medcalc.org/calc/diagnostic_test.php)
+:::
+:::
+
+# 🎯 Your Turn
+
+## Step 1 — Random Forest page 🌲
+
+In your `ml-template`, open **`models/random-forest.qmd`** and:
+
+::: {.incremental}
+1. **Load** your data:
+   ```r
+   analysis_data <- rio::import("models/data/analysis_data.rds")
+   ```
+2. Use the **same outcome** as in your other models.
+3. Copy your **decision-tree pipeline** as a starting point.
+4. **Swap the spec**:
+   ```r
+   rand_forest(mtry = tune(), min_n = tune(), trees = 100) |>
+       set_engine("ranger", importance = "permutation") |>
+       set_mode("classification")
+   ```
+:::
+
+---
+
+## Step 2 — Tune, fit, evaluate 🚀
+
+::: {.incremental}
+5. `tune_grid(grid = 11)` for a quick first pass.
+6. **CV sanity-check** with `fit_resamples()`.
+7. `finalize_workflow()` → `last_fit()`.
+8. Build a **`vip()`** plot.
+9. **Render** your website. 🌐
+:::
+
+::: {.fragment}
+> 🌟 **Bonus:** open **`models/xgboost.qmd`** and do the exact same thing with `boost_tree()`.
+:::
+
+# 👯 Bridge to KNN
+
+## One more model. **Then you publish.** 🚀
+
+::: {.columns}
+::: {.column width="55%"}
+::: {.incremental}
+- We've covered **linear** (Lasso), **tree** (Decision Tree), and **ensemble** (RF, XGBoost) models.
+- Next up: **KNN** — a totally different idea. *"Show me your friends and I'll tell you who you are."* 👯
+- Then: 🎉 **publish your project website** to Quarto Pub.
+:::
+:::
+::: {.column width="45%"}
+![](https://media.giphy.com/media/xUjSOWCndCdECCyOEY/giphy.gif){fig-align="center"}
+:::
+:::
+
+# 🎁 Wrapping Up
+
+## What you learned this session
+
+::: {.incremental}
+- ✅ The **Condorcet Jury Theorem** = why ensembles work.
+- ✅ **Bagging** (parallel, decorrelated trees) → **Random Forest**.
+- ✅ **Boosting** (sequential, error-correcting trees) → **XGBoost**.
+- ✅ Same `tidymodels` pipeline, two new specs.
+- ✅ Honest **head-to-head comparison** on the test set.
+- ✅ XGBoost is **not always** better — choose with your head, not your heart.
+:::
+
+::: {.fragment}
+> 🌟 You've now seen **5 models** on the same pipeline. KNN is just one more. 💪
+:::
+
+---
+
+## Review questions 🧠
+
+::: {.fragment}
+1. Why is `mtry < total predictors` important for a Random Forest?
+:::
+
+::: {.fragment}
+2. What's the **conceptual** difference between bagging and boosting?
+:::
+
+::: {.fragment}
+3. Why is XGBoost **easier to overfit** than a Random Forest?
+:::
+
+::: {.fragment}
+4. If your dataset has **20 rows**, would you choose RF or XGBoost? Why?
+:::
+
+::: {.fragment}
+5. **Bonus**: when would you **not** use any tree-based model? 🤔
+:::
+
+---
+
+## 📚 Want to keep learning?
+
+- 📘 [**Tidy Modeling with R — Ch. 13 Grid Search**](https://www.tmwr.org/grid-search) — Kuhn & Silge
+- 📘 [**Hands-On ML with R — RF & GBMs**](https://bradleyboehmke.github.io/HOML/random-forest.html) — Boehmke & Greenwell
+- 🎮 [**MLU-Explain — Random Forest**](https://mlu-explain.github.io/random-forest/) — interactive
+- 🎥 [**StatQuest — Random Forests**](https://www.youtube.com/watch?v=J4Wdy0Wc_xQ) — Josh Starmer
+- 🎥 [**StatQuest — XGBoost**](https://www.youtube.com/watch?v=OtD8wVaFm6E) — clearest XGBoost explainer
+- 📦 [**`ranger`**](https://imbs-hl.github.io/ranger/) and [**`xgboost`**](https://xgboost.readthedocs.io/) docs
+- 🎥 [**Julia Silge — XGBoost screencast**](https://juliasilge.com/blog/xgboost-tune-volleyball/) — real walkthrough
+
+---
+
+## See you for KNN! 👯
+
+![](https://media.giphy.com/media/o2aNcKCB2VNcs/giphy.gif){fig-align="center" width="55%"}
+
+> **5 down. 1 to go.** Your project website is *almost* ready. 🚀

@@ -1,0 +1,1316 @@
+---
+title: "Session 2 — The Data Jedi Academy: Cleaning Your Data with R and Tidyverse"
+author: "Catalina Cañizares, Ph.D."
+date: today
+format: 
+  revealjs:
+    scrollable: true
+    slide-number: true
+    width: 1600
+    height: 900
+    theme: "simple"
+    echo: false
+    chalkboard: true
+    code-copy: true
+    css: style.css
+editor_options: 
+  chunk_output_type: console
+bibliography: ref.bib
+---
+
+## About This Material
+
+> Session 2 — *The Data Jedi Academy: Cleaning Your Data with R and Tidyverse* © 2024 by Catalina Canizares is licensed under Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International.
+
+This material is freely available under the Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License. Some sections are based on content from two other presentations, which are credited at the end of this presentation.
+
+For more information on this license, please visit: [Creative Commons License](https://creativecommons.org/licenses/by-nc-nd/4.0/)
+
+# **We will go as fast as the slowest person in the room!** 🐢➡️🚀
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+library(skimr)
+library(tidyverse)
+```
+
+::: {.callout-tip}
+## Quick recap from yesterday
+- ✅ You opened your `ml-template` on Posit Cloud
+- ✅ You rendered a Quarto website
+- ✅ You drafted your *About me* and *Dataset* pages
+
+**Today: clean and explore the data so it's ready for modeling on Wednesday.** 🧼
+:::
+
+---
+
+## 🎯 Objectives for Today
+
+::: {.incremental}
+By the end of this session you will be able to:
+
+1. Recognize what a **tidy dataset** looks like (and why it matters).
+2. Use the pipe operator (`|>`) to chain steps fluently.
+3. **Wrangle data** with the core `dplyr` verbs:
+   `count`, `arrange`, `filter`, `select`, `rename`, `mutate`, `summarise`, joins.
+4. Reshape data with `tidyr` (`pivot_longer` / `pivot_wider`).
+5. Make your **first `ggplot`** to visualize what you found.
+6. Apply all of the above to **your own YRBS data** and update your project website.
+:::
+
+# 🌌 Welcome to the `tidyverse`
+
+## What is the tidyverse?
+
+::: {.columns}
+::: {.column width="55%"}
+::: {.incremental}
+- A **collection of R packages** by Hadley Wickham, Mara Averick, and the team at Posit.
+- All of them share the **same grammar**: data goes in, transformed data comes out.
+- If you learn one, you basically know the others.
+- It is the **modern way** to do data science in R.
+:::
+:::
+::: {.column width="45%"}
+![](img/wickham.png){fig-align="center" width="80%"}
+:::
+:::
+
+---
+
+## The packages you'll use most 📦
+
+| Package | What it does |
+|---------|-------------|
+| [**`dplyr`**](https://dplyr.tidyverse.org/) | Wrangle data: filter, select, mutate, summarise |
+| [**`tidyr`**](https://tidyr.tidyverse.org/) | Reshape data: long ↔ wide, separate, unite |
+| [**`ggplot2`**](https://ggplot2.tidyverse.org/) | Make plots |
+| [**`readr`**](https://readr.tidyverse.org/) | Import data (csv, tsv) |
+| [**`tibble`**](https://tibble.tidyverse.org/) | A nicer `data.frame` |
+| [**`stringr`**](https://stringr.tidyverse.org/) | Work with text |
+| [**`forcats`**](https://forcats.tidyverse.org/) | Work with categorical variables (factors) |
+| [**`purrr`**](https://purrr.tidyverse.org/) | Functional programming (loops without loops) |
+
+::: {.fragment}
+**Loading them all at once:**
+
+```r
+library(tidyverse)
+```
+:::
+
+---
+
+## What is *tidy data*?
+
+::: {.columns}
+::: {.column width="50%"}
+::: {.incremental}
+A dataset is **tidy** when:
+
+1. Each **variable** is a column.
+2. Each **observation** is a row.
+3. Each **value** is in its own cell.
+:::
+
+::: {.fragment}
+> Tidy data makes every analysis 10× easier.
+> Untidy data is where most of your time goes. 😩
+:::
+:::
+::: {.column width="50%"}
+![](img/tidydata.png){fig-align="center"}
+:::
+:::
+
+---
+
+## Where does cleaning fit in the workflow?
+
+![](img/data-science-workflow.png){fig-align="center"}
+
+::: {.fragment}
+> 🧼 You'll spend **80% of your time here**. That's normal.
+:::
+
+---
+
+## The tidyverse covers most of it
+
+![](img/data-sciencie-workflow-packages.png){fig-align="center"}
+
+---
+
+## A word about *tibbles* 📋
+
+A **tibble** is just a friendlier `data.frame`. When you load the tidyverse, almost every function returns a tibble.
+
+::: {.columns}
+::: {.column width="50%"}
+**`data.frame` (base R)**
+
+- Prints *everything* (scary on big data)
+- Auto-converts strings to factors (annoying)
+- Partial matching — silent bugs
+:::
+::: {.column width="50%"}
+**`tibble` (tidyverse)**
+
+- Prints only the first 10 rows + tells you the dimensions
+- Never converts strings to factors automatically
+- Tells you when you typo a column name
+:::
+:::
+
+::: {.fragment}
+Don't overthink it — **a tibble is a data.frame with better manners**. You can use them interchangeably.
+:::
+
+# 🪈 The Pipe Operator
+
+## What does the pipe do?
+
+The pipe means **"and then"** — it takes whatever is on the left and feeds it as the *first argument* of the function on the right.
+
+::: {.columns}
+::: {.column width="50%"}
+**Without the pipe** 😵
+
+```r
+arrange(
+  filter(
+    select(starwars, name, height, mass),
+    species == "Human"
+  ),
+  desc(height)
+)
+```
+:::
+::: {.column width="50%"}
+**With the pipe** 😎
+
+```r
+starwars |>
+  select(name, height, mass) |>
+  filter(species == "Human") |>
+  arrange(desc(height))
+```
+:::
+:::
+
+::: {.fragment}
+> Reads like a recipe: *"take starwars, **and then** select these columns, **and then** filter, **and then** arrange."*
+:::
+
+---
+
+## Two pipes exist — use `|>` 🎯
+
+::: {.columns}
+::: {.column width="60%"}
+::: {.incremental}
+- **`|>`** — the **native** R pipe (since R 4.1, 2021). No package needed.
+- **`%>%`** — the **classic** `magrittr` pipe (loaded by `library(tidyverse)`).
+- They do **the same thing** for our purposes.
+- **We'll use `|>` this week.** When you read older code or tutorials, you'll see `%>%` — same idea.
+:::
+
+::: {.fragment}
+**Keyboard shortcut for `|>`:**
+
+- 🍎 Mac: `⌘ + ⇧ + M`
+- 🪟 Windows / Linux: `Ctrl + Shift + M`
+
+(In RStudio: *Tools → Global Options → Code → ✅ Use native pipe operator*)
+:::
+:::
+::: {.column width="40%"}
+![](img/pipe.png)
+
+::: {.fragment}
+::: {.callout-note}
+## Fun fact
+`%>%` lives in a package called **`magrittr`** — a tribute to René Magritte's painting *"The Treachery of Images"* (the famous *"Ceci n'est pas une pipe"*). 🎨
+:::
+:::
+:::
+:::
+
+# 🎬 Meet the Data: Star Wars
+
+## The `starwars` dataset
+
+A built-in dataset that ships with `dplyr` — perfect for learning because everyone knows the characters.
+
+```{r}
+#| echo: true
+starwars
+```
+
+---
+
+## Let's `glimpse()` it
+
+```{r}
+#| echo: true
+glimpse(starwars)
+```
+
+::: {.fragment}
+> 87 characters, 14 variables. Some are numeric (`height`, `mass`), some categorical (`species`, `gender`), some are even *list-columns* (`films`!).
+:::
+
+---
+
+## Or `skim()` for the full profile
+
+```{r}
+#| echo: true
+#| output-location: fragment
+skim(starwars)
+```
+
+# 🛠️ The dplyr Verbs
+
+## Why dplyr?
+
+::: {.incremental}
+- A **grammar of data manipulation**: a small set of *verbs* that do one thing well.
+- Everything chains together with the pipe.
+- Works the same on a tiny tibble *or* a million-row database.
+:::
+
+::: {.fragment}
+**Today's verbs** 👇
+
+::: {.columns}
+::: {.column width="50%"}
+- `count()`
+- `arrange()`
+- `filter()`
+- `select()`
+- `rename()`
+:::
+::: {.column width="50%"}
+- `mutate()` (+ `if_else`, `case_when`)
+- `summarise()` (with `.by`)
+- `*_join()` family
+:::
+:::
+:::
+
+---
+
+## Verb syntax
+
+All verbs follow the same shape:
+
+> **`function(data, argument1, argument2, ...)`**
+
+::: {.fragment}
+But because we use the pipe, the data comes first:
+
+> **`data |> function(argument1, argument2, ...)`**
+
+The pipe automatically passes `data` as the first argument. ✨
+:::
+
+---
+
+## Before we start: let's create a tibble we'll reuse
+
+We'll calculate **BMI** for each character and call the result `starwars_bmi`.
+
+::: {.columns}
+::: {.column width="50%"}
+**Base R 🤢**
+
+```{r}
+#| echo: true
+starwars$bmi <- starwars$mass / (starwars$height / 100)^2
+```
+
+Lots of `$`, lots of repetition.
+:::
+::: {.column width="50%"}
+**Tidyverse 😎**
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2|3|4"
+starwars_bmi <-
+    starwars |>
+    mutate(bmi = mass / (height / 100)^2) |>
+    select(bmi, everything())
+```
+
+Reads like English.
+:::
+:::
+
+```{r}
+#| echo: true
+#| output-location: fragment
+starwars_bmi
+```
+
+# 🔢 `count()` — frequency tables
+
+## Count values in a column
+
+`count()` tells you **how many rows** there are per category. The most useful verb for exploring categorical data.
+
+```{r}
+#| echo: true
+#| output-location: fragment
+starwars |>
+    count(species)
+```
+
+---
+
+## `count()` with `sort = TRUE`
+
+```{r}
+#| echo: true
+#| output-location: fragment
+starwars |>
+    count(species, sort = TRUE)
+```
+
+::: {.fragment}
+> 🧠 Use this on every categorical variable when you start exploring a dataset. It's a 1-liner that catches data-entry errors and class imbalance instantly.
+:::
+
+# 🔃 `arrange()` — order rows
+
+## Arrange ascending
+
+```{r}
+#| echo: true
+#| output-location: fragment
+starwars_bmi |>
+    arrange(bmi)
+```
+
+---
+
+## Arrange descending with `desc()`
+
+```{r}
+#| echo: true
+#| output-location: fragment
+starwars_bmi |>
+    arrange(desc(bmi))
+```
+
+# 🔍 `filter()` — pick rows
+
+## Equal to
+
+```{r}
+#| echo: true
+#| output-location: fragment
+starwars_bmi |>
+    filter(sex == "female")
+```
+
+---
+
+## Not equal to
+
+```{r}
+#| echo: true
+#| output-location: fragment
+starwars_bmi |>
+    filter(sex != "female")
+```
+
+---
+
+## Numeric comparisons
+
+```{r}
+#| echo: true
+#| output-location: fragment
+starwars_bmi |>
+    filter(birth_year >= 112)
+```
+
+---
+
+## Combine conditions
+
+```{r}
+#| echo: true
+#| output-location: fragment
+starwars_bmi |>
+    filter(sex == "male", height > 180) # AND
+```
+
+::: {.fragment}
+```{r}
+#| echo: true
+#| output-location: fragment
+starwars_bmi |>
+    filter(sex == "male" | height > 180) # OR
+```
+:::
+
+---
+
+## ⚠️ NA gotcha
+
+```{r}
+#| echo: true
+#| output-location: fragment
+# This DROPS NAs silently:
+starwars_bmi |> filter(sex == "male") |> nrow()
+```
+
+::: {.fragment}
+```{r}
+#| echo: true
+#| output-location: fragment
+# To explicitly check for missing:
+starwars_bmi |> filter(is.na(sex)) |> nrow()
+```
+:::
+
+::: {.fragment}
+::: {.callout-warning}
+## `==` and `NA`
+`NA == "male"` returns `NA`, **not** `FALSE`. So `filter(sex == "male")` drops missing rows. Always check missingness explicitly with `is.na()`.
+:::
+:::
+
+---
+
+## 🆕 `filter_out()` — drop rows the easy way
+
+::: {.callout-note}
+## New in dplyr 1.2.0 (Feb 2026)
+`filter()` is *designed* for keeping rows. When you want to **drop** rows, use the new `filter_out()` — much clearer and safer with NAs.
+:::
+
+::: {.columns}
+::: {.column width="50%"}
+**The old way 😬**
+
+```r
+patients |> 
+  filter(!(deceased & date < 2012))
+```
+
+Easy to write, easy to get wrong: this **drops `NA`s too**, which you usually don't want.
+:::
+::: {.column width="50%"}
+**The new way 😎**
+
+```r
+patients |> 
+  filter_out(deceased, date < 2012)
+```
+
+Reads like Stata's `drop if`. NAs stay, which is usually what you want when *dropping*.
+:::
+:::
+
+::: {.fragment}
+::: {.callout-tip}
+## When to reach for `filter_out()`
+If you find yourself writing `!=`, `!`, or `!is.na()` to "drop" rows, that's your cue. `filter_out()` was made for exactly that. 📖 [Read more](https://tidyverse.org/blog/2026/02/dplyr-1-2-0/)
+:::
+:::
+
+# ✂️ `select()` — pick columns
+
+## Keep specific columns
+
+```{r}
+#| echo: true
+#| output-location: fragment
+starwars_bmi |>
+    select(name, bmi, sex)
+```
+
+---
+
+## Drop columns with `-`
+
+```{r}
+#| echo: true
+#| output-location: fragment
+starwars_bmi |>
+    select(-bmi)
+```
+
+---
+
+## Chain it together
+
+```{r}
+#| echo: true
+#| output-location: fragment
+starwars_bmi |>
+    select(name, bmi, sex) |>
+    filter(sex == "male") |>
+    arrange(bmi)
+```
+
+# 🏷️ `rename()` — change column names
+
+## Rename columns
+
+```{r}
+#| echo: true
+#| output-location: fragment
+starwars_bmi |>
+    select(name, bmi, sex) |>
+    filter(sex == "male") |>
+    arrange(bmi) |>
+    rename(personaje = name, sexo = sex)
+```
+
+::: {.fragment}
+**Pro tip**: you can rename *inside* `select()`:
+
+```{r}
+#| echo: true
+#| output-location: fragment
+starwars_bmi |>
+    select(personaje = name, sexo = sex, bmi)
+```
+:::
+
+# ☕ Quick break
+
+![](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExcjRkbWhyZGhxcW5nejI4NGhxZG9yZ2Uzb2owMTF5Z2FpcnM2MWlqNyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/GTS1f1dWh4mvkJRUrK/giphy.gif){fig-align="center" width=70%}
+
+# 💜 `mutate()` — create / modify columns
+
+## My personal favorite
+
+`mutate()` adds new variables that are **functions of existing variables**.
+
+```{r}
+#| echo: true
+#| output-location: fragment
+starwars_bmi |>
+    mutate(id = row_number()) |>
+    select(id, name, sex, bmi) |>
+    filter(sex == "male") |>
+    arrange(bmi)
+```
+
+---
+
+## `mutate()` + `if_else()` — binary recodes
+
+```{r}
+#| echo: true
+#| output-location: fragment
+starwars |>
+    mutate(
+        is_blue_eyes = if_else(eye_color == "blue", 1, 0, missing = NA_real_)
+    ) |>
+    select(name, eye_color, is_blue_eyes) |>
+    arrange(desc(is_blue_eyes))
+```
+
+::: {.fragment}
+::: {.callout-tip}
+## Always set `missing = `
+`if_else()` will return `NA` for missing inputs by default. Be explicit so you know what's happening.
+:::
+:::
+
+---
+
+## `mutate()` + `case_when()` — multi-way recodes 💜
+
+`case_when()` lets you handle **many conditions** at once. Each condition is `condition ~ value`.
+
+```{r}
+#| echo: true
+#| output-location: fragment
+starwars |>
+    mutate(
+        is_human = case_when(
+            species == "Human" ~ 1,
+            species != "Human" ~ 0,
+            .default = NA
+        )
+    ) |>
+    select(name, species, is_human)
+```
+
+---
+
+## A more interesting `case_when()`
+
+Categorize BMI into clinical groups:
+
+```{r}
+#| echo: true
+#| output-location: fragment
+starwars_bmi |>
+    mutate(
+        bmi_category = case_when(
+            bmi < 18.5 ~ "Underweight",
+            bmi >= 18.5 & bmi < 25 ~ "Normal weight",
+            bmi >= 25 & bmi < 30 ~ "Overweight",
+            bmi >= 30 & bmi < 35 ~ "Obesity Class I",
+            bmi >= 35 & bmi < 40 ~ "Obesity Class II",
+            bmi >= 40 ~ "Obesity Class III",
+            .default = NA_character_
+        )
+    ) |>
+    select(name, bmi, bmi_category)
+```
+
+::: {.fragment}
+> 🌟 You'll use this exact pattern on **YRBS** to create risk categories.
+:::
+
+---
+
+## 🆕 `recode_values()` — when you're matching values
+
+::: {.callout-note}
+## New in dplyr 1.2.0 (Feb 2026)
+When every condition looks like `column == value ~ ...`, that's a sign you should use **`recode_values()`** instead. It removes the repetition.
+:::
+
+Recoding a Likert score into labels:
+
+::: {.columns}
+::: {.column width="50%"}
+**With `case_when()` 😅**
+
+```r
+likert |> mutate(
+  category = case_when(
+    score == 1 ~ "Strongly disagree",
+    score == 2 ~ "Disagree",
+    score == 3 ~ "Neutral",
+    score == 4 ~ "Agree",
+    score == 5 ~ "Strongly agree"
+  )
+)
+```
+
+`score ==` repeated 5 times. 🙄
+:::
+::: {.column width="50%"}
+**With `recode_values()` ✨**
+
+```r
+likert |> mutate(
+  category = score |> recode_values(
+    1 ~ "Strongly disagree",
+    2 ~ "Disagree",
+    3 ~ "Neutral",
+    4 ~ "Agree",
+    5 ~ "Strongly agree"
+  )
+)
+```
+
+Just the mapping. Clean. 💎
+:::
+:::
+
+::: {.fragment}
+::: {.callout-tip}
+## Bonus: lookup tables
+`recode_values()` also accepts `from = ` and `to = ` arguments, so your mapping can live in a separate tibble (or even a CSV) — perfect for long pipelines or shared reference data.
+:::
+:::
+
+---
+
+## 🆕 `replace_values()` — partial updates the easy way
+
+For when you want to **fix a few values** in a column without touching the rest. Especially great for handling missingness.
+
+```r
+state <- c("NC", "NY", "CA", NA, "NY", "Unknown", NA)
+
+# Replace NAs with a label
+state |> replace_values(NA ~ "Unknown")
+#> [1] "NC"  "NY"  "CA"  "Unknown" "NY" "Unknown" "Unknown"
+
+# Treat "Unknown" as missing
+state |> replace_values("Unknown" ~ NA)
+
+# Standardize multiple problem values at once
+state |> replace_values(c(NA, "Unknown") ~ "<missing>")
+```
+
+::: {.fragment}
+::: {.callout-tip}
+## Why this is great
+Cleaner than `if_else(is.na(state), "Unknown", state)`, type-stable, and **pipe-friendly** (your column is the first argument). 💛
+
+📖 [Full blog post on dplyr 1.2.0 →](https://tidyverse.org/blog/2026/02/dplyr-1-2-0/)
+:::
+:::
+
+# 📊 `summarise()` — collapse rows
+
+## *I always get it wrong the first time* 😒
+
+`summarise()` reduces many rows down to **one row** (or one row per group).
+
+```{r}
+#| echo: true
+#| output-location: fragment
+starwars_bmi |>
+    summarise(
+        mean_bmi = mean(bmi, na.rm = TRUE)
+    )
+```
+
+::: {.fragment}
+::: {.callout-warning}
+## Always `na.rm = TRUE`
+By default, `mean(c(1, 2, NA))` returns `NA`. Use `na.rm = TRUE` so missing values are skipped.
+:::
+:::
+
+---
+
+## Summarise *by group* with `.by =`
+
+```{r}
+#| echo: true
+#| output-location: fragment
+starwars_bmi |>
+    summarise(
+        mean_bmi = mean(bmi, na.rm = TRUE),
+        sd_bmi = sd(bmi, na.rm = TRUE),
+        min = min(bmi, na.rm = TRUE),
+        max = max(bmi, na.rm = TRUE),
+        n = n(),
+        .by = sex
+    )
+```
+
+---
+
+## `.by =` vs `group_by()` — same idea, two flavors
+
+::: {.columns}
+::: {.column width="50%"}
+**Modern (`.by`):**
+
+```r
+starwars_bmi |>
+  summarise(
+    mean_bmi = mean(bmi, na.rm = TRUE),
+    .by = sex
+  )
+```
+
+One step, no leftovers.
+:::
+::: {.column width="50%"}
+**Classic (`group_by`):**
+
+```r
+starwars_bmi |>
+  group_by(sex) |>
+  summarise(
+    mean_bmi = mean(bmi, na.rm = TRUE)
+  ) |>
+  ungroup()
+```
+
+You'll see this everywhere in older code.
+:::
+:::
+
+::: {.fragment}
+> Both work. Pick one. The `.by` version is newer and slightly cleaner.
+:::
+
+---
+
+## Building a summary step by step
+
+**Step 1**: create the BMI categories and save as a new tibble:
+
+```{r}
+#| echo: true
+#| output-location: fragment
+starwars_bmi_cat <-
+    starwars_bmi |>
+    mutate(
+        bmi_category = case_when(
+            bmi < 18.5 ~ "Underweight",
+            bmi >= 18.5 & bmi < 25 ~ "Normal weight",
+            bmi >= 25 & bmi < 30 ~ "Overweight",
+            bmi >= 30 & bmi < 35 ~ "Obesity Class I",
+            bmi >= 35 & bmi < 40 ~ "Obesity Class II",
+            bmi >= 40 ~ "Obesity Class III",
+            .default = NA_character_
+        )
+    ) |>
+    filter(!is.na(bmi_category))
+
+starwars_bmi_cat
+```
+
+::: {.callout-tip}
+## The arrow `<-`
+`object_name <- value` saves the result so you can reuse it. Shortcut: `Option/Alt + -`.
+:::
+
+---
+
+## Step 2: summarize the saved object
+
+```{r}
+#| echo: true
+#| output-location: fragment
+starwars_bmi_cat |>
+    summarise(
+        mean_bmi = mean(bmi, na.rm = TRUE),
+        sd_bmi = sd(bmi, na.rm = TRUE),
+        n = n(),
+        .by = c(bmi_category, species)
+    ) |>
+    arrange(bmi_category, mean_bmi)
+```
+
+---
+
+## Same idea — collapse "Human vs not"
+
+```{r}
+#| echo: true
+#| output-location: fragment
+starwars_bmi_cat |>
+    mutate(
+        is_human = if_else(species == "Human", "Human", "Other", missing = NA)
+    ) |>
+    filter(!is.na(is_human)) |>
+    summarise(
+        mean_bmi = mean(bmi, na.rm = TRUE),
+        sd_bmi = sd(bmi, na.rm = TRUE),
+        n = n(),
+        .by = c(bmi_category, is_human)
+    ) |>
+    arrange(bmi_category)
+```
+
+# 🤝 The `*_join()` Family
+
+## When do you need a join?
+
+When you have **two tables that share an ID** and want to combine them.
+
+| Join | What it returns |
+|------|-----------------|
+| **`left_join(x, y)`** | All rows from `x`, matched rows from `y` |
+| **`right_join(x, y)`** | All rows from `y`, matched rows from `x` |
+| **`inner_join(x, y)`** | Only rows that match in **both** |
+| **`full_join(x, y)`** | All rows from **either** |
+| **`anti_join(x, y)`** | Rows in `x` *not* matched in `y` (great for QC) |
+
+---
+
+## A natural Star Wars example
+
+Imagine the `starwars` data was split across two tables:
+
+::: {.columns}
+::: {.column width="50%"}
+**`sw_basics`** — physical traits
+
+```{r}
+#| echo: true
+sw_basics <- starwars |>
+    select(name, height, mass)
+
+sw_basics
+```
+:::
+::: {.column width="50%"}
+**`sw_origin`** — biographical info
+
+```{r}
+#| echo: true
+sw_origin <- starwars |>
+    select(name, species, homeworld) |>
+    slice(1:60) # only first 60 characters
+
+sw_origin
+```
+:::
+:::
+
+::: {.fragment}
+> Notice: `sw_basics` has **87** characters, `sw_origin` has only **60**. What happens when we join them?
+:::
+
+---
+
+## `left_join()` — keep everyone in the left table
+
+```{r}
+#| echo: true
+#| output-location: fragment
+sw_basics |>
+    left_join(sw_origin, by = "name")
+```
+
+::: {.fragment}
+> Characters not in `sw_origin` get `NA` for species and homeworld.
+:::
+
+---
+
+## `inner_join()` — only matches in both
+
+```{r}
+#| echo: true
+#| output-location: fragment
+sw_basics |>
+    inner_join(sw_origin, by = "name")
+```
+
+::: {.fragment}
+> Drops anyone missing from either table.
+:::
+
+---
+
+## `anti_join()` — find what's missing 🕵️
+
+```{r}
+#| echo: true
+#| output-location: fragment
+sw_basics |>
+    anti_join(sw_origin, by = "name")
+```
+
+::: {.fragment}
+> Use this for **quality control**: which IDs in your survey aren't in your roster?
+:::
+
+# 🔄 Reshaping: `tidyr`
+
+## Long vs. wide data
+
+::: {.columns}
+::: {.column width="50%"}
+**Wide format**
+
+[One row per character — different attributes are different columns.]{.mark}
+
+```{r}
+#| echo: true
+starwars |>
+    select(name, height, mass, hair_color)
+```
+:::
+::: {.column width="50%"}
+**Long format**
+
+[One row per *attribute* — name + variable + value.]{.mark}
+
+```{r}
+#| echo: true
+starwars |>
+    select(name, height, mass, hair_color) |>
+    mutate(across(-name, as.character)) |>
+    pivot_longer(
+        cols = -name,
+        names_to = "attribute",
+        values_to = "value"
+    )
+```
+:::
+:::
+
+---
+
+## Why does this matter? 🤔
+
+::: {.incremental}
+- **`ggplot2`** wants long data for plotting many series at once.
+- **Many models** in `tidymodels` need long format.
+- **Some tables** are easier to read in wide format.
+- Knowing how to flip between them = a superpower. ✨
+:::
+
+---
+
+## `pivot_longer()` — wide → long
+
+```{r}
+#| echo: true
+#| output-location: fragment
+starwars_long <-
+    starwars |>
+    select(name, height, mass, hair_color) |>
+    mutate(across(-name, as.character)) |>
+    pivot_longer(
+        cols = -name,
+        names_to = "attribute",
+        values_to = "value"
+    )
+
+starwars_long
+```
+
+📖 [Documentation](https://tidyr.tidyverse.org/reference/pivot_longer.html)
+
+---
+
+## `pivot_wider()` — long → wide
+
+```{r}
+#| echo: true
+#| output-location: fragment
+starwars_long |>
+    pivot_wider(
+        names_from = attribute,
+        values_from = value
+    )
+```
+
+📖 [Documentation](https://tidyr.tidyverse.org/reference/pivot_wider.html)
+
+# 📈 Bonus: A First Taste of `ggplot2`
+
+## Anatomy of a ggplot
+
+Three pieces:
+
+1. **Data** — the tibble you want to plot
+2. **Aesthetics** (`aes()`) — which columns map to x, y, color, size…
+3. **Geoms** — the type of plot (`geom_point`, `geom_boxplot`, `geom_bar`…)
+
+```r
+ggplot(data, aes(x = ..., y = ...)) +
+  geom_*()
+```
+
+::: {.callout-note}
+## Notice: `+`, not `|>`
+ggplot uses **`+`** to add layers, not the pipe. (One of those quirky things.)
+:::
+
+---
+
+## A boxplot on Star Wars
+
+```{r}
+#| echo: true
+#| output-location: column
+starwars_bmi_cat |>
+    filter_out(sex == "hermaphroditic") |>
+    ggplot(aes(x = sex, y = bmi)) +
+    geom_boxplot(aes(fill = sex), alpha = 0.6) +
+    geom_jitter(width = 0.15, alpha = 0.5) +
+    labs(
+        x = NULL,
+        y = "BMI",
+        title = "BMI by sex in the Star Wars universe"
+    ) +
+    theme_minimal()
+```
+
+---
+
+## A bar chart of counts
+
+```{r}
+#| echo: true
+#| output-location: column
+starwars |>
+    count(species, sort = TRUE) |>
+    slice(1:10) |>
+    ggplot(aes(x = n, y = fct_reorder(species, n))) +
+    geom_col(fill = "steelblue") +
+    labs(
+        x = "Count",
+        y = NULL,
+        title = "Top 10 species in the Star Wars data"
+    ) +
+    theme_minimal()
+```
+
+::: {.fragment}
+> `fct_reorder()` is from `forcats` — sorts the bars by count.
+:::
+
+# 🌍 Now: Land It On YRBS
+
+## From Star Wars to your real project
+
+You just learned the verbs. Now let's apply them to **the dataset for your project**: the YRBS data inside your `ml-template`.
+
+```{r}
+#| echo: true
+#| eval: false
+library(tidyverse)
+library(rio)
+
+# Load the analysis data shipped with your template
+analysis_data <- import("models/data/analysis_data.rds")
+
+glimpse(analysis_data)
+```
+
+::: {.fragment}
+> The verbs are **the same**. Only the data changes. ✨
+:::
+
+---
+
+## Quick demo: `count()` an outcome variable
+
+```{r}
+#| echo: true
+#| eval: false
+analysis_data |>
+    count(SuicideIdeation, sort = TRUE)
+```
+
+```
+# A tibble: 3 × 2
+  SuicideIdeation     n
+  <chr>           <int>
+1 No               9215
+2 Yes              1708
+3 NA                  …
+```
+
+::: {.fragment}
+> 🧠 *Right away* you see the **class imbalance** — that will matter on Wednesday when we train models.
+:::
+
+---
+
+## `mutate()` + `case_when()` on YRBS
+
+Build a "risk level" variable from a few binary indicators:
+
+```{r}
+#| echo: true
+#| eval: false
+analysis_data |>
+    mutate(
+        risk_level = case_when(
+            GunCarrying == "Yes" | UnsafeAtSchool == "Yes" ~ "High",
+            AttackedInNeighborhood == "Yes" ~ "Medium",
+            .default = "Low"
+        )
+    ) |>
+    count(risk_level)
+```
+
+::: {.fragment}
+> Same `case_when()` you wrote for BMI — different domain. 💪
+:::
+
+---
+
+## `summarise()` by group on YRBS
+
+Mean age by suicide-ideation group:
+
+```{r}
+#| echo: true
+#| eval: false
+analysis_data |>
+    filter(!is.na(SuicideIdeation)) |>
+    summarise(
+        mean_age = mean(Age, na.rm = TRUE),
+        n = n(),
+        .by = SuicideIdeation
+    )
+```
+
+# 🎯 Your Turn
+
+## Add a Wrangling Section to *your* `dataset.qmd`
+
+::: {.columns}
+::: {.column width="55%"}
+In your `ml-template`, open **`dataset.qmd`** and add a new section called *"Exploring the data"*. Inside it:
+
+::: {.incremental}
+1. **Load the data**
+   ```r
+   analysis_data <- rio::import("models/data/analysis_data.rds")
+   ```
+2. **`count()`** your outcome variable.
+3. **`mutate()` + `case_when()`** to create one new variable that matters for your research question.
+4. **`summarise()`** at least 2 statistics, grouped by something interesting.
+5. **Bonus**: make 1 `ggplot` (a boxplot or bar chart).
+6. **Render** your website. 🚀
+:::
+:::
+::: {.column width="45%"}
+![](https://media.giphy.com/media/UTGF13ELbCSNtFcp1l/giphy.gif?cid=ecf05e47zjszf14eubnlug3sh83z9qsicknrogxjeoze73kq&ep=v1_gifs_search&rid=giphy.gif&ct=g)
+:::
+:::
+
+# 🎁 Wrapping Up
+
+## What you learned today
+
+::: {.incremental}
+- ✅ What **tidy data** is and why it matters.
+- ✅ The **pipe `|>`** for chaining steps fluently.
+- ✅ The core `dplyr` verbs:
+  `count`, `arrange`, `filter`, `select`, `rename`, `mutate`, `summarise`, joins.
+- ✅ Reshape with `pivot_longer()` / `pivot_wider()`.
+- ✅ Your **first `ggplot`**.
+- ✅ How to apply *all of it* to your YRBS project data.
+:::
+
+---
+
+## Before next session 📋
+
+::: {.incremental}
+1. **Update your `dataset.qmd`** with the wrangling section we just did.
+2. **Render your website** at least once successfully.
+3. **Decide your outcome variable** — what are you predicting on Wednesday?
+4. **Skim** the [`dplyr` cheatsheet](https://rstudio.github.io/cheatsheets/data-transformation.pdf).
+5. **Bring your laptop charged.** Tomorrow we model. 🤖
+:::
+
+---
+
+## 📚 Want to keep learning?
+
+- 🆕 [**dplyr 1.2.0 release notes** (Feb 2026)](https://tidyverse.org/blog/2026/02/dplyr-1-2-0/) — `filter_out()`, `recode_values()`, `replace_values()` and more
+- 📋 [`dplyr` cheatsheet](https://rstudio.github.io/cheatsheets/data-transformation.pdf)
+- 🎴 [`tidyr` cheatsheet](https://rstudio.github.io/cheatsheets/tidyr.pdf)
+- 📘 [R for Data Science — Data Transformation](https://r4ds.hadley.wickham.co.nz/data-transform)
+- 🌐 [dplyr.tidyverse.org](https://dplyr.tidyverse.org/) — official reference
+- 🎥 [Julia Silge's TidyTuesday screencasts](https://www.youtube.com/@JuliaSilge)
+- 📰 [TidyTuesday — a new dataset every week](https://github.com/rfordatascience/tidytuesday)
+- 🖼️ [The R Graph Gallery](https://r-graph-gallery.com/) — every plot you've ever wanted, with code
+
+---
+
+## See ya next time! 🤖
+
+![](https://media.giphy.com/media/9Cj0oZUR3VslO/giphy.gif?cid=ecf05e47l0z481214hh5l04r9jjzfkubno3f0loukb8f83ma&ep=v1_gifs_search&rid=giphy.gif&ct=g){fig-align="center" width="60%"}
+
+## Credits
+
+I used material from: [Oliver Gimenez](https://github.com/oliviergimenez/intro_tidyverse) and [L. Paloma Rojas](https://palolili23.github.io/tidyverse_workshop_oscr_slides/index.html#1).
+
+Thank you! 💛

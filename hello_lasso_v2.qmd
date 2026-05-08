@@ -1,0 +1,1076 @@
+---
+title: "Regularization: Ridge, Lasso & Elastic Net with `tidymodels`"
+author: "Catalina Cañizares, Ph.D."
+date: today
+format:
+  revealjs:
+    scrollable: true
+    slide-number: true
+    transition: "fade"
+    auto-play-media: true
+    auto-stretch: true
+    footnotes-hover: true
+    code-copy: true
+    css: style.css
+editor_options: 
+  chunk_output_type: console
+---
+
+## About This Material
+
+> Regularization Techniques: Ridge, Lasso, and Elastic Net Using `tidymodels` © 2024 by Catalina Canizares is licensed under Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International.
+
+This material is freely available under the Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License.
+
+For more information on this license, please visit: [Creative Commons License](https://creativecommons.org/licenses/by-nc-nd/4.0/)
+
+---
+
+## 🌅 Where we are
+
+::: {.callout-tip}
+## Day 4 — morning
+- ✅ **Monday:** R + Quarto + your project website.
+- ✅ **Tuesday:** wrangled YRBS data with `tidyverse`.
+- ✅ **Wednesday morning:** the **concepts** behind machine learning.
+- ✅ **Wednesday afternoon:** your **first `tidymodels` pipeline** (logistic regression).
+- 🧠 **Right now:** **Lasso, Ridge, and Elastic Net** — same pipeline, smarter spec.
+- 🛠️ **This afternoon:** trees, forests, KNN.
+:::
+
+::: {.fragment}
+> Yesterday you built the pipeline. Today you **swap one line** to get a model that picks predictors *for you*. ✨
+:::
+
+---
+
+## 🎯 Objectives
+
+::: {.incremental}
+By the end of this session you will be able to:
+
+1. Explain **why** we shrink coefficients (and what overfitting has to do with it).
+2. Tell **Ridge vs Lasso vs Elastic Net** apart in one sentence each.
+3. Describe what the **penalty** ($\lambda$) does — geometrically and intuitively.
+4. Tune $\lambda$ with **cross-validation** using `tune_grid()`.
+5. Build the **Lasso page** of your project website.
+6. Read a **variable-importance plot** like a pro.
+:::
+
+# 🤔 Why Regularize?
+
+## A quick warmup 🎮
+
+::: {.columns}
+::: {.column width="50%"}
+Before we dive in — a fast review of yesterday's ideas.
+
+[👉 I click here… you wait…](https://play.kahoot.it/v2/?quizId=090bbc1e-c963-4f36-9cfb-45f81949c1f3)
+
+> Class imbalance, train/test split, recipes, workflows…
+:::
+::: {.column width="50%"}
+![](https://media.giphy.com/media/kDCargqZQ88Jq/giphy.gif?cid=ecf05e47cql4isfzdq2udvl3cqfh225u0ab93sm4u87alq33&ep=v1_gifs_search&rid=giphy.gif&ct=g){fig-align="center"}
+:::
+:::
+
+---
+
+## The problem with "throw everything at the model" 😬
+
+::: {.incremental}
+- YRBS has **40+ predictors** of risky behavior. Many are correlated. Some are noise.
+- A plain logistic regression will happily fit a coefficient for *every* one.
+- Result → **overfitting**: train metrics look amazing, test metrics flop. 📉
+- We need a way to say: *"only keep the predictors that actually matter."*
+:::
+
+::: {.fragment}
+::: {.callout-tip}
+## The big idea
+**Shrinkage** = pull coefficients toward zero. Some land *exactly* at zero — that's automatic feature selection. 💡
+:::
+:::
+
+---
+
+## What is "shrinkage"?
+
+::: {.incremental}
+- Shrinkage **shrinks** (or zeroes out) the coefficients of predictors.
+- It strikes a balance between **fitting the data** and **avoiding overfitting**.
+- Smaller coefficients → **less variance** → better generalization to new data.
+- The two famous shrinkage methods: **Ridge** and **Lasso**. (Elastic Net = both.)
+:::
+
+::: {.footer}
+[ISLRv2](https://hastie.su.domains/ISLR2/ISLRv2_website.pdf)
+:::
+
+# 📐 The Math (just enough)
+
+## Residual Sum of Squares (RSS)
+
+::: {.columns}
+::: {.column width="55%"}
+Every regression starts here:
+
+$$
+\text{RSS} = \sum_{i=1}^n\bigg( y_i - \beta_0 - \sum_{j=1}^p \beta_j x_{ij}\bigg)^2
+$$
+
+::: {.incremental}
+- The **error** between model prediction and actual data.
+- Smaller RSS → better fit on the **training** data.
+- ⚠️ Minimizing RSS alone is exactly how we overfit.
+:::
+:::
+::: {.column width="45%"}
+![](img/rss.png){fig-align="center"}
+:::
+:::
+
+::: {.footer}
+[ISLRv2](https://hastie.su.domains/ISLR2/ISLRv2_website.pdf)
+:::
+
+# 🔵 Ridge Regression (L2)
+
+## What Ridge does
+
+::: {.incremental}
+- Adds a **penalty term** to the RSS: a multiple of the **squared** coefficients.
+- The penalty parameter $\lambda$ controls how aggressive the shrinkage is.
+- All predictors **stay in the model** — but their coefficients get smaller.
+- Also called **L2 regularization**.
+:::
+
+::: {.fragment}
+$$
+\underbrace{\sum_{i=1}^n\bigg( y_i - \beta_0 - \sum_{j=1}^p \beta_j x_{ij}\bigg)^2}_{\text{RSS (fit)}} + \underbrace{\lambda \sum_{j=1}^p \beta_j^2}_{\text{shrinkage penalty}}
+$$
+:::
+
+::: {.footer}
+[ISLRv2](https://hastie.su.domains/ISLR2/ISLRv2_website.pdf)
+:::
+
+---
+
+## Ridge — visually
+
+::: {.columns}
+::: {.column width="50%"}
+![](img/ridge_graph.png)
+:::
+::: {.column width="50%"}
+::: {.incremental}
+- $\lambda = 0$ → ordinary least squares.
+- $\lambda \to \infty$ → all coefficients squeezed toward (but never *exactly*) zero.
+- Ridge **never drops** a predictor.
+:::
+:::
+:::
+
+::: {.fragment}
+> 🎯 Ridge is great when you believe **most predictors contribute a little**.
+:::
+
+::: {.footer}
+[ISLRv2](https://hastie.su.domains/ISLR2/ISLRv2_website.pdf)
+:::
+
+# 🟠 Lasso (L1)
+
+## What Lasso does
+
+::: {.incremental}
+- Same idea as Ridge — but the penalty uses the **absolute value** of the coefficients.
+- The geometry of the L1 penalty lets coefficients hit **exactly zero**.
+- That means **automatic feature selection** built into the model. ✨
+- Also called **L1 regularization**.
+:::
+
+::: {.fragment}
+$$
+\sum_{i=1}^n\bigg( y_i - \beta_0 - \sum_{j=1}^p \beta_j x_{ij}\bigg)^2 + \lambda \sum_{j=1}^p | \beta_j|
+$$
+:::
+
+::: {.footer}
+[ISLRv2](https://hastie.su.domains/ISLR2/ISLRv2_website.pdf)
+:::
+
+---
+
+## Lasso — visually
+
+::: {.columns}
+::: {.column width="50%"}
+![](img/lasso_graph.png)
+:::
+::: {.column width="50%"}
+::: {.incremental}
+- $\lambda = 0$ → least-squares fit (everything stays).
+- As $\lambda$ grows, predictors are **dropped one by one** (their lines hit 0).
+- $\lambda$ *very large* → null model (no predictors at all).
+:::
+:::
+:::
+
+::: {.fragment}
+> 🎯 Lasso is great when you suspect **only a few predictors really matter**.
+:::
+
+::: {.footer}
+[ISLRv2](https://hastie.su.domains/ISLR2/ISLRv2_website.pdf)
+:::
+
+---
+
+## Ridge vs Lasso — side by side
+
+::: {.panel-tabset}
+
+### 👀 Visual
+::: {.columns}
+::: {.column width="50%"}
+**Lasso (L1)**
+![](img/lasso_graph.png){width="90%"}
+:::
+::: {.column width="50%"}
+**Ridge (L2)**
+![](img/ridge_graph.png){width="90%"}
+:::
+:::
+
+### 📊 Behavior
+| | **Ridge** | **Lasso** |
+|---|---|---|
+| Penalty | $\sum \beta_j^2$ | $\sum \|\beta_j\|$ |
+| Drops predictors? | ❌ never | ✅ yes (some hit 0) |
+| Best when | many small effects | few strong effects |
+| Bias / variance | small bias, low variance | larger bias, sparser model |
+| Interpretability | medium | high (only kept predictors) |
+
+### 🎯 The geometry
+
+::: {.columns}
+::: {.column width="55%"}
+![](img/Contours .png){fig-align="center"}
+:::
+::: {.column width="45%"}
+::: {.incremental}
+- The **ellipses** are RSS contours (small RSS in the middle).
+- The **gray region** is where the penalty allows coefficients to live.
+- **Ridge = circle** → tangency rarely lands on an axis → no zeros.
+- **Lasso = diamond** → tangency *often* lands on a corner → exact zeros. ✨
+:::
+:::
+:::
+
+:::
+
+::: {.footer}
+[ISLRv2](https://hastie.su.domains/ISLR2/ISLRv2_website.pdf)
+:::
+
+# 🟣 Elastic Net
+
+## Best of both worlds
+
+::: {.incremental}
+- Combines **Ridge + Lasso** in one penalty.
+- Keeps Lasso's **feature selection** *and* Ridge's **handling of correlated predictors**.
+- Controlled by two knobs: `penalty` ($\lambda$) and `mixture` (how much L1 vs L2).
+:::
+
+::: {.fragment}
+$$
+\sum_{i=1}^n\bigg( y_i - \beta_0 - \sum_{j=1}^p \beta_j x_{ij}\bigg)^2 + \lambda_1 \sum_{j=1}^p | \beta_j| + \lambda_2 \sum_{j=1}^p \beta_j^2
+$$
+:::
+
+::: {.fragment}
+::: {.callout-tip}
+## In `tidymodels`
+- `mixture = 1` → pure **Lasso**
+- `mixture = 0` → pure **Ridge**
+- `0 < mixture < 1` → **Elastic Net**
+:::
+:::
+
+::: {.footer}
+[Practitioner's Guide to Data Science](https://scientistcafe.com/ids/elastic-net.html)
+:::
+
+# 🎛️ Picking the Best $\lambda$
+
+## How do we choose $\lambda$?
+
+::: {.incremental}
+- $\lambda$ is a **hyperparameter** — you set it *before* training.
+- Try a **grid** of candidate values, evaluate each with **cross-validation**.
+- Pick the $\lambda$ that maximizes your metric (e.g., **ROC AUC**).
+- This is exactly what `tune_grid()` automates for us. 🤖
+:::
+
+::: {.fragment}
+> 🌟 The same `tune()` placeholder + grid pattern works for *every* tunable model in `tidymodels`. Learn it once, reuse forever.
+:::
+
+---
+
+# 💻 Lasso with `tidymodels`
+
+## Today's task 🎯
+
+::: {.columns}
+::: {.column width="55%"}
+> **From 40+ youth-risk-behavior items, which ones best predict whether a teen will text-and-drive?** 📱🚗
+
+::: {.incremental}
+- **Outcome**: `TextingDriving` (binary: Yes / No)
+- **Predictors**: every other risky-behavior item in YRBS
+- **Model**: Lasso logistic regression
+- **Why Lasso?** It will *automatically* drop irrelevant predictors and hand us a short list of the strongest signals.
+:::
+:::
+::: {.column width="45%"}
+![](https://media.giphy.com/media/eGyJz0UnrEy3K/giphy.gif?cid=ecf05e470l48hi14w34gpqwhaddfljk9xuwn2xir0rn52323&ep=v1_gifs_search&rid=giphy.gif&ct=g){fig-align="center"}
+:::
+:::
+
+---
+
+## Setup — load packages 📦
+
+```{r}
+#| echo: true
+#| message: false
+#| warning: false
+library(tidyverse)
+library(tidymodels)
+library(MLearnYRBSS)
+library(janitor)
+library(skimr)
+library(vip)
+
+data("riskyBehaviors")
+```
+
+::: {.fragment}
+::: {.callout-note}
+## Want help writing the spec?
+`usemodels::use_glmnet(TextingDriving ~ ., data = train)` will scaffold the recipe + spec + workflow + grid for you. Copy, paste, adjust. 🤖
+:::
+:::
+
+---
+
+## 1️⃣ Recode the outcome to binary
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1-3|4-9|10|11-17"
+#| output-location: fragment
+riskyBehaviors_analysis <-
+    riskyBehaviors |>
+    mutate(
+        TextingDriving = case_when(
+            TextingDriving == 1 ~ 0,
+            TextingDriving %in% c(2, 3, 4, 5) ~ 1,
+            .default = NA
+        ),
+        TextingDriving = factor(TextingDriving)
+    ) |>
+    drop_na(TextingDriving) |>
+    select(-SourceVaping, -SourceAlcohol, -SexOrientation,
+           -DrivingDrinking, -SexualAbuse, -SexualAbuseByPartner,
+           -Grade, -Age)
+```
+
+---
+
+## What did we just do? 🤔
+
+::: {.incremental}
+- 🎯 **Outcome encoding:** `0` = never texted-and-drove · `1` = at least once.
+- 🚨 We'll target the **second level** (`1`) when computing ROC.
+- 🧹 We **dropped** redundant or post-event columns (e.g. `DrivingDrinking`) to avoid leakage.
+:::
+
+# 2️⃣ Split + Resample
+
+## Train / test split — stratified
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|3-4|6-7|9"
+#| output-location: fragment
+set.seed(1990)
+
+analysis_split <- initial_split(
+    riskyBehaviors_analysis,
+    strata = TextingDriving
+)
+
+analysis_train <- training(analysis_split)
+analysis_test <- testing(analysis_split)
+
+analysis_split
+```
+
+::: {.fragment}
+::: {.callout-tip}
+## Always `strata =` the outcome
+Keeps the class balance roughly equal in train and test. **Critical** when the outcome is imbalanced.
+:::
+:::
+
+---
+
+## Sanity check — class balance
+
+::: {.columns}
+::: {.column width="50%"}
+**Training**
+```{r}
+#| echo: true
+#| output-location: fragment
+analysis_train |>
+    tabyl(TextingDriving) |>
+    adorn_pct_formatting(0) |>
+    adorn_totals()
+```
+:::
+::: {.column width="50%"}
+**Testing**
+```{r}
+#| echo: true
+#| output-location: fragment
+analysis_test |>
+    tabyl(TextingDriving) |>
+    adorn_pct_formatting(0) |>
+    adorn_totals()
+```
+:::
+:::
+
+::: {.fragment}
+> Both sets show the same proportions — `strata =` did its job. ✅
+:::
+
+---
+
+## Cross-validation folds
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|3"
+#| output-location: fragment
+set.seed(1990)
+
+analysis_folds <- vfold_cv(analysis_train, v = 5, strata = TextingDriving)
+analysis_folds
+```
+
+::: {.fragment}
+> **5 folds** of the *training* set. Each candidate $\lambda$ will be evaluated on all 5 — the test set stays sacred.
+:::
+
+# 3️⃣ Recipe + Spec + Workflow
+
+## Recipe (preprocessing)
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1-2|3|4|5|6|7"
+#| output-location: fragment
+texting_rec <-
+    recipe(TextingDriving ~ ., data = analysis_train) |>
+    step_zv(all_predictors()) |>
+    step_impute_mode(all_nominal_predictors()) |>
+    step_impute_mean(all_numeric_predictors()) |>
+    step_normalize(all_numeric_predictors()) |>
+    step_dummy(all_nominal_predictors())
+
+texting_rec
+```
+
+::: {.fragment}
+::: {.callout-warning}
+## `step_normalize()` is **mandatory** for Lasso 🚨
+Lasso penalizes coefficients on the same scale. Without normalization, predictors measured in larger units get unfairly shrunk. Don't skip it.
+:::
+:::
+
+---
+
+## Model spec — `glmnet` 🌱
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1-3|4|6"
+#| output-location: fragment
+texting_spec <-
+    logistic_reg(
+        penalty = tune(), # ⬅️ we'll tune this
+        mixture = 1 # ⬅️ pure Lasso
+    ) |>
+    set_engine("glmnet")
+
+texting_spec
+```
+
+---
+
+## The `mixture` knob 🎛️
+
+::: {.callout-tip}
+## One spec, three models
+- `mixture = 1` → **Lasso** 🟠
+- `mixture = 0` → **Ridge** 🔵
+- `0 < mixture < 1` → **Elastic Net** 🟣
+:::
+
+::: {.fragment}
+> Want Elastic Net? `mixture = tune()` and let CV pick the best blend.
+> [📖 Read the docs](https://parsnip.tidymodels.org/reference/glmnet-details.html)
+:::
+
+---
+
+## Workflow — bundle them 🔗
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2|3|4"
+#| output-location: fragment
+texting_wf <-
+    workflow() |>
+    add_recipe(texting_rec) |>
+    add_model(texting_spec)
+
+texting_wf
+```
+
+::: {.fragment}
+> Same shape as yesterday's logistic regression. **Only the spec changed.** ✨
+:::
+
+# 4️⃣ Tune the Penalty
+
+## What's a tuning grid?
+
+::: {.columns}
+::: {.column width="55%"}
+::: {.incremental}
+- A **list of candidate** $\lambda$ values to try.
+- For each value, `tidymodels` fits the model on every CV fold.
+- The grid lives on the **log scale** because $\lambda$ ranges over many orders of magnitude.
+- Then we pick the $\lambda$ with the best metric.
+:::
+:::
+::: {.column width="45%"}
+![](img/grid.gif){fig-align="center"}
+:::
+:::
+
+---
+
+## Three flavors of grid
+
+![](https://dials.tidymodels.org/logo.png){.absolute top=0 right=0 width=80 height=90}
+
+::: {.panel-tabset}
+
+### Manual
+```{r}
+#| echo: true
+#| output-location: fragment
+glmnet_grid <- data.frame(penalty = 10^seq(-6, -1, length.out = 20))
+glmnet_grid
+```
+A simple log-spaced sequence — quick and dirty.
+
+### Wide range
+```{r}
+#| echo: true
+#| output-location: fragment
+penalty_grid <- grid_regular(penalty(range = c(-4, 4)), levels = 50)
+penalty_grid
+```
+A custom range you supply — useful when you've explored before.
+
+### Recommended
+```{r}
+#| echo: true
+#| output-location: fragment
+lambda_grid <- grid_regular(penalty(), levels = 50)
+lambda_grid
+```
+The default `penalty()` range from `dials` — sensible defaults, no thinking needed. ⭐
+
+:::
+
+::: {.fragment}
+> 🌟 Start with the **recommended** version. Only get fancy if your tuning curve looks weird.
+:::
+
+---
+
+## How do you "see" the grid?
+
+![](img/grid_search_2.png){fig-align="center" width="65%"}
+
+::: {.footer}
+[ISLR tidymodels labs](https://emilhvitfeldt.github.io/ISLR-tidymodels-labs/06-regularization.html)
+:::
+
+---
+
+## Run the tuning ⚙️
+
+![](https://tune.tidymodels.org/logo.png){.absolute top=0 right=0 width=80 height=90}
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|3|5-10"
+#| output-location: fragment
+doParallel::registerDoParallel()
+
+set.seed(2023)
+
+lasso_tune <-
+    tune_grid(
+        object = texting_wf,
+        resamples = analysis_folds,
+        grid = lambda_grid,
+        control = control_resamples(event_level = "second")
+    )
+
+doParallel::stopImplicitCluster()
+```
+
+::: {.fragment}
+::: {.callout-tip}
+## Behind the scenes
+Each row of the grid → fit on every CV fold → average performance. With `levels = 50` and `v = 5` that's **250 model fits** — `doParallel` keeps it snappy. 🚀
+:::
+:::
+
+---
+
+## Collect the metrics
+
+```{r}
+#| echo: true
+#| output-location: fragment
+lasso_tune |>
+    collect_metrics()
+```
+
+---
+
+## Visualize the metrics
+
+::: {.panel-tabset}
+
+### autoplot
+```{r}
+#| echo: true
+#| output-location: fragment
+autoplot(lasso_tune)
+```
+
+### Custom ggplot
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2|3|4|5|6"
+#| output-location: fragment
+lasso_tune |>
+    collect_metrics() |>
+    ggplot(aes(penalty, mean, color = .metric)) +
+    geom_line(linewidth = 1.5) +
+    facet_wrap(~.metric, scales = "free", nrow = 2) +
+    theme(legend.position = "none")
+```
+
+:::
+
+::: {.fragment}
+> Look for the $\lambda$ that **maximizes ROC AUC** *before* the curve starts to crash. That's your sweet spot.
+:::
+
+---
+
+## Pick the best $\lambda$ candidate
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2|4"
+#| output-location: fragment
+best <- lasso_tune |>
+    select_best(metric = "roc_auc")
+
+best
+```
+
+::: {.fragment}
+> ✨ One number — our winning $\lambda$ candidate. **Don't commit yet** — let's see how it actually performs first. 🤔
+:::
+
+# 5️⃣ Sanity-Check Before Committing
+
+## How does our chosen $\lambda$ *actually* do? 🔍
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2|3|4"
+#| output-location: fragment
+texting_wf |>
+    finalize_workflow(best) |>
+    fit_resamples(resamples = analysis_folds) |>
+    collect_metrics()
+```
+
+::: {.fragment}
+> An honest, CV-estimated performance for our **single** chosen $\lambda$.
+:::
+
+---
+
+## 🔄 This is your decision point!
+
+::: {.incremental}
+- 😀 **Metrics look good** → lock it in, evaluate on test. ✅
+- 😬 **Metrics look bad** → **STOP**. Go back and re-tune. 🛑
+:::
+
+::: {.fragment}
+::: {.callout-warning}
+## 🚨 Important
+Once you commit with `finalize_workflow()` → `last_fit()`, **you've used your test set**. No going back.
+:::
+:::
+
+---
+
+## What does "go back and re-tune" mean? 🔧
+
+::: {.incremental}
+- Try a **wider** or **finer** $\lambda$ grid.
+- Add a different **metric** (e.g. `pr_auc` for imbalanced data).
+- Try `mixture = tune()` (Elastic Net) instead of pure Lasso.
+- Revisit your **recipe** — feature engineering matters.
+:::
+
+::: {.fragment}
+> 🌟 **Iterating here is the *job*.** Most "good models" took 5–10 rounds of this loop.
+:::
+
+# 6️⃣ Finalize + Fit
+
+## Looks good? Lock it in 🔒
+
+```{r}
+#| echo: true
+#| output-location: fragment
+final_wf <- finalize_workflow(texting_wf, best)
+
+final_wf
+```
+
+::: {.fragment}
+> `finalize_workflow()` plugs the best $\lambda$ into the original workflow. **Now we're committed.** ✅
+:::
+
+---
+
+## Fit on the training set
+
+::: {.columns}
+::: {.column width="65%"}
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2|4"
+#| output-location: fragment
+texting_fit <-
+    fit(final_wf, data = analysis_train)
+
+texting_fit
+```
+:::
+::: {.column width="35%"}
+![](img/woddy_fit.gif){fig-align="center"}
+:::
+:::
+
+# 7️⃣ Evaluate on the Test Set
+
+## `last_fit()` — the magic shortcut ✨
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1|2-6"
+#| output-location: fragment
+texting_last_fit <-
+    last_fit(
+        final_wf,
+        split = analysis_split,
+        metrics = metric_set(accuracy, kap, roc_auc, sensitivity, specificity)
+    )
+
+texting_last_fit
+```
+
+---
+
+## Why `last_fit()` is so cool 🪄
+
+::: {.callout-tip}
+## One function, four guarantees
+- ✅ Fits on **all** training data
+- ✅ Predicts on the **test** set
+- ✅ Computes metrics — once, honestly
+- ✅ Impossible to accidentally cheat
+:::
+
+::: {.fragment}
+> 🌟 **Use this everywhere** — every model, every project. Period.
+:::
+
+---
+
+## Test-set metrics
+
+```{r}
+#| echo: true
+#| output-location: fragment
+collect_metrics(texting_last_fit)
+```
+
+::: {.fragment}
+> 👀 Compare these to your CV metrics. They should be **in the same ballpark** — that means your model generalizes.
+:::
+
+---
+
+## Test-set predictions
+
+```{r}
+#| echo: true
+#| code-line-numbers: "1-4|6"
+#| output-location: fragment
+the_prediction <-
+    texting_last_fit |>
+    collect_predictions() |>
+    select(-.config, -.row)
+
+the_prediction
+```
+
+---
+
+## Confusion matrix
+
+```{r}
+#| echo: true
+#| output-location: fragment
+the_prediction |>
+    conf_mat(TextingDriving, .pred_class) |>
+    autoplot(type = "heatmap")
+```
+
+::: {.fragment}
+> **Diagonals** = correct calls. **Off-diagonals** = mistakes. With imbalanced outcomes, look at the *off-diagonals* honestly.
+:::
+
+---
+
+## ROC curve
+
+```{r}
+#| echo: true
+#| output-location: fragment
+the_prediction |>
+    roc_curve(truth = TextingDriving, .pred_1, event_level = "second") |>
+    autoplot()
+```
+
+::: {.fragment}
+> A curve hugging the **top-left corner** = excellent. The diagonal = random guessing.
+:::
+
+# 🌟 The Lasso Payoff
+
+## Variable importance — who survived? 🏆
+
+```{r}
+#| echo: true
+#| fig-width: 10
+#| fig-height: 5
+#| code-line-numbers: "1|3|4|5|6|7|9-13"
+#| output-location: slide
+library(vip)
+
+texting_last_fit |>
+    extract_fit_engine() |>
+    vi() |>
+    group_by(Sign) |>
+    slice_max(Importance, n = 5) |>
+    ungroup() |>
+    ggplot(aes(Importance, fct_reorder(Variable, Importance), fill = Sign)) +
+    geom_col() +
+    facet_wrap(vars(Sign), scales = "free_y") +
+    labs(y = NULL) +
+    theme(legend.position = "none")
+```
+
+---
+
+## How to read this plot 👀
+
+::: {.callout-tip}
+## What you're looking at
+- **POS** bars push the prediction *toward* texting-and-driving.
+- **NEG** bars push it *away* from texting-and-driving.
+- Predictors not shown were **shrunk to zero** by Lasso — automatically irrelevant. ✨
+:::
+
+::: {.fragment}
+> 🌟 This plot is your **headline figure** for the manuscript. 📝
+:::
+
+---
+
+## Inspect the (sparse) coefficients
+
+```{r}
+#| echo: true
+#| output-location: fragment
+texting_fit |>
+    extract_fit_parsnip() |>
+    tidy() |>
+    filter(estimate != 0) |>
+    arrange(desc(abs(estimate)))
+```
+
+::: {.fragment}
+> 🌟 Many rows you started with are gone. Lasso did the **feature selection** for you.
+:::
+
+# 🎯 Your Turn
+
+## Step 1 — Set up your page 📄
+
+In your `ml-template`, open **`models/lasso.qmd`** and:
+
+::: {.incremental}
+1. **Load** your data:
+   ```r
+   analysis_data <- rio::import("models/data/analysis_data.rds")
+   ```
+2. Use the **same outcome** you used for logistic regression yesterday.
+3. Copy your **logistic-regression pipeline** as a starting point. 📋
+:::
+
+---
+
+## Step 2 — Swap the spec 🔄
+
+::: {.incremental}
+4. Change the spec to Lasso:
+   ```r
+   logistic_reg(penalty = tune(), mixture = 1) |>
+       set_engine("glmnet")
+   ```
+5. Add `tune_grid()` + `select_best()` + the **CV sanity-check** with `fit_resamples()`.
+6. Then `finalize_workflow()` → `last_fit()`.
+:::
+
+---
+
+## Step 3 — Compare & publish 🚀
+
+::: {.incremental}
+7. Build a **`vip()`** plot of the top predictors.
+8. Compare your test metrics to **yesterday's logistic regression** — better? worse? **interpret!** 🤔
+9. **Render** your website. 🌐
+:::
+
+::: {.fragment}
+![](img/woody_amazed.gif){fig-align="center" width="35%"}
+:::
+
+# 🎁 Wrapping Up
+
+## What you learned this session
+
+::: {.incremental}
+- ✅ **Why** we shrink coefficients — overfitting & high variance.
+- ✅ **Ridge** (L2) keeps everything, **Lasso** (L1) drops things, **Elastic Net** does both.
+- ✅ The **penalty** $\lambda$ is a hyperparameter — pick it with **cross-validation**.
+- ✅ The full pipeline in `tidymodels`: split → recipe → spec → workflow → **tune** → finalize → fit → evaluate.
+- ✅ How to read a **variable-importance plot**.
+- ✅ Same shape as yesterday's pipeline. **One spec change**, brand-new model. ✨
+:::
+
+::: {.fragment}
+> 🌟 You've now seen the full **tune → finalize** loop. Every algorithm tomorrow uses the **exact same shape**. 💪
+:::
+
+---
+
+## Review questions 🧠
+
+::: {.fragment}
+1. Is RSS still relevant once we add an L1 or L2 penalty? **Why?**
+:::
+
+::: {.fragment}
+2. Would it be more honest to call L2 "the *squared* regularization"?
+:::
+
+::: {.fragment}
+3. If you want to **reduce dimensionality**, you'd reach for which penalty?
+:::
+
+::: {.fragment}
+4. To turn this spec into a **Ridge** regression, what would you change?
+
+```{r}
+#| echo: true
+#| eval: false
+review_spec <-
+    logistic_reg(
+        penalty = tune(),
+        mixture = tune()
+    ) |>
+    set_engine("glmnet")
+```
+:::
+
+::: {.fragment}
+5. **Bonus**: stepwise selection vs Lasso — which would you trust more, and why? 🤔
+:::
+
+---
+
+## 📚 Want to keep learning?
+
+- 📘 [**Tidy Modeling with R — Ch. 12 Tuning**](https://www.tmwr.org/tuning) — Kuhn & Silge
+- 📘 [**ISLR — Ch. 6 Linear Model Selection & Regularization**](https://www.statlearning.com/) — free PDF
+- 🧪 [**ISLR `tidymodels` labs — Regularization**](https://emilhvitfeldt.github.io/ISLR-tidymodels-labs/06-regularization.html)
+- 🎮 [**MLU-Explain — Double Descent**](https://mlu-explain.github.io/double-descent/)
+- 🤖 [**`usemodels::use_glmnet()`**](https://usemodels.tidymodels.org/) — auto-scaffolds the whole Lasso workflow
+- 🎥 [**Julia Silge — Lasso screencasts**](https://www.youtube.com/@JuliaSilge) — tons of real-world examples
+
+---
+
+## See you after the break! 🌳🌲
+
+![](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMTh3aWhnbWl5c3RkYm54OHlidjdsd2dsdnhtZDh0YzFrbjV2enBybiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/nVXzt7FSJlX7W/giphy.gif){fig-align="center" width="55%"}
+
+> Same pipeline. Different spec. **Trees and forests, here we come.** 💪
