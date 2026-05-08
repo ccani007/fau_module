@@ -1,5 +1,5 @@
 ---
-title: "Session 2 — The Data Jedi Academy: Cleaning Your Data with R and Tidyverse"
+title: "The Data Jedi Academy: Cleaning Your Data with R and Tidyverse"
 author: "Catalina Cañizares, Ph.D."
 date: today
 format: 

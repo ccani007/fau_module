@@ -30,6 +30,7 @@
 .reveal {
     color: var(--fau-ink);
     font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 32px;   /* default revealjs is ~40px — tweak this knob to taste */
 }
 
 .reveal .slides section {

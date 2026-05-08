@@ -1,42 +1,74 @@
 - source: session_1.qmd
   quarto-pub:
     - id: 3c93f774-646a-4770-8881-9cc9df4fef30
-      url: 'https://catalina.quarto.pub/session-1---intro-to-r'
+      url: https://catalina.quarto.pub/session-1---intro-to-r
 - source: session_2.qmd
   quarto-pub:
     - id: e042066a-cd39-4afd-bd59-78891ff3c3aa
-      url: 'https://catalina.quarto.pub/session-2---laundry-data-service-cleaning-your-data-with-r-and-tidyverse'
+      url: https://catalina.quarto.pub/session-2---laundry-data-service-cleaning-your-data-with-r-and-tidyverse
     - id: d01ae86b-cf89-4ed6-8a3b-c7a9994fdaed
-      url: 'https://catalina.quarto.pub/session-2---the-data-jedi-academy-cleaning-your-data-with-r-and-tidyverse'
+      url: https://catalina.quarto.pub/session-2---the-data-jedi-academy-cleaning-your-data-with-r-and-tidyverse
 - source: session_2_tables.qmd
   quarto-pub:
     - id: 8f813108-8f1d-4714-acfa-3b398c9fec5c
-      url: 'https://catalina.quarto.pub/session-2---shake-it-off-mastering-data-tables-with-taylor-swifts-tracks'
+      url: https://catalina.quarto.pub/session-2---shake-it-off-mastering-data-tables-with-taylor-swifts-tracks
 - source: session_3_introToTidymodels.qmd
   quarto-pub:
     - id: 944f430a-cf0b-4f4e-8530-53072ace28b4
-      url: 'https://catalina.quarto.pub/introduction-to-tidymodels-78fb'
+      url: https://catalina.quarto.pub/introduction-to-tidymodels-78fb
 - source: session_3_lasso.qmd
   quarto-pub:
     - id: 669e7d5f-6ea1-4429-944c-8d092db1c926
-      url: 'https://catalina.quarto.pub/regularization-techniques-ridge-lasso-and-elastic-net-using-tidymodels-daaa'
+      url: https://catalina.quarto.pub/regularization-techniques-ridge-lasso-and-elastic-net-using-tidymodels-daaa
 - source: session_3_introML.qmd
   quarto-pub:
     - id: c59f4430-b43a-4499-8e77-5c02d3fe492c
-      url: 'https://catalina.quarto.pub/introduction-to-machine-learning-ec98'
+      url: https://catalina.quarto.pub/introduction-to-machine-learning-ec98
 - source: session_4_DecisionTrees.qmd
   quarto-pub:
     - id: fc9273bb-debb-4c51-9bf4-ca94be11aefc
-      url: 'https://catalina.quarto.pub/decision-trees-using-tidymodels-cce4'
+      url: https://catalina.quarto.pub/decision-trees-using-tidymodels-cce4
 - source: session_4_RandomForest-XGBoost.qmd
   quarto-pub:
     - id: bf94dbf8-2a27-4c86-9785-3c21895f95c7
-      url: 'https://catalina.quarto.pub/random-forest-and-xgboost'
+      url: https://catalina.quarto.pub/random-forest-and-xgboost
 - source: session_4_KNN.qmd
   quarto-pub:
     - id: 6f4ec071-5475-4e04-9a6b-b59f486a579f
-      url: 'https://catalina.quarto.pub/knn-using-tidymodels'
+      url: https://catalina.quarto.pub/knn-using-tidymodels
 - source: session_4_RandomForest-XGboost.qmd
   quarto-pub:
     - id: f9d2d312-85a3-4058-b93c-ccb66693409d
-      url: 'https://catalina.quarto.pub/session-4-random-forest-and-xgboost'
+      url: https://catalina.quarto.pub/session-4-random-forest-and-xgboost
+- source: hello_r_and_quarto_v2.qmd
+  netlify:
+    - id: a6dfeaf3-cc4c-4a3b-a560-d76a154a9535
+      url: https://sage-cobbler-80bbb6.netlify.app
+- source: hello_tidyverse_v2.qmd
+  netlify:
+    - id: 82ea9416-b7bb-43ec-83d3-f4bff20c3fef
+      url: https://remarkable-rugelach-81695d.netlify.app
+- source: hello_ml_v2.qmd
+  netlify:
+    - id: e0a28af5-edd5-4d6c-aecc-b9753444c7c4
+      url: https://elegant-travesseiro-3e48e6.netlify.app
+- source: hello_tidymodels_v2.qmd
+  netlify:
+    - id: 28f68ebc-6704-4a1f-b880-d39bbb47c53f
+      url: https://fluffy-mochi-549d8d.netlify.app
+- source: hello_lasso_v2.qmd
+  netlify:
+    - id: bd9cc2e4-5f11-4c8d-b86e-a3d4cb5ae6e4
+      url: https://dreamy-pegasus-792574.netlify.app
+- source: hello_DecisionTrees_v2.qmd
+  netlify:
+    - id: d5631105-1f97-4e60-8531-6f9ac0ea39ed
+      url: https://nimble-bienenstitch-a09356.netlify.app
+- source: hello_RandomForest-XGboost_v2.qmd
+  netlify:
+    - id: 2b977fbf-2740-47d8-9d06-ca9fad24074c
+      url: https://luxury-lebkuchen-7f9c2f.netlify.app
+- source: hello_KNN_v2.qmd
+  netlify:
+    - id: e36ccbc6-2214-4cf4-8bdb-a9b5f8de66ca
+      url: https://comfy-tarsier-1dcab0.netlify.app

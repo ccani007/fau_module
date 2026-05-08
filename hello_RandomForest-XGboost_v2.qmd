@@ -75,7 +75,7 @@ By the end of this session you will be able to:
 ::: {.column width="50%"}
 ![](https://media.giphy.com/media/cInyFHymgymsKA3jHi/giphy.gif){fig-align="center"}
 
-[👉 Submit your guess](https://YOUR-USERNAME.shinyapps.io/wisdom-of-crowds/)
+[👉 Submit your guess](https://lcj9js-catalina-canizares.shinyapps.io/wisdom-of-crowds/)
 :::
 :::
 
@@ -837,6 +837,7 @@ best_xgb
 ::: {.fragment}
 ```{r}
 #| echo: true
+#| cache: true
 #| output-location: fragment
 xgb_wf |>
     finalize_workflow(best_xgb) |>
@@ -855,15 +856,9 @@ xgb_wf |>
 
 ```{r}
 #| echo: true
-#| eval: false
-final_wf_xg  <- finalize_workflow(xgb_wf, best_xgb)
+#| cache: true
+final_wf_xg    <- finalize_workflow(xgb_wf, best_xgb)
 alcohol_fit_xg <- fit(final_wf_xg, alcohol_train)
-```
-
-```{r}
-#| echo: false
-final_wf_xg <- finalize_workflow(xgb_wf, best_xgb)
-alcohol_fit_xg <- readRDS("outputs/alcohol_fit_xg.rds")
 ```
 
 ::: {.fragment}
